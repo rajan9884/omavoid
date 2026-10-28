@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 set -u
-~/.local/bin/qs-app-indexer >/dev/null 2>&1 || true
 hyprctl reload >/dev/null 2>&1 || true
-nohup ~/.local/bin/launch-quattro-shell >/dev/null 2>&1 &
-disown
+setsid /home/rajan/.local/bin/launch-quattro-shell >/dev/null 2>&1 &
 command -v notify-send >/dev/null 2>&1 && notify-send "Quattro Shell" "Reloaded Quickshell & Hyprland" || true
