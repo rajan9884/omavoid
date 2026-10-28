@@ -235,6 +235,39 @@ user = "_greeter"
 GREETD
         sudo chmod -R go+r /etc/greetd
         getent passwd _greeter >/dev/null 2>&1 && sudo usermod -aG video,input _greeter || true
+
+        # Ensure greetd run script checks for dbus and elogind
+        if [ -d /etc/sv/greetd ]; then
+            cat <<'RUN' | sudo tee /etc/sv/greetd/run >/dev/null
+#!/bin/sh
+exec 2>&1
+sv check dbus >/dev/null || exit 1
+sv check elogind >/dev/null || exit 1
+exec greetd
+RUN
+            sudo chmod +x /etc/sv/greetd/run
+        fi
+    fi
+
+    # Backlight save/restore across reboots
+    sudo mkdir -p /var/lib/backlight
+    sudo chown root:video /var/lib/backlight 2>/dev/null || true
+    sudo chmod 775 /var/lib/backlight 2>/dev/null || true
+    cat <<'RC' | sudo tee /etc/rc.local >/dev/null
+#!/bin/sh
+[ -x /usr/local/bin/void-backlight ] && /usr/local/bin/void-backlight restore &
+RC
+    sudo chmod +x /etc/rc.local
+    cat <<'RC' | sudo tee /etc/rc.shutdown >/dev/null
+#!/bin/sh
+[ -x /usr/local/bin/void-backlight ] && /usr/local/bin/void-backlight save
+RC
+    sudo chmod +x /etc/rc.shutdown
+
+    # Mark Omarchy first-run as completed so repetitive notifications do not pop up on every login
+    if command -v omarchy-done >/dev/null 2>&1; then
+        omarchy-done mark first-run-user 2>/dev/null || true
+        omarchy-done mark finalize-user 2>/dev/null || true
     fi
 
     # systemd-run shim
@@ -366,7 +399,7 @@ setup_runit_and_groups() {
         [ -L "/var/service/${conflict_svc}" ] && sudo rm -f "/var/service/${conflict_svc}"
     done
 
-    for svc in dbus elogind seatd NetworkManager bluetoothd polkitd upowerd; do
+    for svc in dbus elogind seatd NetworkManager bluetoothd polkitd; do
         if [ -d "/etc/sv/${svc}" ] && [ ! -L "/var/service/${svc}" ]; then
             sudo ln -sf "/etc/sv/${svc}" "/var/service/${svc}"
             log_ok "Enabled runit service: ${svc}"

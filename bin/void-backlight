@@ -1,0 +1,41 @@
+#!/bin/bash
+# Save and restore backlight brightness across boots on Void Linux
+
+STATE_DIR="/var/lib/backlight"
+USER_STATE="${HOME:-/home/rajan}/.local/state/omarchy/brightness"
+
+case "${1:-restore}" in
+    save)
+        mkdir -p "$STATE_DIR" 2>/dev/null
+        mkdir -p "$(dirname "$USER_STATE")" 2>/dev/null
+        for dev in /sys/class/backlight/*; do
+            [ -d "$dev" ] || continue
+            name=$(basename "$dev")
+            val=$(cat "$dev/brightness" 2>/dev/null)
+            [ -n "$val" ] || continue
+            echo "$val" > "$STATE_DIR/$name" 2>/dev/null || true
+            echo "$val" > "$USER_STATE" 2>/dev/null || true
+        done
+        ;;
+    restore)
+        restored=0
+        for file in "$STATE_DIR"/*; do
+            [ -f "$file" ] || continue
+            name=$(basename "$file")
+            dev="/sys/class/backlight/$name"
+            if [ -d "$dev" ]; then
+                val=$(cat "$file" 2>/dev/null)
+                if [ -n "$val" ]; then
+                    echo "$val" > "$dev/brightness" 2>/dev/null || brightnessctl -d "$name" set "$val" >/dev/null 2>&1 || true
+                    restored=1
+                fi
+            fi
+        done
+        if [ "$restored" -eq 0 ] && [ -f "$USER_STATE" ]; then
+            val=$(cat "$USER_STATE" 2>/dev/null)
+            if [ -n "$val" ]; then
+                brightnessctl set "$val" >/dev/null 2>&1 || true
+            fi
+        fi
+        ;;
+esac
