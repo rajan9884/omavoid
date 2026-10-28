@@ -8,8 +8,8 @@ export TERMINAL="foot"
 
 if [ -z "${WAYLAND_DISPLAY:-}" ] && [ "${XDG_VTNR:-0}" -eq 1 ]; then
     if command -v dbus-run-session >/dev/null 2>&1; then
-        exec dbus-run-session Hyprland
+        exec dbus-run-session Hyprland --config ~/.config/hypr/hyprland.lua
     else
-        exec Hyprland
+        exec Hyprland --config ~/.config/hypr/hyprland.lua
     fi
 fi
