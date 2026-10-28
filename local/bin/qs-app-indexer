@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-OUT="/tmp/quattro-apps-rajan.json"
+OUT="/tmp/quattro-apps-${USER:-$(id -un)}.json"
 
 python3 - <<'PY' > "${OUT}.tmp" 2>/dev/null || echo "[]" > "${OUT}.tmp"
 import glob, json, os, re

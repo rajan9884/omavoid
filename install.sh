@@ -1,19 +1,29 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # QUATTRO-VOID: LIGHTWEIGHT OMARCHY QUATTRO 4.0 FORK FOR VOID LINUX
-# Target User: rajan (/home/rajan)
+# Fully reproducible fresh-install automation for Void Linux (x86_64 runit)
+#
 # 1. Configures Fastly Void XBPS repos & Hyprland-Void community repo
 # 2. Installs Wayland, Quickshell, PipeWire, TUI, and CLI packages
-# 3. Synchronizes official Quattro assets (omarchy.ttf, 2-quattro wallpaper, themes, shell)
+# 3. Synchronizes official Quattro assets (omarchy.ttf, wallpapers, themes, shell)
 # 4. Installs Void compatibility shims (uwsm, systemd-cat, systemctl, pacman, magick, PAM)
-# 5. Enables Runit services (dbus, NetworkManager, bluetoothd, seatd, polkitd, upowerd)
+# 5. Configures Runit services, udev sound rules, and user groups
 # 6. Deploys pure Quickshell desktop, Hyprland configs, and TUI shortcuts
 # ==============================================================================
 
 set -euo pipefail
 
-TARGET_USER="${SUDO_USER:-rajan}"
-TARGET_HOME="/home/${TARGET_USER}"
+# Determine target non-root user and home directory dynamically
+if [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != "root" ]; then
+    TARGET_USER="$SUDO_USER"
+elif [ "$(id -un)" != "root" ]; then
+    TARGET_USER="$(id -un)"
+else
+    TARGET_USER="$(logname 2>/dev/null || id -un 1000 2>/dev/null || echo "user")"
+fi
+
+TARGET_HOME="$(getent passwd "$TARGET_USER" 2>/dev/null | cut -d: -f6)"
+[ -z "$TARGET_HOME" ] && TARGET_HOME="/home/${TARGET_USER}"
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 BLUE='\033[1;34m'
@@ -26,7 +36,8 @@ log_ok()    { printf "${GREEN}[OK]${NC}   %s\n" "$1"; }
 log_warn()  { printf "${YELLOW}[WARN]${NC} %s\n" "$1"; }
 
 echo "======================================================================"
-echo "  Quattro-Void (Omarchy Quattro 4.0) Setup for Void Linux (${TARGET_USER})"
+echo "  Quattro-Void (Omarchy Quattro 4.0) Setup for Void Linux"
+echo "  Target User: ${TARGET_USER} (${TARGET_HOME})"
 echo "======================================================================"
 
 # 1. Configure Fastly CDN & Hyprland-Void XBPS Repositories
@@ -55,7 +66,7 @@ install_packages() {
         NetworkManager bluez upower inotify-tools socat
         foot alacritty
         wl-clipboard cliphist wtype
-        grim slurp brightnessctl file
+        grim slurp brightnessctl file imv xdg-utils psmisc
         qt6-wayland qt6-declarative qt6-svg qt6-shadertools qt6-imageformats qt6ct
         python3 fontconfig
         zsh starship fzf zoxide eza bat fd ripgrep jq
@@ -78,7 +89,7 @@ install_packages() {
 # 3. Synchronize Official Omarchy Quattro Assets
 sync_upstream_omarchy() {
     log_info "Deploying Omarchy Quattro fonts, themes, wallpapers, and shell to /usr/share/omarchy..."
-    sudo mkdir -p /usr/share/omarchy /usr/share/fonts/omarchy
+    sudo mkdir -p /usr/share/omarchy /usr/share/fonts/omarchy /usr/share/omarchy/install/helpers
 
     SRC_OMARCHY=""
     if [ -d "${TARGET_HOME}/omarchy/shell" ]; then
@@ -94,6 +105,7 @@ sync_upstream_omarchy() {
         sudo cp -r "$SRC_OMARCHY/default" /usr/share/omarchy/
         sudo cp -r "$SRC_OMARCHY/config" /usr/share/omarchy/
         sudo cp -r "$SRC_OMARCHY/bin" /usr/share/omarchy/
+        [ -d "$SRC_OMARCHY/install" ] && sudo cp -r "$SRC_OMARCHY/install" /usr/share/omarchy/
         if [ -f "$SRC_OMARCHY/default/fonts/omarchy/omarchy.ttf" ]; then
             sudo cp "$SRC_OMARCHY/default/fonts/omarchy/omarchy.ttf" /usr/share/fonts/omarchy/
         fi
@@ -107,6 +119,7 @@ sync_upstream_omarchy() {
             sudo cp -r "$TMP_OMARCHY/default" /usr/share/omarchy/
             sudo cp -r "$TMP_OMARCHY/config" /usr/share/omarchy/
             sudo cp -r "$TMP_OMARCHY/bin" /usr/share/omarchy/
+            [ -d "$TMP_OMARCHY/install" ] && sudo cp -r "$TMP_OMARCHY/install" /usr/share/omarchy/
             if [ -f "$TMP_OMARCHY/default/fonts/omarchy/omarchy.ttf" ]; then
                 sudo cp "$TMP_OMARCHY/default/fonts/omarchy/omarchy.ttf" /usr/share/fonts/omarchy/
             fi
@@ -114,9 +127,16 @@ sync_upstream_omarchy() {
         fi
     fi
 
-    # Fallback to repo bundled fonts/themes if still missing
-    if [ -f "${REPO_DIR}/fonts/omarchy/omarchy.ttf" ] && [ ! -f /usr/share/fonts/omarchy/omarchy.ttf ]; then
+    # Fallback / priority repo bundled fonts, themes, and install helpers
+    if [ -f "${REPO_DIR}/fonts/omarchy/omarchy.ttf" ]; then
         sudo cp "${REPO_DIR}/fonts/omarchy/omarchy.ttf" /usr/share/fonts/omarchy/
+    fi
+    if [ -d "${REPO_DIR}/themes" ] && [ ! -d /usr/share/omarchy/themes ]; then
+        sudo cp -r "${REPO_DIR}/themes" /usr/share/omarchy/
+    fi
+    if [ -d "${REPO_DIR}/install/helpers" ]; then
+        sudo mkdir -p /usr/share/omarchy/install/helpers
+        sudo cp -r "${REPO_DIR}/install/helpers/"* /usr/share/omarchy/install/helpers/
     fi
 
     sudo fc-cache -fv >/dev/null 2>&1 || true
@@ -148,7 +168,7 @@ sync_upstream_omarchy() {
 # 4. Install Void Linux Compatibility Shims
 install_void_shims() {
     log_info "Installing Void Linux compatibility shims and environment variables..."
-    sudo mkdir -p /usr/local/bin /etc/pam.d /etc/profile.d
+    sudo mkdir -p /usr/local/bin /etc/pam.d /etc/profile.d /etc/sudoers.d
 
     echo "OMARCHY_PATH=/usr/share/omarchy" | sudo tee /etc/omarchy.conf >/dev/null
     echo "export OMARCHY_PATH=/usr/share/omarchy" | sudo tee /etc/profile.d/omarchy.sh >/dev/null
@@ -182,8 +202,8 @@ SHIM
 #!/usr/bin/env bash
 cmd="${1:-}"
 case "$cmd" in
-    poweroff|power-off) exec loginctl poweroff 2>/dev/null || exec sudo poweroff ;;
-    reboot) exec loginctl reboot 2>/dev/null || exec sudo reboot ;;
+    poweroff|power-off) exec loginctl poweroff 2>/dev/null || exec sudo -n poweroff ;;
+    reboot) exec loginctl reboot 2>/dev/null || exec sudo -n reboot ;;
     suspend) exec loginctl suspend 2>/dev/null || exec zzz ;;
     hibernate) exec loginctl hibernate 2>/dev/null || exec ZZZ ;;
     is-active|status) exit 0 ;;
@@ -218,7 +238,7 @@ SHIM
         sudo ln -sf /usr/bin/elogind-inhibit /usr/local/bin/systemd-inhibit
     fi
 
-    # Install custom repository binaries
+    # Install custom repository binaries (void-audio-init, void-backlight, omarchy-system, etc.)
     if [ -d "${REPO_DIR}/bin" ]; then
         for b in "${REPO_DIR}"/bin/*; do
             if [ -f "$b" ]; then
@@ -274,10 +294,9 @@ RC
     sudo chmod +x /etc/rc.shutdown
 
     # Mark Omarchy first-run as completed so repetitive notifications do not pop up on every login
-    if command -v omarchy-done >/dev/null 2>&1; then
-        omarchy-done mark first-run-user 2>/dev/null || true
-        omarchy-done mark finalize-user 2>/dev/null || true
-    fi
+    mkdir -p "${TARGET_HOME}/.local/state/omarchy/done"
+    touch "${TARGET_HOME}/.local/state/omarchy/done/first-run-user"
+    touch "${TARGET_HOME}/.local/state/omarchy/done/finalize-user"
 
     # systemd-run shim
     cat <<'SHIM' | sudo tee /usr/local/bin/systemd-run >/dev/null
@@ -361,10 +380,18 @@ esac
 SHIM
     sudo chmod +x /usr/local/bin/omarchy-universal-shortcut
 
-    # Passwordless browser policy rule
-    if [ -f /home/rajan/omarchy/etc/sudoers.d/omarchy-theme-browser ]; then
-        sudo cp /home/rajan/omarchy/etc/sudoers.d/omarchy-theme-browser /etc/sudoers.d/zz-omarchy-theme-browser
-        sudo chmod 0440 /etc/sudoers.d/zz-omarchy-theme-browser
+    # Sudoers rules for passwordless power management & theme browser tinting
+    cat <<SUDO | sudo tee /etc/sudoers.d/zz-omarchy-power >/dev/null
+${TARGET_USER} ALL=(root) NOPASSWD: /usr/bin/reboot, /usr/bin/poweroff, /usr/bin/shutdown, /usr/bin/halt, /usr/bin/zzz, /usr/bin/ZZZ, /usr/local/bin/omarchy-enable-greetd
+SUDO
+    sudo chmod 0440 /etc/sudoers.d/zz-omarchy-power
+
+    cat <<'SUDO' | sudo tee /etc/sudoers.d/zz-omarchy-theme-browser >/dev/null
+%wheel ALL=(root) NOPASSWD: /usr/bin/omarchy-theme-set-browser-policy [0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]
+SUDO
+    sudo chmod 0440 /etc/sudoers.d/zz-omarchy-theme-browser
+
+    if [ -f /usr/share/omarchy/bin/omarchy-theme-set-browser-policy ]; then
         sudo ln -snf /usr/share/omarchy/bin/omarchy-theme-set-browser-policy /usr/bin/omarchy-theme-set-browser-policy
     fi
 
@@ -397,24 +424,34 @@ SHIM
     log_ok "Compatibility shims installed."
 }
 
-# 5. Configure Runit Services & User Groups for `rajan`
+# 5. Configure Runit Services, Hardware Rules, and User Groups
 setup_runit_and_groups() {
     log_info "Configuring user groups & Void runit services for '${TARGET_USER}'..."
     for grp in wheel video audio input _seatd bluetooth network storage; do
         getent group "$grp" >/dev/null 2>&1 && sudo usermod -aG "$grp" "$TARGET_USER" || true
     done
 
+    # Remove conflicting network services if NetworkManager is used
     for conflict_svc in wpa_supplicant dhcpcd; do
         [ -L "/var/service/${conflict_svc}" ] && sudo rm -f "/var/service/${conflict_svc}"
     done
 
-    for svc in dbus elogind seatd NetworkManager bluetoothd polkitd; do
+    # Enable essential runit services
+    for svc in dbus elogind seatd NetworkManager bluetoothd polkitd acpid; do
         if [ -d "/etc/sv/${svc}" ] && [ ! -L "/var/service/${svc}" ]; then
             sudo ln -sf "/etc/sv/${svc}" "/var/service/${svc}"
             log_ok "Enabled runit service: ${svc}"
         fi
     done
 
+    # Enable greetd display manager if installed
+    if [ -d /etc/sv/greetd ] && command -v greetd >/dev/null 2>&1; then
+        sudo rm -f /var/service/agetty-tty1 2>/dev/null || true
+        sudo ln -sf /etc/sv/greetd /var/service/greetd
+        log_ok "Enabled greetd display manager on VT 1."
+    fi
+
+    # Configure ALSA PipeWire integration
     sudo mkdir -p /etc/alsa/conf.d
     [ -f /usr/share/alsa/alsa.conf.d/50-pipewire.conf ] && sudo ln -sf /usr/share/alsa/alsa.conf.d/50-pipewire.conf /etc/alsa/conf.d/
     [ -f /usr/share/alsa/alsa.conf.d/99-pipewire-default.conf ] && sudo ln -sf /usr/share/alsa/alsa.conf.d/99-pipewire-default.conf /etc/alsa/conf.d/
@@ -433,7 +470,7 @@ UDEV
     sudo udevadm control --reload 2>/dev/null || true
     sudo udevadm trigger --subsystem-match=sound 2>/dev/null || true
 
-    # PipeWire session manager auto-spawn
+    # PipeWire session manager auto-spawn (WirePlumber + PipeWire-Pulse)
     sudo mkdir -p /etc/pipewire/pipewire.conf.d
     cat <<'CONF' | sudo tee /etc/pipewire/pipewire.conf.d/10-session-manager.conf >/dev/null
 context.exec = [
@@ -484,11 +521,19 @@ deploy_dotfiles() {
         fi
     fi
 
+    # Set up theme hooks for btop and neovim
+    mkdir -p "${TARGET_HOME}/.config/btop/themes"
+    ln -snf "${TARGET_HOME}/.local/state/omarchy/current/theme/btop.theme" "${TARGET_HOME}/.config/btop/themes/current.theme"
+    mkdir -p "${TARGET_HOME}/.config/nvim/lua/plugins"
+    ln -snf "${TARGET_HOME}/.local/state/omarchy/current/theme/neovim.lua" "${TARGET_HOME}/.config/nvim/lua/plugins/theme.lua"
+
+    # Set login shell to zsh if installed
     if command -v zsh >/dev/null 2>&1; then
         sudo chsh -s "$(command -v zsh)" "$TARGET_USER" || true
     fi
 
-    sudo chown -R "${TARGET_USER}:${TARGET_USER}" "${TARGET_HOME}/.config" "${TARGET_HOME}/.local" "${TARGET_HOME}/.zshrc" "${TARGET_HOME}/.zprofile" 2>/dev/null || true
+    # Ensure proper non-root ownership on all deployed user files
+    sudo chown -R "${TARGET_USER}:${TARGET_USER}" "${TARGET_HOME}/.config" "${TARGET_HOME}/.local" "${TARGET_HOME}/.zshrc" "${TARGET_HOME}/.zprofile" "${TARGET_HOME}/Pictures" 2>/dev/null || true
     log_ok "Dotfiles deployed to ${TARGET_HOME}."
 }
 
@@ -501,5 +546,5 @@ deploy_dotfiles
 
 echo ""
 echo "======================================================================"
-log_ok "Quattro-Void setup complete! Log in on TTY1 as '${TARGET_USER}'."
+log_ok "Quattro-Void setup complete! Log in on VT 1 as '${TARGET_USER}'."
 echo "======================================================================"

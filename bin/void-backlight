@@ -2,19 +2,22 @@
 # Save and restore backlight brightness across boots on Void Linux
 
 STATE_DIR="/var/lib/backlight"
-USER_STATE="${HOME:-/home/rajan}/.local/state/omarchy/brightness"
+USER_STATE=""
+if [ -n "${HOME:-}" ] && [ "$HOME" != "/root" ]; then
+    USER_STATE="${HOME}/.local/state/omarchy/brightness"
+fi
 
 case "${1:-restore}" in
     save)
         mkdir -p "$STATE_DIR" 2>/dev/null
-        mkdir -p "$(dirname "$USER_STATE")" 2>/dev/null
+        [ -n "$USER_STATE" ] && mkdir -p "$(dirname "$USER_STATE")" 2>/dev/null
         for dev in /sys/class/backlight/*; do
             [ -d "$dev" ] || continue
             name=$(basename "$dev")
             val=$(cat "$dev/brightness" 2>/dev/null)
             [ -n "$val" ] || continue
             echo "$val" > "$STATE_DIR/$name" 2>/dev/null || true
-            echo "$val" > "$USER_STATE" 2>/dev/null || true
+            [ -n "$USER_STATE" ] && echo "$val" > "$USER_STATE" 2>/dev/null || true
         done
         ;;
     restore)
@@ -31,7 +34,7 @@ case "${1:-restore}" in
                 fi
             fi
         done
-        if [ "$restored" -eq 0 ] && [ -f "$USER_STATE" ]; then
+        if [ "$restored" -eq 0 ] && [ -n "$USER_STATE" ] && [ -f "$USER_STATE" ]; then
             val=$(cat "$USER_STATE" 2>/dev/null)
             if [ -n "$val" ]; then
                 brightnessctl set "$val" >/dev/null 2>&1 || true

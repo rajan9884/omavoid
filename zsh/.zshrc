@@ -1,5 +1,6 @@
-export USER="rajan"
-export HOME="/home/rajan"
+export USER="${USER:-$(id -un)}"
+export HOME="${HOME:-$(getent passwd "$USER" 2>/dev/null | cut -d: -f6)}"
+[ -z "$HOME" ] && export HOME="/home/$USER"
 export OMARCHY_PATH="/usr/share/omarchy"
 export PATH="$HOME/.local/bin:/usr/share/omarchy/bin:$PATH"
 export EDITOR="nvim"

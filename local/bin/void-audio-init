@@ -1,12 +1,25 @@
 #!/usr/bin/env bash
+# Robust audio initialization for Void Linux under Wayland / Hyprland
 set -u
+
+if [ -z "${XDG_RUNTIME_DIR:-}" ]; then
+    export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+fi
+
+# Clean up stale lock/socket files if pipewire daemon is not running
 if ! pgrep -u "$USER" -x pipewire >/dev/null 2>&1; then
-    pipewire >/dev/null 2>&1 &
-    sleep 0.3
+    rm -f "$XDG_RUNTIME_DIR"/pipewire-*.lock "$XDG_RUNTIME_DIR"/pipewire-0* 2>/dev/null || true
+    nohup /usr/bin/pipewire >/dev/null 2>&1 &
+    disown
+    sleep 0.5
 fi
+
 if ! pgrep -u "$USER" -x wireplumber >/dev/null 2>&1; then
-    wireplumber >/dev/null 2>&1 &
+    nohup /usr/bin/wireplumber >/dev/null 2>&1 &
+    disown
 fi
+
 if ! pgrep -u "$USER" -x pipewire-pulse >/dev/null 2>&1; then
-    pipewire-pulse >/dev/null 2>&1 &
+    nohup /usr/bin/pipewire-pulse >/dev/null 2>&1 &
+    disown
 fi

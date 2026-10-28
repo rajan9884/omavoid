@@ -1,0 +1,5 @@
+#!/bin/sh
+if [ -d /etc/sv/greetd ] && [ ! -L /var/service/greetd ]; then
+    rm -f /var/service/agetty-tty1 2>/dev/null || true
+    ln -sf /etc/sv/greetd /var/service/greetd 2>/dev/null || true
+fi

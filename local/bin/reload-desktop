@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 set -u
 hyprctl reload >/dev/null 2>&1 || true
-setsid /home/rajan/.local/bin/launch-quattro-shell >/dev/null 2>&1 &
+setsid "${HOME:-/home/${USER:-$(id -un)}}/.local/bin/launch-quattro-shell" >/dev/null 2>&1 &
 command -v notify-send >/dev/null 2>&1 && notify-send "Quattro Shell" "Reloaded Quickshell & Hyprland" || true
