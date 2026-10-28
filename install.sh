@@ -60,6 +60,7 @@ install_packages() {
         python3 fontconfig
         zsh starship fzf zoxide eza bat fd ripgrep jq
         btop yazi lazygit calcurse neovim fastfetch git curl unzip vips ffmpegthumbnailer
+        greetd tuigreet
         nerd-fonts-symbols-ttf font-jetbrains-mono-ttf noto-fonts-ttf noto-fonts-emoji
     )
 
@@ -187,6 +188,11 @@ SHIM
     # uwsm and uwsm-app shim
     cat <<'SHIM' | sudo tee /usr/local/bin/uwsm >/dev/null
 #!/bin/sh
+if [ "$1" = "stop" ]; then
+    hyprctl dispatch exit >/dev/null 2>&1 || loginctl terminate-user "$USER" 2>/dev/null || true
+    exit 0
+fi
+
 while [ $# -gt 0 ]; do
     case "$1" in
         --) shift; break ;;
@@ -199,6 +205,33 @@ done
 SHIM
     sudo chmod +x /usr/local/bin/uwsm
     sudo cp -f /usr/local/bin/uwsm /usr/local/bin/uwsm-app
+
+    # systemd-inhibit to elogind-inhibit symlink
+    if [ -x /usr/bin/elogind-inhibit ]; then
+        sudo ln -sf /usr/bin/elogind-inhibit /usr/local/bin/systemd-inhibit
+    fi
+
+    # Install omarchy-system binary
+    if [ -f "${REPO_DIR}/bin/omarchy-system" ]; then
+        sudo cp -f "${REPO_DIR}/bin/omarchy-system" /usr/share/omarchy/bin/omarchy-system
+        sudo chmod +x /usr/share/omarchy/bin/omarchy-system
+        sudo ln -sf /usr/share/omarchy/bin/omarchy-system /usr/local/bin/omarchy-system
+    fi
+
+    # Configure greetd with tuigreet
+    if command -v tuigreet >/dev/null 2>&1; then
+        sudo mkdir -p /etc/greetd
+        cat <<'GREETD' | sudo tee /etc/greetd/config.toml >/dev/null
+[terminal]
+vt = 1
+
+[default_session]
+command = "tuigreet --time --remember --remember-user-session --sessions /usr/share/wayland-sessions --session-wrapper 'dbus-run-session' --cmd /usr/bin/start-hyprland --power-shutdown 'loginctl poweroff' --power-reboot 'loginctl reboot' --asterisks"
+user = "_greeter"
+GREETD
+        sudo chmod -R go+r /etc/greetd
+        getent passwd _greeter >/dev/null 2>&1 && sudo usermod -aG video,input _greeter || true
+    fi
 
     # systemd-run shim
     cat <<'SHIM' | sudo tee /usr/local/bin/systemd-run >/dev/null

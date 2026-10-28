@@ -39,6 +39,10 @@ hl.unbind("SUPER + SHIFT + S")           -- Google Maps web app
 hl.unbind("SUPER + SHIFT + X")           -- X web app
 hl.unbind("SUPER + SHIFT + ALT + X")     -- X Post web app
 
+-- Notifications: Super + Comma dismisses newest, Super + Alt + Comma invokes
+o.rebind("SUPER + comma", "Dismiss last notification", { ipc = "notifications.dismissOne" })
+o.rebind("SUPER + ALT + comma", "Dismiss, invoke, or focus last notification", { ipc = "notifications.act" })
+
 -- Workspaces 1..10
 for workspace = 1, 10 do
   local key = tostring(workspace % 10)
