@@ -139,10 +139,26 @@ sync_upstream_omarchy() {
         sudo cp -r "${REPO_DIR}/install/helpers/"* /usr/share/omarchy/install/helpers/
     fi
 
-    # Deploy customized Omarchy menu definition to system default
-    if [ -f "${REPO_DIR}/config/omarchy/omarchy-menu.jsonc" ]; then
-        sudo cp "${REPO_DIR}/config/omarchy/omarchy-menu.jsonc" /usr/share/omarchy/default/omarchy/omarchy-menu.jsonc
+    # Clean up stale upstream plugins and panels
+    sudo rm -rf /usr/share/omarchy/shell/plugins/agents \
+                /usr/share/omarchy/shell/plugins/dev-gallery \
+                /usr/share/omarchy/shell/plugins/panels/dropbox \
+                /usr/share/omarchy/shell/plugins/panels/tailscale \
+                /usr/share/omarchy/shell/plugins/panels/disk-speedtest \
+                /usr/share/omarchy/shell/plugins/panels/speedtest \
+                /usr/share/omarchy/shell/plugins/panels/elsewhen 2>/dev/null || true
+
+    # Link customized shell and menu definitions directly from dotfiles
+    if [ -d "${REPO_DIR}/config/quickshell" ]; then
+        sudo rm -rf /usr/share/omarchy/shell
+        sudo ln -sfn "${REPO_DIR}/config/quickshell" /usr/share/omarchy/shell
     fi
+    if [ -f "${REPO_DIR}/config/omarchy/omarchy-menu.jsonc" ]; then
+        sudo ln -sfn "${REPO_DIR}/config/omarchy/omarchy-menu.jsonc" /usr/share/omarchy/default/omarchy/omarchy-menu.jsonc
+    fi
+
+    # Grant user ownership to prevent sync and permission discrepancies
+    sudo chown -R "${TARGET_USER}:${TARGET_USER}" /usr/share/omarchy
 
     sudo fc-cache -fv >/dev/null 2>&1 || true
     sudo chmod +x /usr/share/omarchy/bin/* 2>/dev/null || true
