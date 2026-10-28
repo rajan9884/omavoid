@@ -135,6 +135,13 @@ sync_upstream_omarchy() {
         sudo ln -sf "$(command -v quickshell)" /usr/local/bin/qs
     fi
 
+    # Ensure omarchy-launch-shell initializes audio before starting Quickshell
+    if [ -f /usr/share/omarchy/bin/omarchy-launch-shell ]; then
+        if ! grep -q "void-audio-init" /usr/share/omarchy/bin/omarchy-launch-shell; then
+            sudo sed -i '/run_shell() {/a \  command -v void-audio-init >/dev/null 2>&1 && void-audio-init' /usr/share/omarchy/bin/omarchy-launch-shell
+        fi
+    fi
+
     log_ok "Official assets synchronized."
 }
 
