@@ -6,8 +6,7 @@
       "app",
       "applications"
     ],
-    "provider": "apps",
-    "action": "omarchy-shell omarchy.dock apps"
+    "provider": "apps"
   },
   "appearance": {
     "icon": "󰏘",
@@ -64,13 +63,13 @@
     "icon": "󰒲",
     "label": "Suspend",
     "when": "! omarchy-toggle-enabled suspend-off && ! omarchy-sleep-disabled",
-    "action": "systemctl suspend"
+    "action": "omarchy-system suspend"
   },
   "system.hibernate": {
     "icon": "󰤁",
     "label": "Hibernate",
     "when": "omarchy-hibernation-available && ! omarchy-sleep-disabled",
-    "action": "systemctl hibernate"
+    "action": "omarchy-system hibernate"
   },
   "system.logout": {
     "icon": "󰍃",
@@ -1295,7 +1294,7 @@
   "setup.config.hyprland": {
     "icon": "",
     "label": "Hyprland",
-    "action": "omarchy-launch-config-editor \"$HOME/.config/hypr/hyprland.lua\""
+    "action": "omarchy-launch-config-editor \"$HOME/.config/hypr/hyprland.conf\""
   },
   "setup.config.hyprsunset": {
     "icon": "",
