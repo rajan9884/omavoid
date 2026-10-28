@@ -409,6 +409,29 @@ setup_runit_and_groups() {
     sudo mkdir -p /etc/alsa/conf.d
     [ -f /usr/share/alsa/alsa.conf.d/50-pipewire.conf ] && sudo ln -sf /usr/share/alsa/alsa.conf.d/50-pipewire.conf /etc/alsa/conf.d/
     [ -f /usr/share/alsa/alsa.conf.d/99-pipewire-default.conf ] && sudo ln -sf /usr/share/alsa/alsa.conf.d/99-pipewire-default.conf /etc/alsa/conf.d/
+
+    # Udev sound hardware permissions for audio group
+    sudo mkdir -p /etc/udev/rules.d
+    cat <<'UDEV' | sudo tee /etc/udev/rules.d/60-sound.rules >/dev/null
+SUBSYSTEM=="sound", GROUP="audio", MODE="0660"
+KERNEL=="controlC[0-9]*", GROUP="audio", MODE="0660"
+KERNEL=="pcmC[0-9]*", GROUP="audio", MODE="0660"
+KERNEL=="hwC[0-9]*", GROUP="audio", MODE="0660"
+KERNEL=="midiC[0-9]*", GROUP="audio", MODE="0660"
+KERNEL=="timer", GROUP="audio", MODE="0660"
+KERNEL=="seq", GROUP="audio", MODE="0660"
+UDEV
+    sudo udevadm control --reload 2>/dev/null || true
+    sudo udevadm trigger --subsystem-match=sound 2>/dev/null || true
+
+    # PipeWire session manager auto-spawn
+    sudo mkdir -p /etc/pipewire/pipewire.conf.d
+    cat <<'CONF' | sudo tee /etc/pipewire/pipewire.conf.d/10-session-manager.conf >/dev/null
+context.exec = [
+    { path = "/usr/bin/wireplumber" args = "" }
+    { path = "/usr/bin/pipewire" args = [ "-c", "pipewire-pulse.conf" ] }
+]
+CONF
 }
 
 # 6. Deploy Dotfiles to Target User Home

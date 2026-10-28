@@ -7,9 +7,9 @@ export VISUAL="nvim"
 export TERMINAL="foot"
 
 if [ -z "${WAYLAND_DISPLAY:-}" ] && [ "${XDG_VTNR:-0}" -eq 1 ]; then
-    if command -v dbus-run-session >/dev/null 2>&1; then
-        exec dbus-run-session Hyprland --config ~/.config/hypr/hyprland.lua
+    if command -v start-hyprland >/dev/null 2>&1; then
+        exec dbus-run-session start-hyprland -- --config ~/.config/hypr/hyprland.lua
     else
-        exec Hyprland --config ~/.config/hypr/hyprland.lua
+        exec dbus-run-session Hyprland --config ~/.config/hypr/hyprland.lua
     fi
 fi
