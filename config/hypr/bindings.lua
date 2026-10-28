@@ -4,8 +4,8 @@
 o.rebind("SUPER + T", "Toggle floating window", "omarchy-toggle-floating-centered")
 
 -- Background switcher (Super + Ctrl + Space / Super + Ctrl + W)
-o.rebind("SUPER + CTRL + SPACE", "Background switcher", "omarchy-background-switcher")
-o.rebind("SUPER + CTRL + W", "Background switcher", "omarchy-background-switcher")
+o.rebind("SUPER + CTRL + SPACE", "Background switcher", { menu = "background" })
+o.rebind("SUPER + CTRL + W", "Background switcher", { menu = "background" })
 
 -- Remove redundant Theme menu bind (Super + Ctrl + T), keeping Super + Shift + Ctrl + Space
 hl.unbind("SUPER + CTRL + T")

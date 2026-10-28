@@ -59,7 +59,7 @@ install_packages() {
         qt6-wayland qt6-declarative qt6-svg qt6-shadertools qt6-imageformats qt6ct
         python3 fontconfig
         zsh starship fzf zoxide eza bat fd ripgrep jq
-        btop yazi lazygit calcurse neovim fastfetch git curl unzip
+        btop yazi lazygit calcurse neovim fastfetch git curl unzip vips ffmpegthumbnailer
         nerd-fonts-symbols-ttf font-jetbrains-mono-ttf noto-fonts-ttf noto-fonts-emoji
     )
 
