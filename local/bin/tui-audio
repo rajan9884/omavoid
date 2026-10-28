@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-# TUI Audio Mixer (wiremix -> pulsemixer -> alsamixer)
 set -euo pipefail
-
 if command -v wiremix >/dev/null 2>&1; then
     exec ~/.local/bin/launch-tui-popup wiremix
 elif command -v pulsemixer >/dev/null 2>&1; then

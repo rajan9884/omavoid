@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
-# Wayland Screenshot Utility (grim + slurp + wl-copy)
 set -euo pipefail
-
 DIR="$HOME/Pictures/Screenshots"
 mkdir -p "$DIR"
 FILE="$DIR/screenshot-$(date +%Y%m%d-%H%M%S).png"
-
 if [ "${1:-region}" = "full" ]; then
     grim "$FILE"
 else
@@ -13,6 +10,5 @@ else
     [ -z "$geom" ] && exit 0
     grim -g "$geom" "$FILE"
 fi
-
 wl-copy < "$FILE"
 notify-send "Screenshot Captured" "Saved to $FILE and copied to clipboard"

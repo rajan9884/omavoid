@@ -1,14 +1,17 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # QUATTRO QUICKSHELL IPC CONTROLLER (qshell-ctl)
-# Communicates with the single running Quickshell instance via `quickshell ipc`
-# AND writes to `/tmp/quattro-qs-ipc-rajan` (FileView bridge) so it works across
-# every Quickshell version on Void Linux.
+# Controls Omarchy Quattro Quickshell Menus, Panels, Lockscreen & OSD
 # ==============================================================================
-
 set -euo pipefail
 
-IPC_FILE="/tmp/quattro-qs-ipc-rajan"
+export OMARCHY_PATH="${OMARCHY_PATH:-/usr/share/omarchy}"
+runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$UID}"
+if [[ -z ${WAYLAND_DISPLAY:-} ]]; then
+    socket=$(ls -t "$runtime_dir"/wayland-[0-9]* 2>/dev/null | grep -v '\.lock$' | head -n1)
+    [[ -n $socket ]] && export WAYLAND_DISPLAY=${socket##*/}
+fi
+
 cmd="${1:-}"
 arg="${2:-}"
 
@@ -17,78 +20,69 @@ send_ipc() {
     local p1="${2:-}"
     local p2="${3:-}"
     local p3="${4:-0}"
-    printf "%s|%s|%s|%s|%s\n" "$action" "$p1" "$p2" "$p3" "$(date +%s%N)" > "$IPC_FILE"
-    if command -v quickshell >/dev/null 2>&1; then
-        case "$action" in
-            toggle) quickshell ipc call shell toggle "$p1" >/dev/null 2>&1 || true ;;
-            summon) quickshell ipc call shell summon "$p1" >/dev/null 2>&1 || true ;;
-            hide)   quickshell ipc call shell hide >/dev/null 2>&1 || true ;;
-            lock)   quickshell ipc call shell lock >/dev/null 2>&1 || true ;;
-        esac
-    fi
+
+    case "$action" in
+        toggle)
+            if [ "$p1" = "omarchy.apps" ]; then
+                omarchy-shell -q omarchy.dock apps >/dev/null 2>&1 || omarchy-shell -q shell toggle omarchy.menu '{"menu":"apps"}' || true
+            elif [ "$p1" = "omarchy.keybinds" ]; then
+                omarchy-menu-keybindings >/dev/null 2>&1 || omarchy-shell -q shell toggle omarchy.menu '{"menu":"keybindings"}' || true
+            else
+                omarchy-shell -q shell toggle "$p1" "{}" >/dev/null 2>&1 || true
+            fi
+            ;;
+        summon)
+            omarchy-shell -q shell summon "$p1" "{}" >/dev/null 2>&1 || true
+            ;;
+        hide)
+            omarchy-shell -q shell hide "$p1" >/dev/null 2>&1 || true
+            ;;
+        lock)
+            omarchy-lock >/dev/null 2>&1 || omarchy-shell -q shell lock >/dev/null 2>&1 || true
+            ;;
+        osd)
+            # Route OSD directly or through Quickshell
+            ;;
+    esac
 }
 
 case "$cmd" in
     toggle)
-        [ "$arg" = "menu" ] || [ "$arg" = "apps" ] && ~/.local/bin/qs-app-indexer >/dev/null 2>&1 &
         send_ipc "toggle" "$arg"
         ;;
     summon)
         send_ipc "summon" "$arg"
         ;;
     hide)
-        send_ipc "hide"
+        send_ipc "hide" "$arg"
         ;;
     lock)
         send_ipc "lock"
-        ;;
-    bar-bg)
-        send_ipc "bar-bg"
         ;;
     osd)
         case "$arg" in
             volume-up)
                 wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+
-                vol=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{printf "%d", $2 * 100}')
-                send_ipc "osd" "󰕾" "Volume" "$vol"
                 ;;
             volume-down)
                 wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
-                vol=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{printf "%d", $2 * 100}')
-                send_ipc "osd" "󰖀" "Volume" "$vol"
                 ;;
             volume-mute)
                 wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
-                raw=$(wpctl get-volume @DEFAULT_AUDIO_SINK@)
-                if grep -q "MUTED" <<<"$raw"; then
-                    send_ipc "osd" "󰝟" "Muted" "0"
-                else
-                    vol=$(awk '{printf "%d", $2 * 100}' <<<"$raw")
-                    send_ipc "osd" "󰕾" "Volume" "$vol"
-                fi
                 ;;
             mic-mute)
                 wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
-                if wpctl get-volume @DEFAULT_AUDIO_SOURCE@ | grep -q "MUTED"; then
-                    send_ipc "osd" "󰍭" "Mic Muted" "0"
-                else
-                    send_ipc "osd" "󰍬" "Mic Active" "100"
-                fi
                 ;;
             brightness-up)
                 brightnessctl set 5%+ >/dev/null 2>&1 || true
-                b=$(brightnessctl -m 2>/dev/null | cut -d, -f4 | tr -d '%' || echo 100)
-                send_ipc "osd" "󰃠" "Brightness" "${b:-100}"
                 ;;
             brightness-down)
                 brightnessctl set 5%- >/dev/null 2>&1 || true
-                b=$(brightnessctl -m 2>/dev/null | cut -d, -f4 | tr -d '%' || echo 100)
-                send_ipc "osd" "󰃠" "Brightness" "${b:-100}"
                 ;;
         esac
         ;;
     *)
-        echo "Usage: qshell-ctl {toggle|summon|hide|lock|bar-bg|osd} [target]"
+        echo "Usage: qshell-ctl {toggle|summon|hide|lock|osd} [target]"
         exit 1
         ;;
 esac

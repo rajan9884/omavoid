@@ -1,11 +1,7 @@
-# ==============================================================================
-# QUATTRO-VOID ZSHRC FOR USER: rajan (/home/rajan)
-# Integrated CLI Stack: zoxide, fzf, eza, bat, fd, ripgrep, yazi, lazygit, xbps
-# ==============================================================================
-
 export USER="rajan"
 export HOME="/home/rajan"
-export PATH="$HOME/.local/bin:$PATH"
+export OMARCHY_PATH="/usr/share/omarchy"
+export PATH="$HOME/.local/bin:/usr/share/omarchy/bin:$PATH"
 export EDITOR="nvim"
 export VISUAL="nvim"
 

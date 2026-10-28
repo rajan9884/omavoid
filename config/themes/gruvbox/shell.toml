@@ -1,0 +1,76 @@
+[font]
+base-size = 12
+caption = 10
+body-small = 11
+body = 12
+subtitle = 13
+title = 14
+heading = 16
+display = 24
+display-large = 28
+icon-small = 11
+icon = 14
+icon-large = 18
+
+[spacing]
+scale = 1.0
+scale-with-font = true
+panel-padding = 18
+popup-padding = 14
+row-gap = 6
+
+[bar]
+scale-with-font = true
+size-horizontal = 26
+size-vertical = 28
+icon-slot = 27
+icon-canvas = 16
+icon-font = 13
+status-slot = 21
+
+[controls]
+normal-color = "#d4be98"
+normal-fill-alpha = 0.0
+normal-border = "#d4be98"
+normal-border-width = 1
+normal-border-alpha = 0.22
+hover-cursor-color = "accent"
+hover-cursor-fill-alpha = 0.14
+hover-cursor-border = "accent"
+hover-cursor-border-width = 1
+hover-cursor-border-alpha = 0.35
+focus-color = "accent"
+focus-fill-alpha = 0.14
+focus-border = "rgba(7daea3ee) rgba(a9b665ee) 45deg"
+focus-border-width = 1
+focus-border-alpha = 0.8
+selected-color = "foreground"
+selected-fill-alpha = 0.18
+selected-border-width = 0
+
+[popups]
+background = "#1d2021"
+text = "#d4be98"
+border = "rgba(7daea3ee) rgba(a9b665ee) 45deg"
+border-width = 2
+
+[menu]
+background = "#1d2021"
+text = "#d4be98"
+border = "rgba(7daea3ee) rgba(a9b665ee) 45deg"
+border-width = 2
+selected-border = "accent"
+selected-border-width = "1 1 1 4"
+
+[notifications]
+background = "#1d2021"
+text = "#d4be98"
+border = "#7daea3"
+border-width = 2
+border-width-left = 6
+
+[lock]
+background = "#0f1011"
+text = "#ebdbb2"
+placeholder = "#7c6f64"
+border-active = "rgba(7daea3ee) rgba(a9b665ee) 45deg"

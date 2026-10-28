@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
-# Launch preferred Wayland terminal emulator (Foot -> Alacritty -> Kitty)
 set -euo pipefail
-
 for term in foot alacritty kitty ghostty wezterm; do
     if command -v "$term" >/dev/null 2>&1; then
         exec "$term" "$@"
     fi
 done
-
 exit 1

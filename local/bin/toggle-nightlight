@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-# Toggle wlsunset Night Light (4200K warm filter)
 set -euo pipefail
-
 if pgrep -x wlsunset >/dev/null 2>&1; then
     pkill -x wlsunset
     notify-send "Night Light" "Disabled (6500K)"

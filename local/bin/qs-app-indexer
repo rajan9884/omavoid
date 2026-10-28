@@ -1,32 +1,20 @@
 #!/usr/bin/env bash
-# Scans /usr/share/applications & ~/.local/share/applications and outputs JSON
-# for the pure Quickshell UnifiedMenu / App Launcher (Zero Rofi / Walker needed!)
 set -euo pipefail
-
 OUT="/tmp/quattro-apps-rajan.json"
 
 python3 - <<'PY' > "${OUT}.tmp" 2>/dev/null || echo "[]" > "${OUT}.tmp"
-import glob
-import json
-import os
-import re
+import glob, json, os, re
 
 dirs = [
     "/usr/share/applications",
     "/usr/local/share/applications",
     os.path.expanduser("~/.local/share/applications"),
 ]
-
-apps = []
-seen = set()
-
+apps, seen = [], set()
 for d in dirs:
     for path in sorted(glob.glob(os.path.join(d, "*.desktop"))):
         try:
-            name = None
-            exec_cmd = None
-            nodisplay = False
-            terminal = False
+            name, exec_cmd, comment, nodisplay, terminal = None, None, "", False, False
             with open(path, "r", encoding="utf-8", errors="ignore") as f:
                 in_entry = False
                 for line in f:
@@ -41,6 +29,8 @@ for d in dirs:
                         continue
                     if line.startswith("Name=") and name is None:
                         name = line.split("=", 1)[1].strip()
+                    elif line.startswith("Comment=") and not comment:
+                        comment = line.split("=", 1)[1].strip()
                     elif line.startswith("Exec=") and exec_cmd is None:
                         raw_exec = line.split("=", 1)[1].strip()
                         exec_cmd = re.sub(r"\s+%[fFuUdDnNickvm]", "", raw_exec)
@@ -54,14 +44,12 @@ for d in dirs:
                     exec_cmd = f"~/.local/bin/launch-tui-float {exec_cmd}"
                 apps.append({
                     "title": name,
-                    "category": "App",
+                    "subtext": comment or exec_cmd,
                     "icon": "󰀻",
                     "cmd": exec_cmd
                 })
         except Exception:
             pass
-
 print(json.dumps(apps))
 PY
-
 mv "${OUT}.tmp" "$OUT"

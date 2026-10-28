@@ -1,9 +1,0 @@
-singleton Theme 1.0 Theme.qml
-singleton Telemetry 1.0 Telemetry.qml
-WallpaperLayer 1.0 WallpaperLayer.qml
-Bar 1.0 Bar.qml
-BarPill 1.0 BarPill.qml
-WorkspacesWidget 1.0 WorkspacesWidget.qml
-ClockWidget 1.0 ClockWidget.qml
-MprisWidget 1.0 MprisWidget.qml
-SystemStatusWidget 1.0 SystemStatusWidget.qml

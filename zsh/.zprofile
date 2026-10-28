@@ -1,6 +1,7 @@
 export USER="rajan"
 export HOME="/home/rajan"
-export PATH="$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin"
+export OMARCHY_PATH="/usr/share/omarchy"
+export PATH="$HOME/.local/bin:/usr/share/omarchy/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin"
 export EDITOR="nvim"
 export VISUAL="nvim"
 export TERMINAL="foot"

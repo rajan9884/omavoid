@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
-# Single-shot JSON telemetry script for Quickshell Telemetry.qml singleton
 set -u
 
-# 1. Audio & Mic (PipeWire / wpctl)
 audio_icon="󰕾"
 audio_text="--%"
 audio_vol=0
@@ -29,7 +27,6 @@ if command -v wpctl >/dev/null 2>&1; then
             audio_icon="󰕾"
         fi
     fi
-
     mic_raw=$(wpctl get-volume @DEFAULT_AUDIO_SOURCE@ 2>/dev/null || echo "")
     if grep -q "MUTED" <<<"$mic_raw"; then
         mic_muted="true"
@@ -37,14 +34,11 @@ if command -v wpctl >/dev/null 2>&1; then
     fi
 fi
 
-# 2. Brightness & NightLight
 bright_icon="󰃠"
 bright_text="100%"
 bright_pct=100
 nightlight="false"
-if pgrep -x wlsunset >/dev/null 2>&1; then
-    nightlight="true"
-fi
+pgrep -x wlsunset >/dev/null 2>&1 && nightlight="true"
 if command -v brightnessctl >/dev/null 2>&1 && ls /sys/class/backlight/* >/dev/null 2>&1; then
     b_pct=$(brightnessctl -m 2>/dev/null | cut -d, -f4 | tr -d '%' || echo "100")
     bright_pct="${b_pct:-100}"
@@ -54,7 +48,6 @@ else
     bright_text="DP"
 fi
 
-# 3. Network (NetworkManager)
 wifi_icon="󰤭"
 wifi_text="Offline"
 wifi_connected="false"
@@ -83,11 +76,11 @@ fi
 ip_cand=$(ip -4 -o addr show scope global 2>/dev/null | awk '{split($4,a,"/"); print a[1]; exit}')
 [ -n "$ip_cand" ] && ip_addr="$ip_cand"
 
-# 4. Bluetooth (BlueZ)
 bt_icon="󰂲"
 bt_text="Off"
 bt_powered="false"
 bt_connected="false"
+bt_device=""
 if command -v bluetoothctl >/dev/null 2>&1; then
     if bluetoothctl show 2>/dev/null | grep -q "Powered: yes"; then
         bt_powered="true"
@@ -96,6 +89,7 @@ if command -v bluetoothctl >/dev/null 2>&1; then
         if [ -n "$dev_name" ]; then
             bt_connected="true"
             bt_icon="󰂱"
+            bt_device="$dev_name"
             bt_text="${dev_name:0:10}"
         else
             bt_text="On"
@@ -103,14 +97,13 @@ if command -v bluetoothctl >/dev/null 2>&1; then
     fi
 fi
 
-# 5. Battery & CPU/RAM Load
 bat_icon="󰁹"
-bat_text="AC"
+bat_text="100%"
 bat_pct=100
-bat_status="Full"
+bat_status="AC Connected"
 bat_charging="false"
 bat_low="false"
-bat_dir=$(ls -d /sys/class/power_supply/BAT* 2>/dev/null | head -n1 || true)
+bat_dir=$(ls -d /sys/class/power_supply/BAT* /sys/class/power_supply/battery* 2>/dev/null | head -n1 || true)
 if [ -n "$bat_dir" ] && [ -f "$bat_dir/capacity" ]; then
     cap=$(cat "$bat_dir/capacity" 2>/dev/null || echo 100)
     status=$(cat "$bat_dir/status" 2>/dev/null || echo "Full")
@@ -136,8 +129,8 @@ fi
 
 cpu_load=$(awk '{printf "%d%%", $1 * 10}' /proc/loadavg 2>/dev/null || echo "2%")
 mem_used=$(free -h 2>/dev/null | awk '/^Mem:/ {print $3}' || echo "1.5G")
+uptime_str=$(uptime -p 2>/dev/null || echo "up")
 
-# 6. MPRIS Media
 media_title=""
 media_status="Stopped"
 if command -v playerctl >/dev/null 2>&1; then
@@ -145,8 +138,8 @@ if command -v playerctl >/dev/null 2>&1; then
     if [ "$m_st" = "Playing" ] || [ "$m_st" = "Paused" ]; then
         media_status="$m_st"
         m_raw=$(playerctl metadata --format '{{artist}} - {{title}}' 2>/dev/null | tr -d '"' || echo "")
-        media_title="${m_raw:0:28}"
+        media_title="${m_raw:0:26}"
     fi
 fi
 
-printf '{"audio_icon":"%s","audio_text":"%s","audio_vol":%d,"audio_muted":%s,"mic_icon":"%s","mic_muted":%s,"audio_sink":"%s","bright_icon":"%s","bright_text":"%s","bright_pct":%d,"nightlight":%s,"wifi_icon":"%s","wifi_text":"%s","wifi_connected":%s,"wifi_enabled":%s,"wifi_ssid":"%s","ip_addr":"%s","bt_icon":"%s","bt_text":"%s","bt_powered":%s,"bt_connected":%s,"bat_icon":"%s","bat_text":"%s","bat_pct":%d,"bat_status":"%s","bat_charging":%s,"bat_low":%s,"cpu_load":"%s","mem_used":"%s","media_title":"%s","media_status":"%s"}\n'     "$audio_icon" "$audio_text" "$audio_vol" "$audio_muted" "$mic_icon" "$mic_muted" "$audio_sink"     "$bright_icon" "$bright_text" "$bright_pct" "$nightlight"     "$wifi_icon" "$wifi_text" "$wifi_connected" "$wifi_enabled" "$wifi_ssid" "$ip_addr"     "$bt_icon" "$bt_text" "$bt_powered" "$bt_connected"     "$bat_icon" "$bat_text" "$bat_pct" "$bat_status" "$bat_charging" "$bat_low"     "$cpu_load" "$mem_used" "$media_title" "$media_status"
+printf '{"audio_icon":"%s","audio_text":"%s","audio_vol":%d,"audio_muted":%s,"mic_icon":"%s","mic_muted":%s,"audio_sink":"%s","bright_icon":"%s","bright_text":"%s","bright_pct":%d,"nightlight":%s,"wifi_icon":"%s","wifi_text":"%s","wifi_connected":%s,"wifi_enabled":%s,"wifi_ssid":"%s","ip_addr":"%s","bt_icon":"%s","bt_text":"%s","bt_powered":%s,"bt_connected":%s,"bt_device":"%s","bat_icon":"%s","bat_text":"%s","bat_pct":%d,"bat_status":"%s","bat_charging":%s,"bat_low":%s,"cpu_load":"%s","mem_used":"%s","uptime":"%s","media_title":"%s","media_status":"%s"}\n'     "$audio_icon" "$audio_text" "$audio_vol" "$audio_muted" "$mic_icon" "$mic_muted" "$audio_sink"     "$bright_icon" "$bright_text" "$bright_pct" "$nightlight"     "$wifi_icon" "$wifi_text" "$wifi_connected" "$wifi_enabled" "$wifi_ssid" "$ip_addr"     "$bt_icon" "$bt_text" "$bt_powered" "$bt_connected" "$bt_device"     "$bat_icon" "$bat_text" "$bat_pct" "$bat_status" "$bat_charging" "$bat_low"     "$cpu_load" "$mem_used" "$uptime_str" "$media_title" "$media_status"

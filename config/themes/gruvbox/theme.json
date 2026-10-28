@@ -1,0 +1,23 @@
+{
+  "name": "Gruvbox",
+  "mode": "dark",
+  "accent": "#7daea3",
+  "selection": "#3c3836",
+  "muted": "#7c6f64",
+  "background": "#1d2021",
+  "dark_background": "#141617",
+  "darker_background": "#0f1011",
+  "lighter_background": "#282828",
+  "foreground": "#d4be98",
+  "dark_foreground": "#928374",
+  "light_foreground": "#ddc7a1",
+  "bright_foreground": "#ebdbb2",
+  "red": "#ea6962",
+  "green": "#a9b665",
+  "yellow": "#d8a657",
+  "blue": "#7daea3",
+  "magenta": "#d3869b",
+  "cyan": "#89b482",
+  "hyprland_active_border": "rgba(7daea3ee) rgba(a9b665ee) 45deg",
+  "hyprland_inactive_border": "rgba(3c3836aa)"
+}

@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-# TUI Wi-Fi Manager (impala -> nmtui -> nmcli+fzf)
 set -euo pipefail
-
 if [ "${1:-}" = "--toggle" ]; then
     if command -v nmcli >/dev/null 2>&1; then
         state=$(nmcli radio wifi)
@@ -15,7 +13,6 @@ if [ "${1:-}" = "--toggle" ]; then
     fi
     exit 0
 fi
-
 if command -v impala >/dev/null 2>&1; then
     exec ~/.local/bin/launch-tui-popup impala
 elif command -v nmtui >/dev/null 2>&1; then

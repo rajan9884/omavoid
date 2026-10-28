@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
-# Launch a TUI program inside a centered floating terminal window (class: tui-float)
 set -euo pipefail
 [ $# -eq 0 ] && exit 1
-
 if command -v foot >/dev/null 2>&1; then
     exec foot --app-id="tui-float" --title="TUI: $1" -e "$@"
 elif command -v alacritty >/dev/null 2>&1; then

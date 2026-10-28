@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
-# Restarts the single long-running Quickshell desktop host and reloads Hyprland
 set -u
-
 ~/.local/bin/qs-app-indexer >/dev/null 2>&1 || true
 hyprctl reload >/dev/null 2>&1 || true
-pkill -x quickshell 2>/dev/null || true
-sleep 0.2
-(quickshell -n -p ~/.config/quickshell || quickshell -c ~/.config/quickshell) >/dev/null 2>&1 &
-notify-send "Quattro Shell" "Reloaded Quickshell & Hyprland"
+nohup ~/.local/bin/launch-quattro-shell >/dev/null 2>&1 &
+disown
+command -v notify-send >/dev/null 2>&1 && notify-send "Quattro Shell" "Reloaded Quickshell & Hyprland" || true

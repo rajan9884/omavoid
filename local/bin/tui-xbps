@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-# Void Linux Interactive Package Browser (xbps-query + fzf)
 set -euo pipefail
-
 exec ~/.local/bin/launch-tui-float bash -c '
     pkg=$(xbps-query -Rs "" | fzf --prompt="Void XBPS > " --reverse         --header="Enter: Install Package | ESC: Exit"         --preview="xbps-query -R {2}"         --preview-window="right:55%:wrap" | awk "{print \$2}")
     if [ -n "$pkg" ]; then
