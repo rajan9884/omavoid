@@ -256,17 +256,19 @@ RUN
         fi
     fi
 
-    # Backlight save/restore across reboots
+    # Backlight and ALSA save/restore across reboots
     sudo mkdir -p /var/lib/backlight
     sudo chown root:video /var/lib/backlight 2>/dev/null || true
     sudo chmod 775 /var/lib/backlight 2>/dev/null || true
     cat <<'RC' | sudo tee /etc/rc.local >/dev/null
 #!/bin/sh
+command -v alsactl >/dev/null 2>&1 && alsactl restore &
 [ -x /usr/local/bin/void-backlight ] && /usr/local/bin/void-backlight restore &
 RC
     sudo chmod +x /etc/rc.local
     cat <<'RC' | sudo tee /etc/rc.shutdown >/dev/null
 #!/bin/sh
+command -v alsactl >/dev/null 2>&1 && alsactl store
 [ -x /usr/local/bin/void-backlight ] && /usr/local/bin/void-backlight save
 RC
     sudo chmod +x /etc/rc.shutdown
