@@ -53,7 +53,7 @@ Item {
   // JSONC menu definitions. The shell parses both at startup and merges
   // the user file on top of the defaults, so the keybind → IPC → visible
   // path doesn't have to shell out to bash + jq on every open.
-  property string defaultMenuPath: omarchyPath + "/default/omarchy/omarchy-menu.jsonc"
+  property string defaultMenuPath: Quickshell.env("HOME") + "/.config/omarchy/omarchy-menu.jsonc"
   property string userMenuPath: Quickshell.env("HOME") + "/.config/omarchy/extensions/omarchy-menu.jsonc"
   // Display language for the shipped rows. The code lives in
   // ~/.config/omarchy/language (omarchy-language owns it); a missing file

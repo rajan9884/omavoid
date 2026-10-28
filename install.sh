@@ -69,7 +69,7 @@ install_packages() {
         grim slurp brightnessctl file imv xdg-utils psmisc
         qt6-wayland qt6-declarative qt6-svg qt6-shadertools qt6-imageformats qt6ct
         python3 fontconfig
-        zsh starship fzf zoxide eza bat fd ripgrep jq
+        zsh starship fzf zoxide eza bat fd ripgrep jq gum
         btop yazi lazygit calcurse neovim fastfetch git curl unzip vips ffmpegthumbnailer
         greetd tuigreet
         nerd-fonts-symbols-ttf font-jetbrains-mono-ttf noto-fonts-ttf noto-fonts-emoji
@@ -137,6 +137,11 @@ sync_upstream_omarchy() {
     if [ -d "${REPO_DIR}/install/helpers" ]; then
         sudo mkdir -p /usr/share/omarchy/install/helpers
         sudo cp -r "${REPO_DIR}/install/helpers/"* /usr/share/omarchy/install/helpers/
+    fi
+
+    # Deploy customized Omarchy menu definition to system default
+    if [ -f "${REPO_DIR}/config/omarchy/omarchy-menu.jsonc" ]; then
+        sudo cp "${REPO_DIR}/config/omarchy/omarchy-menu.jsonc" /usr/share/omarchy/default/omarchy/omarchy-menu.jsonc
     fi
 
     sudo fc-cache -fv >/dev/null 2>&1 || true
