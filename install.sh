@@ -211,11 +211,15 @@ SHIM
         sudo ln -sf /usr/bin/elogind-inhibit /usr/local/bin/systemd-inhibit
     fi
 
-    # Install omarchy-system binary
-    if [ -f "${REPO_DIR}/bin/omarchy-system" ]; then
-        sudo cp -f "${REPO_DIR}/bin/omarchy-system" /usr/share/omarchy/bin/omarchy-system
-        sudo chmod +x /usr/share/omarchy/bin/omarchy-system
-        sudo ln -sf /usr/share/omarchy/bin/omarchy-system /usr/local/bin/omarchy-system
+    # Install custom repository binaries
+    if [ -d "${REPO_DIR}/bin" ]; then
+        for b in "${REPO_DIR}"/bin/*; do
+            if [ -f "$b" ]; then
+                sudo cp -f "$b" /usr/share/omarchy/bin/
+                sudo chmod +x "/usr/share/omarchy/bin/$(basename "$b")"
+                sudo ln -sf "/usr/share/omarchy/bin/$(basename "$b")" "/usr/local/bin/$(basename "$b")"
+            fi
+        done
     fi
 
     # Configure greetd with tuigreet
