@@ -362,7 +362,7 @@
     "action": "omarchy-hyprland-window-single-square-aspect-toggle"
   },
   "appearance.branding": {
-    "icon": "",
+    "icon": "",
     "iconFont": "omarchy",
     "label": "Branding"
   },

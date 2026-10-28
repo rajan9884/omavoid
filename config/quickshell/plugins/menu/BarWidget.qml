@@ -12,7 +12,7 @@ BarWidget {
     id: button
     anchors.fill: parent
     bar: root.bar
-    text: "\ue900"
+    text: "\uf32e"
     fontFamily: "omarchy"
     onPressed: function(button) {
       if (!root.bar) return

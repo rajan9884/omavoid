@@ -184,17 +184,110 @@ esac
 SHIM
     sudo chmod +x /usr/local/bin/systemctl
 
-    # uwsm shim
+    # uwsm and uwsm-app shim
     cat <<'SHIM' | sudo tee /usr/local/bin/uwsm >/dev/null
-#!/usr/bin/env bash
-[ "${1:-}" = "app" ] && shift
-while [[ "${1:-}" == -* ]]; do
-    [ "$1" = "--" ] && { shift; break; }
-    shift
+#!/bin/sh
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --) shift; break ;;
+        --*) shift ;;
+        -*) shift ;;
+        *) break ;;
+    esac
 done
-exec "$@"
+[ $# -gt 0 ] && exec "$@"
 SHIM
     sudo chmod +x /usr/local/bin/uwsm
+    sudo cp -f /usr/local/bin/uwsm /usr/local/bin/uwsm-app
+
+    # systemd-run shim
+    cat <<'SHIM' | sudo tee /usr/local/bin/systemd-run >/dev/null
+#!/bin/sh
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --) shift; break ;;
+        --unit=*|--property=*|--description=*|--slice=*|-p|--user|--quiet|--collect|--scope) shift ;;
+        --*) shift ;;
+        -*) shift ;;
+        *) break ;;
+    esac
+done
+[ $# -gt 0 ] && exec "$@"
+SHIM
+    sudo chmod +x /usr/local/bin/systemd-run
+
+    # xdg-terminal-exec fallback shim if not present
+    if [ ! -f /usr/local/bin/xdg-terminal-exec ]; then
+        curl -sL https://raw.githubusercontent.com/Vladimir-csp/xdg-terminal-exec/refs/heads/master/xdg-terminal-exec | sudo tee /usr/local/bin/xdg-terminal-exec >/dev/null
+        sudo chmod +x /usr/local/bin/xdg-terminal-exec
+    fi
+
+    # omasnap screenshot shim (grim + slurp)
+    cat <<'SHIM' | sudo tee /usr/local/bin/omasnap >/dev/null
+#!/bin/bash
+for arg in "$@"; do
+    if [[ -f "$arg" && "$arg" =~ \.(png|jpg|jpeg|webp)$ ]]; then
+        exec imv "$arg"
+    fi
+done
+SCREENSHOT_DIR="${OMASNAP_SCREENSHOT_DIR:-${OMARCHY_SCREENSHOT_DIR:-$HOME/Pictures/Screenshots}}"
+mkdir -p "$SCREENSHOT_DIR"
+filename="$SCREENSHOT_DIR/screenshot-$(date +%Y-%m-%d_%H-%M-%S).png"
+is_fullscreen=0
+for arg in "$@"; do
+    [[ "$arg" == "fullscreen" ]] && { is_fullscreen=1; break; }
+done
+if (( is_fullscreen )); then
+    grim "$filename" || exit 1
+else
+    geometry=$(slurp 2>/dev/null)
+    [ -z "$geometry" ] && exit 0
+    grim -g "$geometry" "$filename" || exit 1
+fi
+if [ -f "$filename" ]; then
+    wl-copy < "$filename"
+    omarchy-notification-send -i "$filename" "Screenshot captured" "Saved to Pictures/Screenshots and copied to clipboard"
+fi
+SHIM
+    sudo chmod +x /usr/local/bin/omasnap
+
+    # Universal clipboard shortcut helper
+    cat <<'SHIM' | sudo tee /usr/local/bin/omarchy-universal-shortcut >/dev/null
+#!/bin/bash
+action="$1"
+active=$(hyprctl activewindow -j 2>/dev/null)
+address=$(jq -r '.address // empty' <<< "$active")
+class=$(jq -r '.class // empty' <<< "$active")
+is_terminal=0
+case "${class,,}" in
+    foot*|alacritty*|kitty*|ghostty*|wezterm*|xterm*) is_terminal=1 ;;
+esac
+case "$action" in
+    copy)
+        if [[ -z "$address" ]]; then wtype -M ctrl -k c -m ctrl
+        elif (( is_terminal )); then hyprctl dispatch sendshortcut "CTRL SHIFT,c,address:$address" >/dev/null
+        else hyprctl dispatch sendshortcut "CTRL,c,address:$address" >/dev/null; fi ;;
+    paste)
+        if [[ -z "$address" ]]; then wtype -M ctrl -k v -m ctrl
+        elif (( is_terminal )); then hyprctl dispatch sendshortcut "CTRL SHIFT,v,address:$address" >/dev/null
+        else hyprctl dispatch sendshortcut "CTRL,v,address:$address" >/dev/null; fi ;;
+    cut)
+        if [[ -z "$address" ]]; then wtype -M ctrl -k x -m ctrl
+        elif (( is_terminal )); then hyprctl dispatch sendshortcut "CTRL SHIFT,x,address:$address" >/dev/null
+        else hyprctl dispatch sendshortcut "CTRL,x,address:$address" >/dev/null; fi ;;
+    selectall)
+        if [[ -z "$address" ]]; then wtype -M ctrl -k a -m ctrl
+        else hyprctl dispatch sendshortcut "CTRL,a,address:$address" >/dev/null; fi ;;
+esac
+SHIM
+    sudo chmod +x /usr/local/bin/omarchy-universal-shortcut
+
+    # Passwordless browser policy rule
+    if [ -f /home/rajan/omarchy/etc/sudoers.d/omarchy-theme-browser ]; then
+        sudo cp /home/rajan/omarchy/etc/sudoers.d/omarchy-theme-browser /etc/sudoers.d/zz-omarchy-theme-browser
+        sudo chmod 0440 /etc/sudoers.d/zz-omarchy-theme-browser
+        sudo ln -snf /usr/share/omarchy/bin/omarchy-theme-set-browser-policy /usr/bin/omarchy-theme-set-browser-policy
+    fi
 
     # pacman shim for xbps queries
     cat <<'SHIM' | sudo tee /usr/local/bin/pacman >/dev/null

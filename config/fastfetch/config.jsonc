@@ -5,7 +5,7 @@
   "modules": [
     "title",
     "separator",
-    { "type": "os", "key": "󰣨 OS" },
+    { "type": "os", "key": " OS" },
     { "type": "kernel", "key": "󰌽 Kernel" },
     { "type": "uptime", "key": "󰅐 Uptime" },
     { "type": "packages", "key": "󰏖 Packages" },
