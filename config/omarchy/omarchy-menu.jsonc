@@ -1327,11 +1327,7 @@
     "icon": "󱚤",
     "label": "AI"
   },
-  "install.webapp": {
-    "icon": "",
-    "label": "Web App",
-    "action": "omarchy-launch-floating-terminal-with-presentation omarchy-webapp-install"
-  },
+
   "install.ai.chatgpt": {
     "icon": "",
     "iconFont": "omarchy",
@@ -1405,12 +1401,7 @@
     "label": "AI",
     "title": "Remove"
   },
-  "remove.webapp": {
-    "icon": "",
-    "label": "Web App",
-    "when": "grep -qE '^Exec=.*(omarchy-launch-webapp|omarchy-webapp-handler)' $HOME/.local/share/applications/*.desktop",
-    "action": "omarchy-webapp-remove"
-  },
+
   "remove.ai.hermes": {
     "icon": "",
     "iconFont": "omarchy",
