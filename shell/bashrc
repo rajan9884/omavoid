@@ -1,0 +1,123 @@
+# .bashrc - Authentic Omarchy Quattro Shell for Void Linux
+
+# If not running interactively, return early
+[[ $- != *i* ]] && return
+
+# Core Environment
+export USER="rajan"
+export HOME="/home/rajan"
+export OMARCHY_PATH="/usr/share/omarchy"
+export PATH="$HOME/.local/bin:$OMARCHY_PATH/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin"
+export EDITOR="nvim"
+export SUDO_EDITOR="nvim"
+export VISUAL="nvim"
+export BROWSER="chromium"
+export BAT_THEME="ansi"
+export MANROFFOPT="-c"
+export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+
+# Load inputrc
+[[ -f /usr/share/omarchy/default/bash/inputrc ]] && bind -f /usr/share/omarchy/default/bash/inputrc
+
+# FZF Environment & Key Bindings
+export FZF_DEFAULT_OPTS=" \
+  --height=60% --layout=reverse --border=rounded --info=inline \
+  --color=bg+:#24283b,bg:#1a1b26,spinner:#7dcfff,hl:#7aa2f7 \
+  --color=fg:#c0caf5,header:#bb9af7,info:#e0af68,pointer:#7aa2f7 \
+  --color=marker:#9ece6a,fg+:#c0caf5,prompt:#7aa2f7,hl+:#7dcfff"
+
+if command -v fd >/dev/null 2>&1; then
+  export FZF_DEFAULT_COMMAND="fd --type f --hidden --follow --exclude .git"
+  export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+  export FZF_ALT_C_COMMAND="fd --type d --hidden --follow --exclude .git"
+fi
+
+[[ -f /usr/share/fzf/key-bindings.bash ]] && source /usr/share/fzf/key-bindings.bash
+[[ -f /usr/share/fzf/completion.bash ]] && source /usr/share/fzf/completion.bash
+
+# Tool Initializers
+if command -v mise >/dev/null 2>&1; then
+  eval "$(mise activate bash)"
+fi
+
+if command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init bash)"
+fi
+
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init bash --print-full-init)"
+fi
+
+# Omarchy Standard Aliases
+if command -v eza >/dev/null 2>&1; then
+  alias ls='eza -lh --group-directories-first --icons=auto'
+  alias lsa='ls -a'
+  alias lt='eza --tree --level=2 --long --icons --git'
+  alias lta='lt -a'
+fi
+
+if [[ "$TERM" == "xterm-kitty" ]]; then
+  alias ff="fzf --preview 'case \$(file --mime-type -b {}) in image/*) kitty icat --clear --transfer-mode=memory --stdin=no --place=\${FZF_PREVIEW_COLUMNS}x\${FZF_PREVIEW_LINES}@0x0 {} ;; *) bat --style=numbers --color=always {} ;; esac'"
+else
+  alias ff="fzf --preview 'bat --style=numbers --color=always {}'"
+fi
+alias eff='$EDITOR "$(ff)"'
+sff() { if [ $# -eq 0 ]; then echo "Usage: sff <destination> (e.g. sff host:/tmp/)"; return 1; fi; local file; file=$(find . -type f -printf '%T@\t%p\n' | sort -rn | cut -f2- | ff) && [ -n "$file" ] && scp "$file" "$1"; }
+
+if command -v zoxide >/dev/null 2>&1; then
+  alias cd="zd"
+  zd() {
+    if (( $# == 0 )); then
+      builtin cd ~ || return
+    elif [[ -d $1 ]]; then
+      builtin cd "$1" || return
+    else
+      if ! z "$@"; then
+        echo "Error: Directory not found"
+        return 1
+      fi
+      printf "\U000F17A9 "
+      pwd
+    fi
+  }
+fi
+
+open() (
+  xdg-open "$@" >/dev/null 2>&1 &
+)
+
+# Navigation
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+
+# Development & Tools
+alias d='docker'
+alias t='tmux attach || tmux new -s Work'
+alias lg='lazygit'
+alias top='btop'
+n() { if [ "$#" -eq 0 ]; then command nvim . ; else command nvim "$@"; fi; }
+
+# Git
+alias g='git'
+alias gcm='git commit -m'
+alias gcam='git commit -a -m'
+alias gcad='git commit -a --amend'
+
+# Void Linux XBPS Power Aliases
+alias xi='sudo xbps-install -S'
+alias xu='sudo xbps-install -Su'
+alias xr='sudo xbps-remove -R'
+alias xq='xbps-query -Rs'
+alias xclean='sudo xbps-remove -Oo'
+alias svstatus='sudo sv status /var/service/*'
+
+# Yazi file manager wrapper
+function y() {
+  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+  yazi "$@" --cwd-file="$tmp"
+  if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+    builtin cd -- "$cwd"
+  fi
+  rm -f -- "$tmp"
+}

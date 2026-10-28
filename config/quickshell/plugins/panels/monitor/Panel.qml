@@ -307,10 +307,9 @@ Panel {
     var output = '"' + name.replace(/[\\"]/g, "\\$&") + '"'
     // hl.monitor updates the existing rule. Keep its mode, position and scale
     // when bringing the display back.
-    var expr = enabled
-      ? 'hl.monitor({ output = ' + output + ', disabled = true })'
-      : 'hl.monitor({ output = ' + output + ', disabled = false })'
-    actionProc.command = ["hyprctl", "eval", expr]
+    actionProc.command = enabled
+      ? ["hyprctl", "keyword", "monitor", name + ",disable"]
+      : ["hyprctl", "keyword", "monitor", name + ",preferred,auto,auto"]
     if (!actionProc.running) actionProc.running = true
   }
 
