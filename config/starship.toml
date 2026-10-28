@@ -1,32 +1,56 @@
+# Starship prompt using Omarchy theme colors (Vantablack grayscale)
+# Colors from ~/.local/state/omarchy/current/theme/colors.toml
+"$schema" = 'https://starship.rs/config-schema.json'
 add_newline = true
-command_timeout = 200
-format = "[$directory$git_branch$git_status]($style)$character"
 
-[character]
-error_symbol = "[✗](bold cyan)"
-success_symbol = "[❯](bold cyan)"
+format = """
+[╭─](fg:#7a7a7a)[](fg:#ffffff bg:#1a1a1a)$os$username[](fg:#ffffff bg:#1a1a1a)$directory[](fg:#ffffff bg:#1a1a1a)$git_branch$git_status[](fg:#ffffff bg:#1a1a1a)$fill[](fg:#ffffff bg:#1a1a1a)$cmd_duration[](fg:#ffffff bg:#1a1a1a)$time[](fg:#ffffff)
+[╰─](fg:#7a7a7a)$character"""
+
+[os]
+disabled = false
+style = "bg:#1a1a1a fg:#ffffff bold"
+[os.symbols]
+Void = "   "
+Linux = " "
+
+[username]
+show_always = false
+style_user = "bg:#1a1a1a fg:#ffffff bold"
+style_root = "bg:#a4a4a4 fg:#000000 bold"
+format = '[$user ]($style)'
 
 [directory]
-truncation_length = 2
+style = "bg:#090909 fg:#ffffff bold"
+format = "[ $path ]($style)"
+truncation_length = 3
 truncation_symbol = "…/"
-repo_root_style = "bold cyan"
-repo_root_format = "[$repo_root]($repo_root_style)[$path]($style)[$read_only]($read_only_style) "
 
 [git_branch]
-format = "[$branch]($style) "
-style = "italic cyan"
+symbol = ""
+style = "bg:#070707 fg:#ffffff bold"
+format = '[ $symbol $branch ]($style)'
 
 [git_status]
-format     = '[$all_status]($style)'
-style      = "cyan"
-ahead      = "⇡${count} "
-diverged   = "⇕⇡${ahead_count}⇣${behind_count} "
-behind     = "⇣${count} "
-conflicted = " "
-up_to_date = " "
-untracked  = "? "
-modified   = " "
-stashed    = ""
-staged     = ""
-renamed    = ""
-deleted    = ""
+style = "bg:#070707 fg:#ffffff"
+format = '[$all_status$ahead_behind ]($style)'
+
+[fill]
+symbol = "·"
+style = "fg:#7a7a7a"
+
+[cmd_duration]
+min_time = 500
+style = "bg:#000000 fg:#ececec"
+format = "[  $duration ]($style)"
+
+[time]
+disabled = false
+time_format = "%H:%M"
+style = "bg:#1a1a1a fg:#ffffff bold"
+format = '[  $time ]($style)'
+
+[character]
+success_symbol = '[❯](bold fg:#8d8d8d)'
+error_symbol = '[❯](bold fg:#a4a4a4)'
+vimcmd_symbol = '[❮](bold fg:#b0b0b0)'

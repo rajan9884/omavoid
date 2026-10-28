@@ -84,7 +84,7 @@ sudo ./install.sh
    - Configures `/etc/greetd/config.toml` with `tuigreet` on VT 1.
    - Grants passwordless power commands and browser tinting via `/etc/sudoers.d/`.
 5. **Runit Services**: Enables `dbus`, `elogind`, `seatd`, `NetworkManager`, `bluetoothd`, `polkitd`, `acpid`, and `greetd`.
-6. **User Configuration**: Deploys Hyprland Lua configs, Quickshell shell, Starship prompt, terminal configs, and sets default login shell to `zsh`.
+6. **User Configuration**: Atomically symlinks all user configurations (`~/.config/*`, `~/.zshrc`, `~/.zprofile`, `~/.local/bin/*`) directly to your cloned repository, ensuring any tweak or system customization is immediately tracked in git while keeping dynamic caches and runtime hooks gitignored. Sets default login shell to `zsh`.
 
 After installation finishes, simply reboot:
 ```bash

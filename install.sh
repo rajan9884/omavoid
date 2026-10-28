@@ -480,30 +480,73 @@ context.exec = [
 CONF
 }
 
-# 6. Deploy Dotfiles to Target User Home
+# 6. Deploy Dotfiles to Target User Home (via Symlinks)
 deploy_dotfiles() {
-    log_info "Deploying Quattro-Void dotfiles to ${TARGET_HOME}..."
+    log_info "Deploying Quattro-Void dotfiles via symlinks to ${TARGET_HOME}..."
     BACKUP_DIR="${TARGET_HOME}/.config-backup-$(date +%Y%m%d-%H%M%S)"
     mkdir -p "${TARGET_HOME}/.config" "${TARGET_HOME}/.local/bin" "${TARGET_HOME}/.local/state/omarchy/current/theme" "${TARGET_HOME}/Pictures/Screenshots"
 
-    for dir in hypr quickshell omarchy foot alacritty btop yazi lazygit fastfetch; do
-        if [ -e "${TARGET_HOME}/.config/${dir}" ]; then
-            mkdir -p "$BACKUP_DIR"
-            cp -r "${TARGET_HOME}/.config/${dir}" "$BACKUP_DIR/"
+    # Symlink all configs from REPO_DIR/config to TARGET_HOME/.config
+    for item in "${REPO_DIR}"/config/*; do
+        [ -e "$item" ] || continue
+        base="$(basename "$item")"
+        target="${TARGET_HOME}/.config/${base}"
+
+        # If target already points directly to repo item, keep it
+        if [ -L "$target" ] && [ "$(readlink -f "$target" 2>/dev/null)" = "$(readlink -f "$item")" ]; then
+            continue
         fi
-        rm -rf "${TARGET_HOME}/.config/${dir}"
-        cp -r "${REPO_DIR}/config/${dir}" "${TARGET_HOME}/.config/${dir}"
+
+        # Backup existing file or directory if not pointing to repo
+        if [ -e "$target" ] || [ -L "$target" ]; then
+            mkdir -p "$BACKUP_DIR"
+            cp -r "$target" "$BACKUP_DIR/" 2>/dev/null || true
+        fi
+
+        # Atomic symlink replacement to prevent inotify reload race conditions
+        ln -sfn "$item" "${target}.tmp.$$"
+        mv -Tf "${target}.tmp.$$" "$target"
+        log_ok "Symlinked ~/.config/${base} -> ${item}"
     done
 
-    # Ensure internal module symlink exists in user quickshell config
-    ln -sfn "${TARGET_HOME}/.config/quickshell" "${TARGET_HOME}/.config/quickshell/qs"
+    # Symlink local helper scripts to TARGET_HOME/.local/bin
+    if [ -d "${REPO_DIR}/local/bin" ]; then
+        for script in "${REPO_DIR}"/local/bin/*; do
+            [ -f "$script" ] || continue
+            chmod +x "$script"
+            sname="$(basename "$script")"
+            starget="${TARGET_HOME}/.local/bin/${sname}"
 
-    cp "${REPO_DIR}/config/starship.toml" "${TARGET_HOME}/.config/starship.toml"
-    cp -f "${REPO_DIR}/local/bin/"* "${TARGET_HOME}/.local/bin/"
-    chmod +x "${TARGET_HOME}/.local/bin/"*
+            if [ -L "$starget" ] && [ "$(readlink -f "$starget" 2>/dev/null)" = "$(readlink -f "$script")" ]; then
+                continue
+            fi
+            if [ -e "$starget" ] || [ -L "$starget" ]; then
+                mkdir -p "$BACKUP_DIR/local-bin"
+                cp -f "$starget" "$BACKUP_DIR/local-bin/" 2>/dev/null || true
+            fi
+            ln -sf "$script" "${starget}.tmp.$$"
+            mv -f "${starget}.tmp.$$" "$starget"
+        done
+        log_ok "Symlinked ~/.local/bin scripts to repo."
+    fi
 
-    cp "${REPO_DIR}/zsh/.zshrc" "${TARGET_HOME}/.zshrc"
-    cp "${REPO_DIR}/zsh/.zprofile" "${TARGET_HOME}/.zprofile"
+    # Symlink ZSH dotfiles
+    for zf in .zshrc .zprofile; do
+        repo_zf="${REPO_DIR}/zsh/${zf}"
+        target_zf="${TARGET_HOME}/${zf}"
+        if [ -f "$repo_zf" ]; then
+            if [ -L "$target_zf" ] && [ "$(readlink -f "$target_zf" 2>/dev/null)" = "$(readlink -f "$repo_zf")" ]; then
+                continue
+            fi
+            if [ -e "$target_zf" ] || [ -L "$target_zf" ]; then
+                mkdir -p "$BACKUP_DIR"
+                cp -f "$target_zf" "$BACKUP_DIR/" 2>/dev/null || true
+            fi
+            ln -sf "$repo_zf" "${target_zf}.tmp.$$"
+            mv -f "${target_zf}.tmp.$$" "$target_zf"
+            log_ok "Symlinked ~/${zf} -> ${repo_zf}"
+        fi
+    done
 
     # Stage initial Tokyo Night / Quattro theme state
     THEME_SRC="/usr/share/omarchy/themes/tokyo-night"
@@ -521,19 +564,20 @@ deploy_dotfiles() {
         fi
     fi
 
-    # Set up theme hooks for btop and neovim
-    mkdir -p "${TARGET_HOME}/.config/btop/themes"
-    ln -snf "${TARGET_HOME}/.local/state/omarchy/current/theme/btop.theme" "${TARGET_HOME}/.config/btop/themes/current.theme"
-    mkdir -p "${TARGET_HOME}/.config/nvim/lua/plugins"
-    ln -snf "${TARGET_HOME}/.local/state/omarchy/current/theme/neovim.lua" "${TARGET_HOME}/.config/nvim/lua/plugins/theme.lua"
+    # Set up theme hooks for btop and neovim in repo (gitignored)
+    mkdir -p "${REPO_DIR}/config/btop/themes"
+    ln -snf "${TARGET_HOME}/.local/state/omarchy/current/theme/btop.theme" "${REPO_DIR}/config/btop/themes/current.theme"
+    mkdir -p "${REPO_DIR}/config/nvim/lua/plugins"
+    ln -snf "${TARGET_HOME}/.local/state/omarchy/current/theme/neovim.lua" "${REPO_DIR}/config/nvim/lua/plugins/theme.lua"
 
     # Set login shell to zsh if installed
     if command -v zsh >/dev/null 2>&1; then
         sudo chsh -s "$(command -v zsh)" "$TARGET_USER" || true
     fi
 
-    # Ensure proper non-root ownership on all deployed user files
-    sudo chown -R "${TARGET_USER}:${TARGET_USER}" "${TARGET_HOME}/.config" "${TARGET_HOME}/.local" "${TARGET_HOME}/.zshrc" "${TARGET_HOME}/.zprofile" "${TARGET_HOME}/Pictures" 2>/dev/null || true
+    # Ensure proper non-root ownership on deployed user symlinks and files
+    sudo chown -h "${TARGET_USER}:${TARGET_USER}" "${TARGET_HOME}/.config/"* "${TARGET_HOME}/.zshrc" "${TARGET_HOME}/.zprofile" 2>/dev/null || true
+    sudo chown -R "${TARGET_USER}:${TARGET_USER}" "${REPO_DIR}" "${TARGET_HOME}/.local" "${TARGET_HOME}/Pictures" 2>/dev/null || true
     log_ok "Dotfiles deployed to ${TARGET_HOME}."
 }
 

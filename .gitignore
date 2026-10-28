@@ -1,0 +1,31 @@
+# Dynamic theme and runtime generated links
+config/btop/themes/
+config/nvim/lua/plugins/theme.lua
+config/nvim/lazy-lock.json
+config/nvim/.neoconf.json
+
+# Neovim / Vim swap and undo files
+*.swp
+*.swo
+*~
+*.bak
+*.tmp
+.netrwhist
+
+# Shell history & dynamic dumps
+.zcompdump*
+*.zcompdump*
+.zsh_history
+
+# OS and Editor metadata
+.DS_Store
+Thumbs.db
+
+# Python bytecode & caches
+__pycache__/
+*.py[cod]
+
+# Logs, sockets, and pids
+*.log
+*.sock
+*.pid
