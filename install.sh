@@ -104,87 +104,45 @@ install_packages() {
 
 # 3. Synchronize Official Omarchy Quattro Assets
 sync_upstream_omarchy() {
-    log_info "Deploying Omarchy Quattro fonts, themes, wallpapers, and shell to /usr/share/omarchy..."
-    sudo mkdir -p /usr/share/omarchy /usr/share/fonts/omarchy /usr/share/omarchy/install/helpers
+    log_info "Synchronizing Omarchy Quattro assets and linking system defaults to dotfiles..."
+    sudo mkdir -p /usr/share/omarchy /usr/share/fonts/omarchy
 
-    SRC_OMARCHY=""
-    if [ -d "${TARGET_HOME}/omarchy/shell" ]; then
-        SRC_OMARCHY="${TARGET_HOME}/omarchy"
-    elif [ -d "/tmp/quattro-shallow/shell" ]; then
-        SRC_OMARCHY="/tmp/quattro-shallow"
-    fi
-
-    if [ -n "$SRC_OMARCHY" ]; then
-        log_info "Using local source from ${SRC_OMARCHY}..."
-        sudo cp -r "$SRC_OMARCHY/shell" /usr/share/omarchy/
-        sudo cp -r "$SRC_OMARCHY/themes" /usr/share/omarchy/
-        sudo cp -r "$SRC_OMARCHY/default" /usr/share/omarchy/
-        sudo cp -r "$SRC_OMARCHY/config" /usr/share/omarchy/
-        sudo cp -r "$SRC_OMARCHY/bin" /usr/share/omarchy/
-        [ -d "$SRC_OMARCHY/install" ] && sudo cp -r "$SRC_OMARCHY/install" /usr/share/omarchy/
-        if [ -f "$SRC_OMARCHY/default/fonts/omarchy/omarchy.ttf" ]; then
-            sudo cp "$SRC_OMARCHY/default/fonts/omarchy/omarchy.ttf" /usr/share/fonts/omarchy/
-        fi
-    elif [ ! -f /usr/share/omarchy/shell/shell.qml ]; then
-        log_info "Cloning shallow quattro branch from github.com/omacom/omarchy..."
-        TMP_OMARCHY="/tmp/omarchy-quattro-$$"
-        git clone --depth 1 -b quattro https://github.com/omacom/omarchy.git "$TMP_OMARCHY" || true
-        if [ -d "$TMP_OMARCHY/shell" ]; then
-            sudo cp -r "$TMP_OMARCHY/shell" /usr/share/omarchy/
-            sudo cp -r "$TMP_OMARCHY/themes" /usr/share/omarchy/
-            sudo cp -r "$TMP_OMARCHY/default" /usr/share/omarchy/
-            sudo cp -r "$TMP_OMARCHY/config" /usr/share/omarchy/
-            sudo cp -r "$TMP_OMARCHY/bin" /usr/share/omarchy/
-            [ -d "$TMP_OMARCHY/install" ] && sudo cp -r "$TMP_OMARCHY/install" /usr/share/omarchy/
-            if [ -f "$TMP_OMARCHY/default/fonts/omarchy/omarchy.ttf" ]; then
-                sudo cp "$TMP_OMARCHY/default/fonts/omarchy/omarchy.ttf" /usr/share/fonts/omarchy/
-            fi
-            rm -rf "$TMP_OMARCHY"
-        fi
-    fi
-
-    # Fallback / priority repo bundled fonts, themes, and install helpers
-    if [ -f "${REPO_DIR}/fonts/omarchy/omarchy.ttf" ]; then
+    # Deploy official fonts
+    if [ -f "${REPO_DIR}/default/fonts/omarchy/omarchy.ttf" ]; then
+        sudo cp "${REPO_DIR}/default/fonts/omarchy/omarchy.ttf" /usr/share/fonts/omarchy/
+    elif [ -f "${REPO_DIR}/fonts/omarchy/omarchy.ttf" ]; then
         sudo cp "${REPO_DIR}/fonts/omarchy/omarchy.ttf" /usr/share/fonts/omarchy/
     fi
-    if [ -d "${REPO_DIR}/themes" ] && [ ! -d /usr/share/omarchy/themes ]; then
-        sudo cp -r "${REPO_DIR}/themes" /usr/share/omarchy/
-    fi
-    if [ -d "${REPO_DIR}/install/helpers" ]; then
-        sudo mkdir -p /usr/share/omarchy/install/helpers
-        sudo cp -r "${REPO_DIR}/install/helpers/"* /usr/share/omarchy/install/helpers/
-    fi
-    if [ -d "${REPO_DIR}/default/audio/tunings" ]; then
-        sudo mkdir -p /usr/share/omarchy/default/audio/tunings
-        sudo cp -r "${REPO_DIR}/default/audio/tunings/"* /usr/share/omarchy/default/audio/tunings/
-    fi
 
-    # Clean up stale upstream plugins and panels
-    sudo rm -rf /usr/share/omarchy/shell/plugins/agents \
-                /usr/share/omarchy/shell/plugins/dev-gallery \
-                /usr/share/omarchy/shell/plugins/panels/dropbox \
-                /usr/share/omarchy/shell/plugins/panels/tailscale \
-                /usr/share/omarchy/shell/plugins/panels/elsewhen 2>/dev/null || true
+    # Unify /usr/share/omarchy directly with dotfiles to keep system default 1:1 identical with ~/.config and dotfiles
+    sudo rm -rf /usr/share/omarchy/bin \
+                /usr/share/omarchy/config \
+                /usr/share/omarchy/default \
+                /usr/share/omarchy/install \
+                /usr/share/omarchy/shell \
+                /usr/share/omarchy/themes \
+                /usr/share/omarchy/shell.tmp.* 2>/dev/null || true
 
-    # Link customized shell and menu definitions directly from dotfiles
-    if [ -d "${REPO_DIR}/config/quickshell" ]; then
-        sudo rm -rf /usr/share/omarchy/shell
-        sudo ln -sfn "${REPO_DIR}/config/quickshell" /usr/share/omarchy/shell
-    fi
-    if [ -f "${REPO_DIR}/config/omarchy/omarchy-menu.jsonc" ]; then
-        sudo ln -sfn "${REPO_DIR}/config/omarchy/omarchy-menu.jsonc" /usr/share/omarchy/default/omarchy/omarchy-menu.jsonc
-    fi
+    sudo ln -sfn "${REPO_DIR}/bin" /usr/share/omarchy/bin
+    sudo ln -sfn "${REPO_DIR}/config" /usr/share/omarchy/config
+    sudo ln -sfn "${REPO_DIR}/default" /usr/share/omarchy/default
+    sudo ln -sfn "${REPO_DIR}/install" /usr/share/omarchy/install
+    sudo ln -sfn "${REPO_DIR}/config/quickshell" /usr/share/omarchy/shell
+    sudo ln -sfn "${REPO_DIR}/themes" /usr/share/omarchy/themes
 
-    # Grant user ownership to prevent sync and permission discrepancies
-    sudo chown -R "${TARGET_USER}:${TARGET_USER}" /usr/share/omarchy
+    # Grant user ownership
+    sudo chown -R "${TARGET_USER}:${TARGET_USER}" /usr/share/omarchy "${REPO_DIR}"
 
     sudo fc-cache -fv >/dev/null 2>&1 || true
-    sudo chmod +x /usr/share/omarchy/bin/* 2>/dev/null || true
+    chmod +x "${REPO_DIR}/bin/"* 2>/dev/null || true
     sudo ln -sfn /usr/share/omarchy/shell /usr/share/omarchy/shell/qs
 
+    # Clean dangling symlinks in /usr/local/bin
+    sudo find /usr/local/bin -xtype l -delete 2>/dev/null || true
+
     # Symlink official omarchy helper scripts to /usr/local/bin
-    if [ -d /usr/share/omarchy/bin ]; then
-        for b in /usr/share/omarchy/bin/*; do
+    if [ -d "${REPO_DIR}/bin" ]; then
+        for b in "${REPO_DIR}/bin/"*; do
             [ -x "$b" ] && sudo ln -sf "$b" "/usr/local/bin/$(basename "$b")" 2>/dev/null || true
         done
     fi
@@ -195,20 +153,20 @@ sync_upstream_omarchy() {
     fi
 
     # Ensure omarchy-launch-shell initializes audio before starting Quickshell
-    if [ -f /usr/share/omarchy/bin/omarchy-launch-shell ]; then
-        if ! grep -q "void-audio-init" /usr/share/omarchy/bin/omarchy-launch-shell; then
-            sudo sed -i '/run_shell() {/a \  command -v void-audio-init >/dev/null 2>&1 && void-audio-init' /usr/share/omarchy/bin/omarchy-launch-shell
+    if [ -f "${REPO_DIR}/bin/omarchy-launch-shell" ]; then
+        if ! grep -q "void-audio-init" "${REPO_DIR}/bin/omarchy-launch-shell"; then
+            sed -i '/run_shell() {/a \  command -v void-audio-init >/dev/null 2>&1 && void-audio-init' "${REPO_DIR}/bin/omarchy-launch-shell"
         fi
     fi
 
     # Ensure omarchy-restart-audio supports Void Linux natively without systemd
-    if [ -f /usr/share/omarchy/bin/omarchy-restart-audio ]; then
-        if ! grep -q "void-audio-init" /usr/share/omarchy/bin/omarchy-restart-audio; then
-            sudo sed -i '/restart_audio_services() {/a \  if ! command -v systemctl >/dev/null 2>&1 || ! systemctl --user is-system-running >/dev/null 2>&1; then pkill -9 -u "$USER" -x pipewire 2>/dev/null || true; pkill -9 -u "$USER" -x wireplumber 2>/dev/null || true; pkill -9 -u "$USER" -f "pipewire -c .*omarchy-speaker-tuning.conf" 2>/dev/null || true; sleep 0.5; void-audio-init; return 0; fi' /usr/share/omarchy/bin/omarchy-restart-audio
+    if [ -f "${REPO_DIR}/bin/omarchy-restart-audio" ]; then
+        if ! grep -q "void-audio-init" "${REPO_DIR}/bin/omarchy-restart-audio"; then
+            sed -i '/restart_audio_services() {/a \  if ! command -v systemctl >/dev/null 2>&1 || ! systemctl --user is-system-running >/dev/null 2>&1; then pkill -9 -u "$USER" -x pipewire 2>/dev/null || true; pkill -9 -u "$USER" -x wireplumber 2>/dev/null || true; pkill -9 -u "$USER" -f "pipewire -c .*omarchy-speaker-tuning.conf" 2>/dev/null || true; sleep 0.5; void-audio-init; return 0; fi' "${REPO_DIR}/bin/omarchy-restart-audio"
         fi
     fi
 
-    log_ok "Official assets synchronized."
+    log_ok "Official assets synchronized and unified with dotfiles."
 }
 
 # 4. Install Void Linux Compatibility Shims
