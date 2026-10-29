@@ -1,0 +1,107 @@
+import QtQuick
+import Quickshell
+import qs.Commons
+
+// Renders any icon spec from lib/ViewModel.js iconSpec():
+//   app   -> themed application icon via the shell's app library
+//   glyph -> Nerd Font glyph
+//   emoji -> emoji text
+//   image -> a local Image source (file://, data:, image:)
+//   remote -> an http(s) image, fetched by the sidecar and shown from its cache
+//   swatch -> a colour square (value is a CSS colour)
+Item {
+  id: root
+  property string kind: ""
+  property string value: ""
+  property var iconResolver: null
+  // Where the sidecar cached a remote image, once it has; "" until then.
+  property string remotePath: ""
+  property color foreground: Color.menu.text
+  property string fontFamily: Style.font.menuFamily
+  property real size: Style.space(22)
+
+  implicitWidth: size
+  implicitHeight: size
+
+  property string tint: ""
+  property string mask: ""
+  readonly property bool isImage: kind === "app" || kind === "image" || (kind === "remote" && remotePath !== "")
+  readonly property bool isSwatch: kind === "swatch"
+  readonly property string glyphText: kind === "raycast-icon" ? (root.iconResolver && typeof root.iconResolver.raycastGlyph === "function" ? root.iconResolver.raycastGlyph(root.value) : "󰘔") : (kind === "remote" ? "󰋩" : root.value)
+
+  function resolveRemote() {
+    root.remotePath = ""
+    if (root.kind !== "remote" || !root.iconResolver || typeof root.iconResolver.fetchImage !== "function") return
+    var wanted = root.value
+    root.iconResolver.fetchImage(wanted).then(function(path) {
+      if (root.value === wanted && root.kind === "remote") root.remotePath = "file://" + String(path)
+    }, function() {})
+  }
+  onValueChanged: resolveRemote()
+  onKindChanged: resolveRemote()
+  Component.onCompleted: resolveRemote()
+
+  Image {
+    id: image
+    anchors.centerIn: parent
+    visible: root.isImage && source !== ""
+    width: root.size
+    height: root.size
+    fillMode: Image.PreserveAspectFit
+    asynchronous: true
+    cache: true
+    sourceSize.width: width * Screen.devicePixelRatio
+    sourceSize.height: height * Screen.devicePixelRatio
+    source: {
+      if (root.kind === "app") return root.iconResolver ? root.iconResolver.iconSource(root.value) : ""
+      if (root.kind === "image") return root.value
+      if (root.kind === "remote") return root.remotePath
+      return ""
+    }
+  }
+
+  // swatch -> a filled rounded square in the given colour (inline colour rows)
+  Rectangle {
+    anchors.centerIn: parent
+    visible: root.isSwatch
+    width: root.size * 0.82
+    height: root.size * 0.82
+    radius: Math.min(Style.cornerRadius, root.size * 0.25)
+    color: root.isSwatch && root.value ? root.value : "transparent"
+    border.width: 1
+    border.color: Util.alpha(root.foreground, 0.25)
+  }
+
+  // Glyphs are centred on their ink, not their advance box: Nerd Font
+  // symbols carry uneven side bearings (and some are double-width), which
+  // otherwise leaves every row's icon a few pixels off the others.
+  // Emoji come from a colour font with sane metrics and show up by the
+  // thousand in the picker grid, so they keep the cheap centred path.
+  readonly property bool isGlyph: !isImage && !isSwatch
+  readonly property bool measureInk: isGlyph && kind !== "emoji"
+  TextMetrics {
+    id: inkMetrics
+    font: glyph.font
+    text: root.measureInk ? root.glyphText : ""
+  }
+  FontMetrics {
+    id: fontMetrics
+    font: glyph.font
+  }
+
+  Text {
+    id: glyph
+    visible: root.isGlyph
+    text: root.glyphText
+    color: root.tint ? root.tint : root.foreground
+    font.family: root.kind === "emoji" ? "Noto Color Emoji" : root.fontFamily
+    font.pixelSize: root.kind === "emoji" ? root.size * 0.78 : root.size * 0.9
+    textFormat: Text.PlainText
+    // tightBoundingRect is relative to the pen origin on the baseline; the
+    // Text item's baseline sits `ascent` below its top.
+    readonly property rect ink: inkMetrics.tightBoundingRect
+    readonly property bool inkValid: ink.width > 0 && ink.height > 0
+    x: inkValid ? Math.round((root.width - ink.width) / 2 - ink.x) : Math.round((root.width - width) / 2)
+    y: inkValid ? Math.round((root.height - ink.height) / 2 - (fontMetrics.ascent + ink.y)) : Math.round((root.height - height) / 2)
+  }
+}
