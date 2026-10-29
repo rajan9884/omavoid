@@ -31,9 +31,8 @@ if [[ "$sink_name" == *"Headphones"* ]]; then
     sink_name="$actual_sink"
     node_id="$(pactl list sinks short 2>/dev/null | awk -v s="$sink_name" '$2 == s {print $1; exit}')"
     pactl set-sink-mute "$sink_name" 0 2>/dev/null || true
-    pactl set-sink-volume "$sink_name" 100% 2>/dev/null || true
-    amixer -c sofhdadsp set Headphone 100% unmute 2>/dev/null || true
-    amixer -c 0 set Headphone 100% unmute 2>/dev/null || true
+    amixer -c sofhdadsp set Headphone unmute 2>/dev/null || true
+    amixer -c 0 set Headphone unmute 2>/dev/null || true
   fi
 elif [[ "$sink_name" == *"Speaker"* || "$sink_name" == "omarchy_speaker_tuning" ]]; then
   pactl set-card-profile "$card_id" "HiFi (HDMI1, HDMI2, HDMI3, Mic1, Mic2, Speaker)" 2>/dev/null || true
@@ -48,12 +47,12 @@ elif [[ "$sink_name" == *"Speaker"* || "$sink_name" == "omarchy_speaker_tuning" 
     sleep 0.04
   done
   if [[ -n ${actual_spk:-} ]]; then
-    pactl set-sink-volume "$actual_spk" 100% 2>/dev/null || true
     pactl set-sink-mute "$actual_spk" 0 2>/dev/null || true
-    amixer -c sofhdadsp set Speaker 100% unmute 2>/dev/null || true
-    amixer -c 0 set Speaker 100% unmute 2>/dev/null || true
+    amixer -c sofhdadsp set Speaker unmute 2>/dev/null || true
+    amixer -c 0 set Speaker unmute 2>/dev/null || true
   fi
   if [[ "$sink_name" == "omarchy_speaker_tuning" ]] && pactl list sinks short 2>/dev/null | grep -q "omarchy_speaker_tuning"; then
+    pactl set-sink-volume "omarchy_speaker_tuning" 100% 2>/dev/null || true
     node_id="$(pactl list sinks short 2>/dev/null | awk '$2 == "omarchy_speaker_tuning" {print $1; exit}')"
   elif [[ -n ${actual_spk:-} ]]; then
     sink_name="$actual_spk"

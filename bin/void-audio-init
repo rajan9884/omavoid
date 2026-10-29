@@ -40,18 +40,13 @@ if ! pgrep -u "$USER" -x pipewire-pulse >/dev/null 2>&1 && ! pgrep -u "$USER" -f
     sleep 0.3
 fi
 
-# Fix any persistent cubic volume clamp in WirePlumber state
-if [ -f "$HOME/.local/state/wireplumber/default-routes" ]; then
-    sed -i 's/0.003375, 0.003375/1.000000, 1.000000/g' "$HOME/.local/state/wireplumber/default-routes" 2>/dev/null || true
-fi
-
 # Ensure hardware ALSA mixer controls are unmuted and auto-mute disabled
 if command -v amixer >/dev/null 2>&1; then
     for card in sofhdadsp 0 1; do
         amixer -c "$card" sset 'Auto-Mute Mode' 'Disabled' >/dev/null 2>&1 || true
-        amixer -c "$card" set Master 100% unmute >/dev/null 2>&1 || true
-        amixer -c "$card" set Headphone 100% unmute >/dev/null 2>&1 || true
-        amixer -c "$card" set Speaker 100% unmute >/dev/null 2>&1 || true
+        amixer -c "$card" set Master unmute >/dev/null 2>&1 || true
+        amixer -c "$card" set Headphone unmute >/dev/null 2>&1 || true
+        amixer -c "$card" set Speaker unmute >/dev/null 2>&1 || true
         amixer -c "$card" cset name='Dmic0 Capture Switch' on >/dev/null 2>&1 || true
         amixer -c "$card" cset name='Capture Switch' on >/dev/null 2>&1 || true
         amixer -c "$card" cset name='Capture Volume' 50,50 >/dev/null 2>&1 || true
@@ -83,16 +78,10 @@ if [ -f "$tuning_conf" ]; then
     fi
 fi
 
-# Ensure physical speaker volume in PipeWire is full 100% so tuning is loud and clear
+# Ensure virtual tuning sink is unity volume and default sink is properly assigned
 if command -v pactl >/dev/null 2>&1; then
-    spk_name="$(pactl list sinks short 2>/dev/null | awk '/HiFi__Speaker__sink/ {print $2; exit}')"
-    if [ -n "$spk_name" ]; then
-        pactl set-sink-volume "$spk_name" 100% >/dev/null 2>&1 || true
-        pactl set-sink-mute "$spk_name" 0 >/dev/null 2>&1 || true
-    fi
-
-    # Ensure default sink points to omarchy_speaker_tuning if active
     if pactl list sinks short 2>/dev/null | grep -q "omarchy_speaker_tuning"; then
+        pactl set-sink-volume omarchy_speaker_tuning 100% >/dev/null 2>&1 || true
         current_sink="$(pactl get-default-sink 2>/dev/null || true)"
         if [ "$current_sink" != "omarchy_speaker_tuning" ] && [[ "$current_sink" == *"Speaker"* || "$current_sink" == "auto_null" || -z "$current_sink" ]]; then
             pactl set-default-sink omarchy_speaker_tuning >/dev/null 2>&1 || true
