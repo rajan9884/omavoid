@@ -13,17 +13,47 @@ if [[ -z $node_id || -z $sink_name ]]; then
 fi
 
 card_id="$(pactl list cards short 2>/dev/null | awk '/sof-hda-dsp|skl_hda_dsp_generic/ {print $1; exit}')"
-card_id="${card_id:-51}"
+card_id="${card_id:-53}"
 
-if [[ "$sink_name" == *"HiFi__Headphones__sink"* ]]; then
+if [[ "$sink_name" == *"Headphones"* ]]; then
   pactl set-card-profile "$card_id" "HiFi (HDMI1, HDMI2, HDMI3, Headphones, Mic1, Mic2)" 2>/dev/null || true
-  sleep 0.1
-elif [[ "$sink_name" == *"HiFi__Speaker__sink"* || "$sink_name" == "omarchy_speaker_tuning" ]]; then
+  for _ in {1..25}; do
+    actual_sink="$(pactl list sinks short 2>/dev/null | awk '/HiFi__Headphones__sink/ {print $2; exit}')"
+    [[ -n $actual_sink ]] && break
+    sleep 0.04
+  done
+  if [[ -n ${actual_sink:-} ]]; then
+    sink_name="$actual_sink"
+    node_id="$(pactl list sinks short 2>/dev/null | awk -v s="$sink_name" '$2 == s {print $1; exit}')"
+    pactl set-sink-mute "$sink_name" 0 2>/dev/null || true
+    pactl set-sink-volume "$sink_name" 100% 2>/dev/null || true
+    amixer -c sofhdadsp set Headphone 100% unmute 2>/dev/null || true
+    amixer -c 0 set Headphone 100% unmute 2>/dev/null || true
+  fi
+elif [[ "$sink_name" == *"Speaker"* || "$sink_name" == "omarchy_speaker_tuning" ]]; then
   pactl set-card-profile "$card_id" "HiFi (HDMI1, HDMI2, HDMI3, Mic1, Mic2, Speaker)" 2>/dev/null || true
-  sleep 0.1
+  for _ in {1..25}; do
+    actual_spk="$(pactl list sinks short 2>/dev/null | awk '/HiFi__Speaker__sink/ {print $2; exit}')"
+    [[ -n $actual_spk ]] && break
+    sleep 0.04
+  done
+  if [[ -n ${actual_spk:-} ]]; then
+    pactl set-sink-volume "$actual_spk" 100% 2>/dev/null || true
+    pactl set-sink-mute "$actual_spk" 0 2>/dev/null || true
+    amixer -c sofhdadsp set Speaker 100% unmute 2>/dev/null || true
+    amixer -c 0 set Speaker 100% unmute 2>/dev/null || true
+  fi
+  if [[ "$sink_name" == "omarchy_speaker_tuning" ]] && pactl list sinks short 2>/dev/null | grep -q "omarchy_speaker_tuning"; then
+    node_id="$(pactl list sinks short 2>/dev/null | awk '$2 == "omarchy_speaker_tuning" {print $1; exit}')"
+  elif [[ -n ${actual_spk:-} ]]; then
+    sink_name="$actual_spk"
+    node_id="$(pactl list sinks short 2>/dev/null | awk -v s="$sink_name" '$2 == s {print $1; exit}')"
+  fi
 fi
 
-timeout 2 wpctl set-default "$node_id" 2>/dev/null || true
+if [[ -n ${node_id:-} && "$node_id" != "-101" && "$node_id" != "-102" && "$node_id" != "0" ]]; then
+  timeout 2 wpctl set-default "$node_id" 2>/dev/null || true
+fi
 timeout 2 pactl set-default-sink "$sink_name" 2>/dev/null || true
 
 # Move only real application streams. A DSP filter-chain's own output is also a

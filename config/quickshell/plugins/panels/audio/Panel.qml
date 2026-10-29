@@ -397,12 +397,40 @@ Panel {
       var n = nodes[i]
       if (n && n.id === row.id && String(n.name || "") === row.name) return n
     }
+    if (row.isVirtualSink) {
+      var isHp = String(row.name).indexOf("Headphones") !== -1
+      return {
+        id: row.id,
+        name: row.name,
+        description: isHp ? "Headphones" : "Laptop Speakers (Tuned)",
+        properties: {
+          "device.icon-name": isHp ? "audio-headphones" : "audio-speakers",
+          "node.description": isHp ? "Headphones" : "Laptop Speakers (Tuned)"
+        }
+      }
+    }
     return null
   }
 
   function refreshDisplayAudioModels() {
     if (!opened) return
-    displayAudioSinks = rowSnapshot(audioSinks)
+    var sinks = rowSnapshot(audioSinks)
+    var hasHp = false
+    var hasSpk = false
+    for (var i = 0; i < sinks.length; i++) {
+      var sname = String(sinks[i].name || "")
+      if (sname.indexOf("Headphones") !== -1) hasHp = true
+      if (sname.indexOf("Speaker") !== -1 || sname === "omarchy_speaker_tuning") hasSpk = true
+    }
+    var hpSinkName = "alsa_output.pci-0000_00_1f.3-platform-skl_hda_dsp_generic.HiFi__Headphones__sink"
+    var spkSinkName = "omarchy_speaker_tuning"
+    if (!hasHp) {
+      sinks.push({ id: -101, name: hpSinkName, isVirtualSink: true })
+    }
+    if (!hasSpk) {
+      sinks.push({ id: -102, name: spkSinkName, isVirtualSink: true })
+    }
+    displayAudioSinks = sinks
     displayAudioSources = rowSnapshot(audioSources)
     displayAudioStreams = rowSnapshot(audioStreams)
     clampCursor()
@@ -544,11 +572,13 @@ Panel {
 
   function setDefaultSink(node) {
     if (!node) return
-    Pipewire.preferredDefaultAudioSink = node
-    if (node.id !== undefined && node.name) {
+    if (node.isPipewireNode || node.isSink) {
+      Pipewire.preferredDefaultAudioSink = node
+    }
+    if (node.name) {
       Quickshell.execDetached([
         "omarchy-audio-output-set-default",
-        String(node.id),
+        String(node.id !== undefined ? node.id : 0),
         String(node.name)
       ])
     }
@@ -570,7 +600,10 @@ Panel {
   function sinkAvailable(node) {
     if (!node || !node.name) return false
     var name = String(node.name)
-    if (name.indexOf("HiFi__Speaker__sink") !== -1 || name.indexOf("HiFi__Headphones__sink") !== -1 || name.indexOf("omarchy_speaker_tuning") !== -1) return true
+    if (name.indexOf("HiFi__Speaker__sink") !== -1) {
+      return !Pipewire.nodes ? true : !Pipewire.nodes.values.some(function(n) { return n && n.name === "omarchy_speaker_tuning" })
+    }
+    if (name.indexOf("HiFi__Headphones__sink") !== -1 || name === "omarchy_speaker_tuning") return true
     if (!sinkAvailabilityLoaded) return true
     return sinkAvailability[name] !== false
   }
@@ -593,6 +626,9 @@ Panel {
   }
 
   function isHeadphones(node) {
+    if (!node) return false
+    var name = String(node.name || "").toLowerCase()
+    if (name.indexOf("headphone") !== -1 || name.indexOf("earphone") !== -1 || name.indexOf("headset") !== -1) return true
     return Model.isHeadphones(node)
   }
 
@@ -1134,7 +1170,17 @@ Panel {
     required property var node
     required property int rowIndex
 
-    readonly property bool isActive: root.sink && node && root.sink.id === node.id
+    readonly property bool isActive: {
+      if (!root.sink || !node) return false
+      if (root.sink.id === node.id) return true
+      var sname = String(root.sink.name || "")
+      var nname = String(node.name || "")
+      if (sname === nname) return true
+      if (nname.indexOf("Headphones") !== -1 && sname.indexOf("Headphones") !== -1) return true
+      if ((nname.indexOf("Speaker") !== -1 || nname === "omarchy_speaker_tuning") &&
+          (sname.indexOf("Speaker") !== -1 || sname === "omarchy_speaker_tuning")) return true
+      return false
+    }
     hasCursor: root.cursorActive && root.focusSection === "output" && root.selectedIndex === rowIndex
     onHasCursorChanged: if (hasCursor) root.ensureCursorVisible(sinkRow)
     current: isActive

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Authentic Omarchy audio stack initialization for Void Linux under Wayland / Hyprland
-# Ensures PipeWire, WirePlumber, PipeWire-Pulse, and Omarchy speaker tuning start cleanly.
+# Ensures PipeWire, WirePlumber, PipeWire-Pulse, Omarchy speaker tuning, and Jack detection start cleanly.
 
 if [ -z "${XDG_RUNTIME_DIR:-}" ]; then
     export XDG_RUNTIME_DIR="/run/user/$(id -u)"
@@ -40,6 +40,11 @@ if ! pgrep -u "$USER" -x pipewire-pulse >/dev/null 2>&1 && ! pgrep -u "$USER" -f
     sleep 0.3
 fi
 
+# Fix any persistent cubic volume clamp in WirePlumber state
+if [ -f "$HOME/.local/state/wireplumber/default-routes" ]; then
+    sed -i 's/0.003375, 0.003375/1.000000, 1.000000/g' "$HOME/.local/state/wireplumber/default-routes" 2>/dev/null || true
+fi
+
 # Ensure hardware ALSA mixer controls are unmuted and auto-mute disabled
 if command -v amixer >/dev/null 2>&1; then
     for card in sofhdadsp 0 1; do
@@ -59,12 +64,24 @@ if [ -f "$tuning_conf" ]; then
     fi
 fi
 
-# Ensure default sink points to omarchy_speaker_tuning if active
+# Ensure physical speaker volume in PipeWire is full 100% so tuning is loud and clear
 if command -v pactl >/dev/null 2>&1; then
+    spk_name="$(pactl list sinks short 2>/dev/null | awk '/HiFi__Speaker__sink/ {print $2; exit}')"
+    if [ -n "$spk_name" ]; then
+        pactl set-sink-volume "$spk_name" 100% >/dev/null 2>&1 || true
+        pactl set-sink-mute "$spk_name" 0 >/dev/null 2>&1 || true
+    fi
+
+    # Ensure default sink points to omarchy_speaker_tuning if active
     if pactl list sinks short 2>/dev/null | grep -q "omarchy_speaker_tuning"; then
         current_sink="$(pactl get-default-sink 2>/dev/null || true)"
         if [ "$current_sink" != "omarchy_speaker_tuning" ] && [[ "$current_sink" == *"Speaker"* || "$current_sink" == "auto_null" || -z "$current_sink" ]]; then
             pactl set-default-sink omarchy_speaker_tuning >/dev/null 2>&1 || true
         fi
     fi
+fi
+
+# Start dynamic jack monitor daemon in background if not already running
+if ! pgrep -u "$USER" -f "python3 /usr/local/bin/omarchy-audio-jack-monitor" >/dev/null 2>&1; then
+    setsid nohup python3 /usr/local/bin/omarchy-audio-jack-monitor >/dev/null 2>&1 &
 fi
