@@ -276,7 +276,7 @@ cmd_transparent() {
 # follows the bar background, reloading Hyprland only when it changes. The
 # toggle sits where Hyprland reads it, under XDG_STATE_HOME.
 sync_glass() {
-  local dir="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/toggles/hypr"
+  local dir="${XDG_STATE_HOME:-$HOME/.local/state}/void/toggles/hypr"
   local flag="$dir/bar-glassy.lua"
 
   if [[ $(current_background) == "glassy" ]]; then

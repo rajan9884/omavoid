@@ -27,7 +27,7 @@ end
 
 function keyboard.selected()
   local paths = require("default.hypr.paths")
-  local values = read_values(paths.config_home .. "/omarchy/keyboard-layouts")
+  local values = read_values(paths.config_home .. "/void/keyboard-layouts")
   if values.XKBLAYOUT then return values end
   return keyboard.installed()
 end

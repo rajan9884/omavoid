@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-CURRENT_THEME="$HOME/.local/state/omarchy/current/theme"
+CURRENT_THEME="$HOME/.local/state/void/current/theme"
 THEME_CONF="$HOME/.config/hypr/conf/theme.conf"
 
 if [[ ! -d "$CURRENT_THEME" ]]; then

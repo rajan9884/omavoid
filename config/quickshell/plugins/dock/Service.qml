@@ -16,8 +16,8 @@ Item {
   property var dock: null
 
   readonly property string home: Quickshell.env("HOME")
-  readonly property string configDir: home + "/.config/omarchy-launcher"
-  readonly property string stateDir: home + "/.local/state/omarchy-launcher"
+  readonly property string configDir: home + "/.config/void-launcher"
+  readonly property string stateDir: home + "/.local/state/void-launcher"
 
   property var entries: []
   property var appEntries: []

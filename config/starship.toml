@@ -1,5 +1,5 @@
 # Starship prompt using Omarchy theme colors (Vantablack grayscale)
-# Colors from ~/.local/state/omarchy/current/theme/colors.toml
+# Colors from ~/.local/state/void/current/theme/colors.toml
 "$schema" = 'https://starship.rs/config-schema.json'
 add_newline = true
 

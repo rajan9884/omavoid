@@ -203,7 +203,7 @@ QtObject {
   }
 
   // Re-derive `shellValues` from theme base + user override and push it to
-  // Style. User keys win, so a machine-level `~/.config/omarchy/shell.toml`
+  // Style. User keys win, so a machine-level `~/.config/void/shell.toml`
   // survives theme switches (which replace only themeShellValues).
   function mergeShell() {
     var merged = {}

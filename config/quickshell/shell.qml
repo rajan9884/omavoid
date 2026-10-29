@@ -1623,11 +1623,11 @@ ShellRoot {
         Util.execArgv(["omarchy-shell", target, method])
     } else if (entry.kind === "brightness") {
       if (!shell.brightnessKeys.handle(entry.target))
-        Util.execArgv(["omarchy-brightness-display", entry.target === "raise" ? "+5%" : "5%-"])
+        Util.execArgv(["void-brightness-display", entry.target === "raise" ? "+5%" : "5%-"])
     } else if (entry.kind === "audio") {
       var media = shell.serviceFor("omarchy.media")
       if (!media || !media.handleVolumeKey(entry.target))
-        Util.execArgv(["omarchy-audio-output-volume", entry.target])
+        Util.execArgv(["void-audio-output-volume", entry.target])
     } else {
       shell.toggle(entry.target, "{}")
     }

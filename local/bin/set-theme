@@ -8,18 +8,18 @@ if [ ! -d "$THEMES_DIR/$slug" ]; then
     exit 1
 fi
 
-mkdir -p "$HOME/.local/state/omarchy/current/theme"
-echo "$slug" > "$HOME/.local/state/omarchy/current/theme.name"
+mkdir -p "$HOME/.local/state/void/current/theme"
+echo "$slug" > "$HOME/.local/state/void/current/theme.name"
 
 cp "$THEMES_DIR/$slug/theme.json" "$HOME/.config/quickshell/theme.json"
 cp "$THEMES_DIR/$slug/colors.toml" "$HOME/.config/quickshell/colors.toml"
 cp "$THEMES_DIR/$slug/shell.toml" "$HOME/.config/quickshell/shell.toml"
-cp "$THEMES_DIR/$slug/colors.toml" "$HOME/.local/state/omarchy/current/theme/colors.toml"
-cp "$THEMES_DIR/$slug/shell.toml" "$HOME/.local/state/omarchy/current/theme/shell.toml"
+cp "$THEMES_DIR/$slug/colors.toml" "$HOME/.local/state/void/current/theme/colors.toml"
+cp "$THEMES_DIR/$slug/shell.toml" "$HOME/.local/state/void/current/theme/shell.toml"
 
-# If upstream omarchy-theme-set is installed from github.com/omacom/omarchy, invoke it too
-if [ -x /usr/share/omarchy/bin/omarchy-theme-set ]; then
-    /usr/share/omarchy/bin/omarchy-theme-set "$slug" >/dev/null 2>&1 || true
+# If upstream void-theme-set is installed from github.com/omacom/omarchy, invoke it too
+if [ -x /usr/share/void/bin/void-theme-set ]; then
+    /usr/share/void/bin/void-theme-set "$slug" >/dev/null 2>&1 || true
 fi
 
 cp "$THEMES_DIR/$slug/hypr-theme.conf" "$HOME/.config/hypr/conf/theme.conf"

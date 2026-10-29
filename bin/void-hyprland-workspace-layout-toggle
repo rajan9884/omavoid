@@ -6,7 +6,7 @@
 # Layout changes replace one notification instead of stacking a new one for
 # each press, so cycling through the layouts leaves a single, current one.
 notify_layout() {
-  local state="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/workspace-layout-notification"
+  local state="${XDG_STATE_HOME:-$HOME/.local/state}/void/workspace-layout-notification"
   local last id
   [[ -r $state ]] && read -r last <"$state"
   if id=$(void-notification-send -p -r "${last:-0}" -g 󱂬 "$1") && [[ $id =~ ^[0-9]+$ ]]; then
@@ -25,7 +25,7 @@ ACTIVE_WORKSPACE=$(hyprctl activeworkspace -j | jq -r '.id')
 # selector relative to the current workspace: targeting one lands on workspace 1
 # and reconfigures that instead.
 [[ $ACTIVE_WORKSPACE =~ ^[0-9]+$ ]] || exit 1
-MODES_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/workspace-layouts"
+MODES_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/void/workspace-layouts"
 MODE_FILE="$MODES_DIR/$ACTIVE_WORKSPACE.lua"
 
 CURRENT_MODE=$(void-hyprland-workspace-layout-current)

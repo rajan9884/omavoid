@@ -4,7 +4,7 @@
 # omarchy:args=[theme|sharp|rounded]
 # omarchy:examples=omarchy hyprland corners | omarchy hyprland corners rounded
 
-TOGGLES_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/toggles/hypr"
+TOGGLES_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/void/toggles/hypr"
 
 # Sharp and rounded are toggle files loaded after every theme, so they override
 # the corners of whichever theme is current. Theme removes both.

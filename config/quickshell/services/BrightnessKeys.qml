@@ -7,7 +7,7 @@ import "BrightnessModel.js" as BrightnessModel
 
 // The display brightness keys, arriving as global shortcuts. On the internal
 // panel they step the backlight here: one brightnessctl write and the OSD in
-// process, instead of omarchy-brightness-display resolving the monitor and
+// process, instead of void-brightness-display resolving the monitor and
 // device, reading, writing and reading back, then an IPC client for the OSD.
 // They step, clamp and read back the way that script does, so either path
 // lands on the same level and OSD. External and Apple displays go through the

@@ -45,7 +45,7 @@ STATUS="false"
 # the picked geometry, which is nobody else's business either. Fall back to
 # the state directory when there is no session runtime dir -- :-/tmp would put
 # both files back at the fixed names this comment describes.
-RUNTIME_DIR="${XDG_RUNTIME_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/omarchy}"
+RUNTIME_DIR="${XDG_RUNTIME_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/void}"
 RECORDING_FILE="$RUNTIME_DIR/void-screenrecord-filename"
 REGION_FILE="$RUNTIME_DIR/void-screenrecord-region"
 # The recorder's pid, so stop and status act on that process alone.

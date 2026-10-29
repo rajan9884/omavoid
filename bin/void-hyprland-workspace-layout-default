@@ -7,7 +7,7 @@
 # Layout changes replace one notification instead of stacking a new one for
 # each press, so cycling through the layouts leaves a single, current one.
 notify_layout() {
-  local state="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/workspace-layout-notification"
+  local state="${XDG_STATE_HOME:-$HOME/.local/state}/void/workspace-layout-notification"
   local last id
   [[ -r $state ]] && read -r last <"$state"
   if id=$(void-notification-send -p -r "${last:-0}" -g 󱂬 "$1") && [[ $id =~ ^[0-9]+$ ]]; then
@@ -15,7 +15,7 @@ notify_layout() {
   fi
 }
 
-MODES_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/workspace-layouts"
+MODES_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/void/workspace-layouts"
 DEFAULT_FILE="$MODES_DIR/default.lua"
 
 # Without a saved default, Hyprland's own layout is the default, which the

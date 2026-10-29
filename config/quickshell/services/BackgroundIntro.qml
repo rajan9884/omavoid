@@ -243,7 +243,7 @@ Item {
   // A shell restart shares this compositor session; a new login does not.
   FileView {
     id: sessionMarker
-    path: Quickshell.env("HOME") + "/.local/state/omarchy/background-intro.session-id"
+    path: Quickshell.env("HOME") + "/.local/state/void/background-intro.session-id"
     blockLoading: true
     watchChanges: false
     printErrors: false
@@ -251,7 +251,7 @@ Item {
 
   Process {
     id: startupBackground
-    command: ["readlink", "-f", Quickshell.env("HOME") + "/.local/state/omarchy/current/background"]
+    command: ["readlink", "-f", Quickshell.env("HOME") + "/.local/state/void/current/background"]
     stdout: StdioCollector { id: startupBackgroundOut }
     onExited: function(exitCode) {
       var path = String(startupBackgroundOut.text || "").trim()

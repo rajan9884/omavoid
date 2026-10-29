@@ -15,8 +15,8 @@ Item {
   property bool suspended: false
   readonly property string home: Quickshell.env("HOME")
   readonly property string stateHome: home + "/.local/state"
-  readonly property string currentBackgroundLink: stateHome + "/omarchy/current/background"
-  readonly property string currentThemeBackgrounds: stateHome + "/omarchy/current/theme/backgrounds"
+  readonly property string currentBackgroundLink: stateHome + "/void/current/background"
+  readonly property string currentThemeBackgrounds: stateHome + "/void/current/theme/backgrounds"
 
   property string currentBackground: ""
   property string displayedBackground: ""

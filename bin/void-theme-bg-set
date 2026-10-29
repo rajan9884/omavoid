@@ -12,7 +12,7 @@ fi
 BACKGROUND="$(realpath "$1")"
 CURRENT_BACKGROUND_LINK="$HOME/.local/state/void/current/background"
 CURRENT_THEME_PATH="$HOME/.local/state/void/current/theme"
-BACKGROUND_TRANSITION_CACHE="$HOME/.cache/omarchy/background-transitions"
+BACKGROUND_TRANSITION_CACHE="$HOME/.cache/void/background-transitions"
 THEME_SET_LOCK="${XDG_RUNTIME_DIR:-/tmp}/void-theme-set.lock"
 INTRO_TOKEN_PATH="${XDG_RUNTIME_DIR:-/tmp}/void-background-intro.token"
 

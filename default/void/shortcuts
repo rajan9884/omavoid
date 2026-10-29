@@ -5,8 +5,8 @@
 # { audio = "raise" }, { brightness = "raise" } or { ipc = "media.next" }
 # dispatches the matching shortcut straight to the shell, with no process to
 # spawn per keypress. Anything missing here still binds, through the
-# omarchy-menu, omarchy-shell, omarchy-audio-output-volume or
-# omarchy-brightness-display command instead.
+# omarchy-menu, omarchy-shell, void-audio-output-volume or
+# void-brightness-display command instead.
 menu root
 menu apps
 menu capture

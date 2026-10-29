@@ -56,7 +56,7 @@ Item {
   property string defaultMenuPath: Quickshell.env("HOME") + "/.config/void/void-menu.jsonc"
   property string userMenuPath: Quickshell.env("HOME") + "/.config/void/extensions/void-menu.jsonc"
   // Display language for the shipped rows. The code lives in
-  // ~/.config/omarchy/language; a missing file
+  // ~/.config/void/language; a missing file
   // means English. The catalog at default/i18n/<code>/menu.json is applied
   // to the default items before the user extension merges on top, so a
   // user's own rows and retitles always win.
@@ -1135,7 +1135,7 @@ Item {
   }
 
   // The JSONC sources are watched so live edits to the default file (or the
-  // user extension at ~/.config/omarchy/extensions/omarchy-menu.jsonc) take
+  // user extension at ~/.config/void/extensions/omarchy-menu.jsonc) take
   // effect without restarting the shell.
   FileView {
     id: defaultMenuFile

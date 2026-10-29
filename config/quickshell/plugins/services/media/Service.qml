@@ -460,7 +460,7 @@ Item {
   //
   // The volume keys arrive as global shortcuts and change the volume here,
   // with no process per press, stepping, clamping, unmuting and debouncing the
-  // way omarchy-audio-output-volume does, so either path lands on the same
+  // way void-audio-output-volume does, so either path lands on the same
   // volume and OSD. That script resolves a DSP sink through to the physical
   // sink it feeds on every press, from the live routing. An ALSA sink is its
   // own physical sink, so only then do the keys act here; any other default

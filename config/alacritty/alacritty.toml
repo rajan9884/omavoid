@@ -1,4 +1,4 @@
-general.import = [ "~/.local/state/omarchy/current/theme/alacritty.toml" ]
+general.import = [ "~/.local/state/void/current/theme/alacritty.toml" ]
 
 [window]
 padding = { x = 14, y = 14 }

@@ -15,8 +15,8 @@ Item {
   // Injected by omarchy-shell; defaults to the session OMARCHY_PATH.
   property string omarchyPath: Quickshell.env("OMARCHY_PATH")
   property string stateHome: Quickshell.env("HOME") + "/.local/state"
-  property string userThemesPath: Quickshell.env("HOME") + "/.config/omarchy/themes"
-  property string imageDirs: Quickshell.env("OMARCHY_IMAGE_SELECTOR_DIRS") || Quickshell.env("OMARCHY_IMAGE_SELECTOR_DIR") || Quickshell.env("OMARCHY_STOCK_BACKGROUNDS_DIR") || (stateHome + "/omarchy/current/theme/backgrounds")
+  property string userThemesPath: Quickshell.env("HOME") + "/.config/void/themes"
+  property string imageDirs: Quickshell.env("OMARCHY_IMAGE_SELECTOR_DIRS") || Quickshell.env("OMARCHY_IMAGE_SELECTOR_DIR") || Quickshell.env("OMARCHY_STOCK_BACKGROUNDS_DIR") || (stateHome + "/void/current/theme/backgrounds")
   property string imageRows: ""
   property string loadedImageRows: ""
   property string selectionFile: Quickshell.env("OMARCHY_IMAGE_SELECTOR_SELECTION_FILE") || Quickshell.env("OMARCHY_BACKGROUND_SELECTION_FILE")
@@ -200,7 +200,7 @@ Item {
     if (themeMode) {
       themeMode = false
       root.opened = false
-      if (path) Util.execArgv(["omarchy-theme-set", nameForPath(path)])
+      if (path) Util.execArgv(["void-theme-set", nameForPath(path)])
       return
     }
 
@@ -455,7 +455,7 @@ Item {
 
   FileView {
     id: themeNameFile
-    path: root.stateHome + "/omarchy/current/theme.name"
+    path: root.stateHome + "/void/current/theme.name"
     watchChanges: true
     onFileChanged: reload()
   }

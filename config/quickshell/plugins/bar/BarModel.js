@@ -547,7 +547,7 @@ function dragDistanceOutside(point, width, height) {
 }
 
 // Display cutouts (a camera notch at the top of a laptop panel) are described
-// by the platform's own package, in /usr/share/omarchy-platform/display-cutouts.json:
+// by the platform's own package, in /usr/share/void-platform/display-cutouts.json:
 //
 //   { "panels": [ { "connector": "eDP", "width": 3024, "height": 1964, "top": 64 } ] }
 //

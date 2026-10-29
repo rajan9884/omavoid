@@ -5,7 +5,7 @@
 # ==============================================================================
 set -euo pipefail
 
-export OMARCHY_PATH="${OMARCHY_PATH:-/usr/share/omarchy}"
+export OMARCHY_PATH="${OMARCHY_PATH:-/usr/share/void}"
 runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$UID}"
 if [[ -z ${WAYLAND_DISPLAY:-} ]]; then
     socket=$(ls -t "$runtime_dir"/wayland-[0-9]* 2>/dev/null | grep -v '\.lock$' | head -n1)
@@ -57,22 +57,22 @@ case "$cmd" in
     osd)
         case "$arg" in
             volume-up)
-                /usr/share/omarchy/bin/omarchy-audio-output-volume raise
+                /usr/share/void/bin/void-audio-output-volume raise
                 ;;
             volume-down)
-                /usr/share/omarchy/bin/omarchy-audio-output-volume lower
+                /usr/share/void/bin/void-audio-output-volume lower
                 ;;
             volume-mute)
-                /usr/share/omarchy/bin/omarchy-audio-output-volume mute-toggle
+                /usr/share/void/bin/void-audio-output-volume mute-toggle
                 ;;
             mic-mute)
-                /usr/share/omarchy/bin/omarchy-audio-input-mute
+                /usr/share/void/bin/void-audio-input-mute
                 ;;
             brightness-up)
-                /usr/share/omarchy/bin/omarchy-brightness-display +5%
+                /usr/share/void/bin/void-brightness-display +5%
                 ;;
             brightness-down)
-                /usr/share/omarchy/bin/omarchy-brightness-display 5%-
+                /usr/share/void/bin/void-brightness-display 5%-
                 ;;
         esac
         ;;

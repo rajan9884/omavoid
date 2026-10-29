@@ -28,7 +28,7 @@ if [ ! -f "$SHELL_PATH/shell.qml" ] && [ -f "$VOID_PATH/shell/shell.qml" ]; then
     SHELL_PATH="$VOID_PATH/shell"
 fi
 
-startup_bg=$(readlink -f "$HOME/.local/state/void/current/background" 2>/dev/null || readlink -f "$HOME/.local/state/omarchy/current/background" 2>/dev/null || echo "")
+startup_bg=$(readlink -f "$HOME/.local/state/void/current/background" 2>/dev/null || readlink -f "$HOME/.local/state/void/current/background" 2>/dev/null || echo "")
 export VOID_STARTUP_BACKGROUND="$startup_bg"
 export OMARCHY_STARTUP_BACKGROUND="$startup_bg"
 

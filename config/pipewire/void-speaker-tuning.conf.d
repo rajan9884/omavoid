@@ -1,1 +1,0 @@
-omarchy-speaker-tuning.conf.d

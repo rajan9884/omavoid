@@ -44,7 +44,7 @@ Item {
   property bool barHidden: false
   property string home: Quickshell.env("HOME")
   property string stateHome: home + "/.local/state"
-  property string omarchyConfigDir: home + "/.config/omarchy"
+  property string omarchyConfigDir: home + "/.config/void"
   property var fallbackBarConfig: ({
     position: "top",
     background: "opaque",
@@ -731,7 +731,7 @@ Item {
     // A file that went away describes nothing, whatever text() still holds.
     property bool missing: false
 
-    path: "/usr/share/omarchy-platform/display-cutouts.json"
+    path: "/usr/share/void-platform/display-cutouts.json"
     blockLoading: true
     watchChanges: true
     printErrors: false
@@ -1553,9 +1553,9 @@ Item {
   }
 
   // FileView also fires for any change in its path's parent directory, so watch
-  // a path inside current/: every plugin writes to ~/.local/state/omarchy.
+  // a path inside current/: every plugin writes to ~/.local/state/void.
   FileView {
-    path: root.stateHome + "/omarchy/current/theme"
+    path: root.stateHome + "/void/current/theme"
     watchChanges: true
     printErrors: false
     onFileChanged: root.scheduleTransparentForegroundRefresh()
@@ -1635,11 +1635,11 @@ Item {
   Process {
     id: barHiddenProbe
     running: true
-    command: ["bash", "-c", "[[ -f $HOME/.local/state/omarchy/toggles/bar-off ]] && echo yes || echo no"]
+    command: ["bash", "-c", "[[ -f $HOME/.local/state/void/toggles/bar-off ]] && echo yes || echo no"]
     stdout: SplitParser { onRead: function(line) { root.barHidden = String(line).trim() === "yes" } }
   }
   FileView {
-    path: root.home + "/.local/state/omarchy/toggles"
+    path: root.home + "/.local/state/void/toggles"
     watchChanges: true
     printErrors: false
     onFileChanged: barHiddenProbe.running = true
