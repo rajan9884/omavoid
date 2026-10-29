@@ -21,12 +21,6 @@ export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 [[ -f /usr/share/omarchy-zsh/shell/zoptions ]] && source /usr/share/omarchy-zsh/shell/zoptions
 
 # FZF Environment & Key Bindings
-export FZF_DEFAULT_OPTS=" \
-  --height=60% --layout=reverse --border=rounded --info=inline \
-  --color=bg+:#24283b,bg:#1a1b26,spinner:#7dcfff,hl:#7aa2f7 \
-  --color=fg:#c0caf5,header:#bb9af7,info:#e0af68,pointer:#7aa2f7 \
-  --color=marker:#9ece6a,fg+:#c0caf5,prompt:#7aa2f7,hl+:#7dcfff"
-
 if command -v fd >/dev/null 2>&1; then
   export FZF_DEFAULT_COMMAND="fd --type f --hidden --follow --exclude .git"
   export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
