@@ -10,7 +10,7 @@ set -euo pipefail
 # English catalog and finally to the key itself. Catalog entries carry
 # %1-style tokens (the same convention as the shell catalogs), substituted
 # from the remaining arguments, so translations may reorder them freely.
-# The language is read the same way omarchy-language reads it; anything
+# The language is read from ~/.config/omarchy/language; anything
 # unexpected means English, the default.
 #
 # --count picks the form of a plural entry ({"one": ..., "other": ...}) by

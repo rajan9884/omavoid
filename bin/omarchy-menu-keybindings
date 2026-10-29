@@ -631,7 +631,7 @@ prioritize_entries() {
 # only touches the text after the arrow, so columns and dispatch hold.
 translate_binding_records() {
   local language catalog
-  language=$(omarchy-language 2>/dev/null) || language=en
+  language=$(cat "${XDG_CONFIG_HOME:-$HOME/.config}/omarchy/language" 2>/dev/null || echo en)
   catalog=$OMARCHY_PATH/default/i18n/$language/keybindings.json
   if [[ $language == "en" || ! -f $catalog ]]; then
     cat
@@ -684,8 +684,8 @@ keybindings_cache_key() {
   {
     printf 'v19\n'
     leading_keyboard
-    omarchy-language 2>/dev/null
-    cat "$OMARCHY_PATH/default/i18n/$(omarchy-language 2>/dev/null)/keybindings.json" 2>/dev/null
+    cat "${XDG_CONFIG_HOME:-$HOME/.config}/omarchy/language" 2>/dev/null || echo en
+    cat "$OMARCHY_PATH/default/i18n/$(cat "${XDG_CONFIG_HOME:-$HOME/.config}/omarchy/language" 2>/dev/null || echo en)/keybindings.json" 2>/dev/null
     hyprctl devices 2>/dev/null | grep -F 'active keymap:'
     cat "$key_names_file" 2>/dev/null
     hyprctl binds 2>/dev/null

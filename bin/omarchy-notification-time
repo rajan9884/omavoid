@@ -5,7 +5,7 @@
 # Day and month names follow the Omarchy language right away, rather than
 # LC_TIME, which only catches up with it at the next login. One timestamp feeds
 # every part, so a notification sent at midnight can't mix two days.
-locale=$(omarchy-language locale)
+locale=${LC_TIME:-${LANG:-en_US.UTF-8}}
 now=$(date +%s)
 day_time=$(LC_TIME=$locale date -d "@$now" +"%A %H:%M")
 day_month_year=$(LC_TIME=$locale date -d "@$now" +"%d %B %Y")

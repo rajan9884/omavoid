@@ -56,7 +56,7 @@ Item {
   property string defaultMenuPath: Quickshell.env("HOME") + "/.config/omarchy/omarchy-menu.jsonc"
   property string userMenuPath: Quickshell.env("HOME") + "/.config/omarchy/extensions/omarchy-menu.jsonc"
   // Display language for the shipped rows. The code lives in
-  // ~/.config/omarchy/language (omarchy-language owns it); a missing file
+  // ~/.config/omarchy/language; a missing file
   // means English. The catalog at default/i18n/<code>/menu.json is applied
   // to the default items before the user extension merges on top, so a
   // user's own rows and retitles always win.
@@ -346,15 +346,6 @@ Item {
       icon: "\uf17c",
       volatile: true,
       actionFor: function(value) { return "omarchy-kernel set " + Util.shellQuote(value) }
-    },
-    // Rows carry a fourth field (the English name) so searching "danish"
-    // finds the row labeled with its native name; mergeProviderRows turns
-    // it into an alias.
-    "languages": {
-      script: "current=$(omarchy-language 2>/dev/null); omarchy-language list 2>/dev/null | while IFS=$'\\t' read -r name code english; do [[ -z $code ]] && continue; printf '%s\\t%s\\t%s\\t%s\\n' \"$name\" \"$code\" \"$current\" \"$english\"; done",
-      icon: "\uf1ab",
-      volatile: true,
-      actionFor: function(value) { return "omarchy-language " + Util.shellQuote(value) }
     }
   })
 

@@ -794,25 +794,6 @@
     "when": "[[ -f ~/.config/hypr/input.lua ]]",
     "action": "omarchy-launch-config-editor \"$HOME/.config/hypr/input.lua\""
   },
-  "setup.typing": {
-    "icon": "",
-    "label": "Typing"
-  },
-  "setup.typing.keyboard": {
-    "icon": "",
-    "label": "Keyboard Layouts",
-    "action": "omarchy-setup-keyboard"
-  },
-  "setup.typing.input": {
-    "icon": "",
-    "label": "Input Methods",
-    "action": "omarchy-setup-input"
-  },
-  "setup.language": {
-    "icon": "",
-    "label": "Language",
-    "provider": "languages"
-  },
   "setup.network": {
     "icon": "󰛳",
     "label": "Network",
@@ -859,40 +840,6 @@
     ],
     "when": "omarchy-network-wifi-connected",
     "action": "omarchy-shell shell summon omarchy.wifiqr"
-  },
-  "setup.plugin": {
-    "icon": "󰐱",
-    "label": "Plugins",
-    "aliases": [
-      "plugin",
-      "plugins"
-    ]
-  },
-  "setup.plugin.enable": {
-    "icon": "󰄬",
-    "label": "Enable Plugin",
-    "action": "omarchy-menu-plugin enable"
-  },
-  "setup.plugin.disable": {
-    "icon": "󰅖",
-    "label": "Disable Plugin",
-    "action": "omarchy-menu-plugin disable"
-  },
-  "setup.plugin.add": {
-    "icon": "󰖟",
-    "label": "Add Plugin",
-    "action": "omarchy-launch-floating-terminal-with-presentation 'omarchy-plugin-add'"
-  },
-  "setup.plugin.clone": {
-    "icon": "󰆏",
-    "label": "Clone Plugin",
-    "action": "omarchy-menu-plugin clone"
-  },
-  "setup.plugin.remove": {
-    "icon": "󰭌",
-    "label": "Remove Plugin",
-    "when": "compgen -G \"$HOME/.config/omarchy/plugins/*/manifest.json\"",
-    "action": "omarchy-menu-plugin remove"
   },
   "setup.config": {
     "icon": "",
