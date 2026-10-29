@@ -602,6 +602,15 @@ UDEV
     sudo udevadm control --reload 2>/dev/null || true
     sudo udevadm trigger --subsystem-match=sound 2>/dev/null || true
 
+    # Install snd-perms runit service to re-trigger sound udev events for WirePlumber
+    if [ -f "${REPO_DIR}/scripts/runit/snd-perms/run" ]; then
+        sudo mkdir -p /etc/sv/snd-perms
+        sudo cp -f "${REPO_DIR}/scripts/runit/snd-perms/run" /etc/sv/snd-perms/run
+        sudo chmod +x /etc/sv/snd-perms/run
+        sudo ln -sf /etc/sv/snd-perms /var/service/
+        log_ok "Enabled snd-perms sound device udev monitor service."
+    fi
+
     # PipeWire session manager auto-spawn (WirePlumber + PipeWire-Pulse)
     sudo mkdir -p /etc/pipewire/pipewire.conf.d
     cat <<'CONF' | sudo tee /etc/pipewire/pipewire.conf.d/10-session-manager.conf >/dev/null
@@ -685,6 +694,12 @@ deploy_dotfiles() {
             log_ok "Symlinked ~/${zf} -> ${repo_zf}"
         fi
     done
+
+    # Deploy ~/.asoundrc for ALSA-to-PipeWire routing
+    if [ -f "${REPO_DIR}/shell/asoundrc" ]; then
+        cp -f "${REPO_DIR}/shell/asoundrc" "${TARGET_HOME}/.asoundrc"
+        log_ok "Deployed ~/.asoundrc for PipeWire ALSA routing."
+    fi
 
     # Stage initial Tokyo Night / Quattro theme state
     THEME_SRC="/usr/share/omarchy/themes/tokyo-night"

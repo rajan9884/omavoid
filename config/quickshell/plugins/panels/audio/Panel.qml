@@ -568,8 +568,10 @@ Panel {
   }
 
   function sinkAvailable(node) {
-    if (!node || !node.name || !sinkAvailabilityLoaded) return true
+    if (!node || !node.name) return false
     var name = String(node.name)
+    if (name.indexOf("HiFi__Speaker__sink") !== -1 || name.indexOf("HiFi__Headphones__sink") !== -1 || name.indexOf("omarchy_speaker_tuning") !== -1) return true
+    if (!sinkAvailabilityLoaded) return true
     return sinkAvailability[name] !== false
   }
 
@@ -659,6 +661,8 @@ Panel {
   implicitWidth: button.implicitWidth
   implicitHeight: button.implicitHeight
 
+  PwObjectTracker { objects: Pipewire.nodes ? Pipewire.nodes.values : [] }
+  PwObjectTracker { objects: [root.sink, root.volumeSink].filter(Boolean) }
   PwObjectTracker { objects: root.candidateSinks }
   PwObjectTracker { objects: root.candidateSources }
   PwObjectTracker { objects: root.audioStreams }
