@@ -203,6 +203,13 @@ sync_upstream_omarchy() {
         fi
     fi
 
+    # Ensure omarchy-restart-audio supports Void Linux natively without systemd
+    if [ -f /usr/share/omarchy/bin/omarchy-restart-audio ]; then
+        if ! grep -q "void-audio-init" /usr/share/omarchy/bin/omarchy-restart-audio; then
+            sudo sed -i '/restart_audio_services() {/a \  if ! command -v systemctl >/dev/null 2>&1 || ! systemctl --user is-system-running >/dev/null 2>&1; then pkill -9 -u "$USER" -x pipewire 2>/dev/null || true; pkill -9 -u "$USER" -x wireplumber 2>/dev/null || true; pkill -9 -u "$USER" -f "pipewire -c .*omarchy-speaker-tuning.conf" 2>/dev/null || true; sleep 0.5; void-audio-init; return 0; fi' /usr/share/omarchy/bin/omarchy-restart-audio
+        fi
+    fi
+
     log_ok "Official assets synchronized."
 }
 

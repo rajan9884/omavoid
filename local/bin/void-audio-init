@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Robust audio initialization for Void Linux under Wayland / Hyprland
-set -euo pipefail
+# Authentic Omarchy audio stack initialization for Void Linux under Wayland / Hyprland
+# Ensures PipeWire, WirePlumber, PipeWire-Pulse, and Omarchy speaker tuning start cleanly.
 
 if [ -z "${XDG_RUNTIME_DIR:-}" ]; then
     export XDG_RUNTIME_DIR="/run/user/$(id -u)"
@@ -8,60 +8,63 @@ fi
 
 mkdir -p "$XDG_RUNTIME_DIR" 2>/dev/null || true
 
-# Exclusive single-instance lock to prevent concurrent races
+# Single-instance flock to avoid race conditions during login
 exec 200>"$XDG_RUNTIME_DIR/void-audio-init.lock"
 flock -n 200 || exit 0
-
-# Trigger udev rule for sound in case early coldplug was missed
-udevadm trigger --subsystem-match=sound 2>/dev/null || true
 
 # Wait up to 5 seconds for ALSA sound hardware node to be readable
 for i in $(seq 1 50); do
     if [ -r /dev/snd/controlC0 ] && [ -w /dev/snd/controlC0 ]; then
         break
     fi
+    udevadm trigger --subsystem-match=sound 2>/dev/null || true
     sleep 0.1
 done
 
-# If multiple wireplumber processes are running (stale or conflicting), clean them up
-wp_count=$(pgrep -u "$USER" -x wireplumber 2>/dev/null | wc -l)
-if [ "$wp_count" -gt 1 ]; then
-    pkill -9 -u "$USER" -x wireplumber 2>/dev/null || true
-    sleep 0.5
-fi
-
-# Clean up stale locks if pipewire is dead
+# Clean up any stale sockets if PipeWire is not running
 if ! pgrep -u "$USER" -x pipewire >/dev/null 2>&1; then
     rm -f "$XDG_RUNTIME_DIR"/pipewire-*.lock "$XDG_RUNTIME_DIR"/pipewire-0* "$XDG_RUNTIME_DIR"/pulse/native 2>/dev/null || true
-    setsid /usr/bin/pipewire >/dev/null 2>&1 &
-    sleep 0.5
+    setsid nohup /usr/bin/pipewire >/dev/null 2>&1 &
+    sleep 0.6
 fi
 
-# PipeWire automatically launches WirePlumber and PipeWire-Pulse via context.exec.
-# Only launch them if they are completely absent after 1 second.
-sleep 0.5
+# Ensure WirePlumber is running (started by PipeWire context.exec or standalone)
 if ! pgrep -u "$USER" -x wireplumber >/dev/null 2>&1; then
-    setsid /usr/bin/wireplumber >/dev/null 2>&1 &
-    sleep 0.5
+    setsid nohup /usr/bin/wireplumber >/dev/null 2>&1 &
+    sleep 0.4
 fi
 
-if ! pgrep -u "$USER" -x pipewire-pulse >/dev/null 2>&1; then
-    setsid /usr/bin/pipewire-pulse >/dev/null 2>&1 &
+# Ensure PipeWire-Pulse is running
+if ! pgrep -u "$USER" -x pipewire-pulse >/dev/null 2>&1 && ! pgrep -u "$USER" -f "pipewire.*pipewire-pulse.conf" >/dev/null 2>&1; then
+    setsid nohup /usr/bin/pipewire -c pipewire-pulse.conf >/dev/null 2>&1 &
+    sleep 0.3
 fi
 
-# Ensure hardware ALSA mixer controls are at 100% (0 dB)
+# Ensure hardware ALSA mixer controls are unmuted and auto-mute disabled
 if command -v amixer >/dev/null 2>&1; then
     for card in sofhdadsp 0 1; do
+        amixer -c "$card" sset 'Auto-Mute Mode' 'Disabled' >/dev/null 2>&1 || true
         amixer -c "$card" set Master 100% unmute >/dev/null 2>&1 || true
         amixer -c "$card" set Headphone 100% unmute >/dev/null 2>&1 || true
         amixer -c "$card" set Speaker 100% unmute >/dev/null 2>&1 || true
     done
 fi
 
-# If omarchy speaker tuning is installed, ensure its filter-chain host client is running
+# If Omarchy speaker tuning is installed, ensure its filter-chain host client is running
 tuning_conf="${XDG_CONFIG_HOME:-$HOME/.config}/pipewire/omarchy-speaker-tuning.conf"
 if [ -f "$tuning_conf" ]; then
     if ! pgrep -u "$USER" -f "pipewire -c .*omarchy-speaker-tuning.conf" >/dev/null 2>&1; then
-        setsid /usr/bin/pipewire -c "$tuning_conf" >/dev/null 2>&1 &
+        setsid nohup /usr/bin/pipewire -c "$tuning_conf" >/dev/null 2>&1 &
+        sleep 0.5
+    fi
+fi
+
+# Ensure default sink points to omarchy_speaker_tuning if active
+if command -v pactl >/dev/null 2>&1; then
+    if pactl list sinks short 2>/dev/null | grep -q "omarchy_speaker_tuning"; then
+        current_sink="$(pactl get-default-sink 2>/dev/null || true)"
+        if [ "$current_sink" != "omarchy_speaker_tuning" ] && [[ "$current_sink" == *"Speaker"* || "$current_sink" == "auto_null" || -z "$current_sink" ]]; then
+            pactl set-default-sink omarchy_speaker_tuning >/dev/null 2>&1 || true
+        fi
     fi
 fi
