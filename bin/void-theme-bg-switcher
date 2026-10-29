@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# omarchy:summary=Open the Omarchy background switcher
+# omarchy:group=theme
+# omarchy:name=bg-switcher
+# omarchy:aliases=omarchy background
+
+theme_name=$(cat "$HOME/.local/state/void/current/theme.name" 2>/dev/null)
+current_background=$(readlink -f "$HOME/.local/state/void/current/background" 2>/dev/null)
+
+void-menu-images \
+  --selected "$current_background" \
+  "$HOME/.local/state/void/current/theme/backgrounds" \
+  "$HOME/.config/void/backgrounds/$theme_name"

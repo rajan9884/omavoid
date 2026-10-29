@@ -1,0 +1,14 @@
+#!/bin/bash
+# Toggle active window between tiling and centered floating (960x620)
+# Supports both Hyprland Lua dispatcher mode and legacy conf dispatcher mode.
+
+window_json=$(hyprctl activewindow -j 2>/dev/null)
+floating=$(echo "$window_json" | jq -r ".floating // false")
+
+if [ "$floating" = "true" ]; then
+    hyprctl dispatch 'hl.dsp.window.float({ action = "off" })' >/dev/null 2>&1 || hyprctl dispatch togglefloating
+else
+    hyprctl dispatch 'hl.dsp.window.float({ action = "on" })' >/dev/null 2>&1 || hyprctl dispatch togglefloating
+    hyprctl dispatch 'hl.dsp.window.resize({ x = 960, y = 620, relative = false })' >/dev/null 2>&1 || hyprctl dispatch resizeactive exact 960 620
+    hyprctl dispatch 'hl.dsp.window.center()' >/dev/null 2>&1 || hyprctl dispatch centerwindow 1
+fi

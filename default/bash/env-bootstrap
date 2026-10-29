@@ -7,12 +7,14 @@
 # /etc/omarchy.conf is written by omarchy-dev-link and reset by
 # omarchy-dev-unlink. When absent, force the packaged default instead of
 # preserving a stale inherited value.
-if [ -f /etc/omarchy.conf ]; then
+if [ -f /etc/void.conf ]; then
+  . /etc/void.conf
+elif [ -f /etc/omarchy.conf ]; then
   . /etc/omarchy.conf
-  : "${OMARCHY_PATH:=/usr/share/omarchy}"
-else
-  OMARCHY_PATH=/usr/share/omarchy
 fi
+: "${VOID_PATH:=/usr/share/void}"
+: "${OMARCHY_PATH:=$VOID_PATH}"
+export VOID_PATH
 export OMARCHY_PATH
 
 # Only prepend in dev-link mode. On a production install, the binaries are

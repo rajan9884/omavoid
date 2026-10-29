@@ -17,7 +17,7 @@ import "Numbers.js" as Numbers
 QtObject {
   id: root
 
-  readonly property string omarchyPath: Quickshell.env("OMARCHY_PATH")
+  readonly property string omarchyPath: Quickshell.env("VOID_PATH") || Quickshell.env("OMARCHY_PATH") || "/usr/share/void"
   readonly property string configHome: Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")
 
   readonly property string language: languageCode(languageFile.text())

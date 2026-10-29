@@ -1,7 +1,7 @@
 -- Custom user overrides for Omarchy Quattro 4.0 keybindings
 
 -- Toggle small centered floating window (Super + T)
-o.rebind("SUPER + T", "Toggle floating window", "omarchy-toggle-floating-centered")
+o.rebind("SUPER + T", "Toggle floating window", "void-toggle-floating-centered")
 
 -- Background switcher (Super + Ctrl + Space / Super + Ctrl + W)
 o.rebind("SUPER + CTRL + SPACE", "Background switcher", { menu = "background" })
@@ -16,7 +16,7 @@ o.rebind("SUPER + SHIFT + ALT + M", "Music TUI", { tui = "cliamp", focus = true 
 
 -- File manager: bind to yazi TUI instead of nautilus
 o.rebind("SUPER + SHIFT + F", "File manager", { tui = "yazi", focus = true })
-o.rebind("SUPER + ALT + SHIFT + F", "File manager (cwd)", { omarchy = "nautilus-cwd" })
+o.rebind("SUPER + ALT + SHIFT + F", "File manager (cwd)", { void = "nautilus-cwd" })
 
 -- Unbind removed apps, calculators, web apps, and dictation
 hl.unbind("SUPER + SHIFT + SLASH")       -- 1Password

@@ -1,5 +1,5 @@
 # Omarchy environment (OMARCHY_PATH + PATH), needed even for non-interactive shells
-[[ -r /usr/share/omarchy/default/bash/env-bootstrap ]] && source /usr/share/omarchy/default/bash/env-bootstrap
+[[ -r $VOID_PATH/default/bash/env-bootstrap ]] && source $VOID_PATH/default/bash/env-bootstrap
 
 # If not running interactively, don't do anything else (leave this above the rc source)
 [[ $- != *i* ]] && return

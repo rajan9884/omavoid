@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # QUATTRO SHELL SUPERVISOR & LAUNCHER FOR VOID LINUX
-# Launches and supervises the authentic Quickshell Omarchy Quattro Desktop
+# Launches and supervises the authentic Quickshell Void Quattro Desktop
 # ==============================================================================
 set -u
 
-export OMARCHY_PATH="${OMARCHY_PATH:-/usr/share/omarchy}"
+export VOID_PATH="${VOID_PATH:-${OMARCHY_PATH:-/usr/share/void}}"
+export OMARCHY_PATH="$VOID_PATH"
 export QS_DISABLE_FILE_WATCHER=1
 export QS_NO_RELOAD_POPUP=1
 
@@ -18,16 +19,17 @@ fi
 
 # Clean up stale locks or sockets
 pkill -x quickshell 2>/dev/null || true
-rm -f "$runtime_dir"/omarchy-shell-*.sock 2>/dev/null || true
+rm -f "$runtime_dir"/omarchy-shell-*.sock "$runtime_dir"/void-shell-*.sock 2>/dev/null || true
 sleep 0.3
 
-# Choose shell root: prefer user ~/.config/quickshell, fallback to /usr/share/omarchy/shell
+# Choose shell root: prefer user ~/.config/quickshell, fallback to /usr/share/void/shell
 SHELL_PATH="$HOME/.config/quickshell"
-if [ ! -f "$SHELL_PATH/shell.qml" ] && [ -f "$OMARCHY_PATH/shell/shell.qml" ]; then
-    SHELL_PATH="$OMARCHY_PATH/shell"
+if [ ! -f "$SHELL_PATH/shell.qml" ] && [ -f "$VOID_PATH/shell/shell.qml" ]; then
+    SHELL_PATH="$VOID_PATH/shell"
 fi
 
-startup_bg=$(readlink -f "$HOME/.local/state/omarchy/current/background" 2>/dev/null || echo "")
+startup_bg=$(readlink -f "$HOME/.local/state/void/current/background" 2>/dev/null || readlink -f "$HOME/.local/state/omarchy/current/background" 2>/dev/null || echo "")
+export VOID_STARTUP_BACKGROUND="$startup_bg"
 export OMARCHY_STARTUP_BACKGROUND="$startup_bg"
 
 while true; do

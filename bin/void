@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Void Linux Quattro Desktop CLI entrypoint
+# Usage: void <command> [args...]
+# ==============================================================================
+
+set -euo pipefail
+
+export VOID_PATH="${VOID_PATH:-${OMARCHY_PATH:-/usr/share/void}}"
+export OMARCHY_PATH="$VOID_PATH"
+
+if [[ $# -eq 0 ]] || [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]] || [[ "$1" == "help" ]]; then
+  cat <<'EOF'
+Void Linux Quattro Desktop CLI
+
+Usage:
+  void <command> [arguments...]
+
+Common Commands:
+  void menu                    Open application / system menu
+  void theme                   Open theme switcher
+  void theme set <name>        Apply specific theme
+  void audio                   Audio output / volume controls
+  void shell                   Send IPC call to Quickshell
+  void toggle <feature>        Toggle animations, bar, etc.
+  void capture <screenshot|region|qr> Capture tools
+  void lock                    Lock session
+  void bar                     Bar controls
+
+Direct executables are also available as `void-<command>` (e.g. `void-menu`).
+EOF
+  exit 0
+fi
+
+cmd="$1"
+shift
+
+# Direct matching
+if command -v "void-$cmd" >/dev/null 2>&1; then
+  exec "void-$cmd" "$@"
+fi
+
+# Fallback aliases
+case "$cmd" in
+  theme)
+    if [[ $# -eq 0 ]]; then
+      exec void-theme-switcher
+    elif [[ "$1" == "set" ]]; then
+      shift
+      exec void-theme-set "$@"
+    else
+      exec void-theme-switcher "$@"
+    fi
+    ;;
+  audio)
+    exec void-audio-output-volume "$@"
+    ;;
+  lock)
+    exec void-system-lock "$@"
+    ;;
+  *)
+    echo "Unknown void command: $cmd" >&2
+    echo "Run 'void --help' for available commands." >&2
+    exit 1
+    ;;
+esac

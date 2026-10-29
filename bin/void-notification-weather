@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# omarchy:summary=Toggle the current weather panel
+
+void-shell shell toggle omarchy.weather

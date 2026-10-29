@@ -1,0 +1,118 @@
+#!/bin/bash
+
+# omarchy:summary=Log out, reboot, or shut down after closing applications
+# omarchy:args=<logout|reboot|shutdown|suspend|hibernate>
+# omarchy:examples=omarchy system logout | omarchy system reboot | omarchy system shutdown
+# omarchy:aliases=omarchy logout | omarchy reboot | omarchy shutdown
+
+usage="Usage: void-system <logout|reboot|shutdown|suspend|hibernate>"
+for arg in "$@"; do
+  case $arg in
+    -h | --help) echo "$usage"; exit 0 ;;
+  esac
+done
+if (( $# > 2 )); then
+  echo "$usage" >&2
+  exit 2
+fi
+
+action=${1:-}
+case $action in
+  logout)
+    message=$(void-i18n system.loggingOut 2>/dev/null || echo "Logging out...")
+    failed_title=$(void-i18n system.logoutFailed 2>/dev/null || echo "Logout failed")
+    failed_body=$(void-i18n system.logoutRetry 2>/dev/null || echo "Could not log out")
+    ;;
+  reboot)
+    message=$(void-i18n system.rebooting 2>/dev/null || echo "Rebooting...")
+    failed_title=$(void-i18n system.rebootFailed 2>/dev/null || echo "Reboot failed")
+    failed_body=$(void-i18n system.rebootRetry 2>/dev/null || echo "Could not reboot")
+    ;;
+  shutdown|poweroff)
+    action="shutdown"
+    message=$(void-i18n system.shuttingDown 2>/dev/null || echo "Shutting down...")
+    failed_title=$(void-i18n system.shutdownFailed 2>/dev/null || echo "Shutdown failed")
+    failed_body=$(void-i18n system.shutdownRetry 2>/dev/null || echo "Could not shut down")
+    ;;
+  suspend)
+    message="Suspending..."
+    failed_title="Suspend failed"
+    failed_body="Could not suspend"
+    ;;
+  hibernate)
+    message="Hibernating..."
+    failed_title="Hibernate failed"
+    failed_body="Could not hibernate"
+    ;;
+  *) echo "$usage" >&2; exit 2 ;;
+esac
+
+do_power_action() {
+  case $action in
+    logout)
+      # Ensure greetd takes over tty1 upon logging out if configured
+      sudo -n /usr/local/bin/void-enable-greetd 2>/dev/null || true
+      hyprctl dispatch exit 2>/dev/null || loginctl terminate-user "$USER" 2>/dev/null || exit 1
+      ;;
+    reboot)
+      sudo -n /usr/local/bin/void-enable-greetd 2>/dev/null || true
+      loginctl reboot 2>/dev/null || sudo -n reboot 2>/dev/null || exit 1
+      ;;
+    shutdown)
+      sudo -n /usr/local/bin/void-enable-greetd 2>/dev/null || true
+      loginctl poweroff 2>/dev/null || sudo -n poweroff 2>/dev/null || exit 1
+      ;;
+    suspend)
+      loginctl suspend 2>/dev/null || zzz 2>/dev/null || sudo -n zzz 2>/dev/null || exit 1
+      ;;
+    hibernate)
+      loginctl hibernate 2>/dev/null || ZZZ 2>/dev/null || sudo -n ZZZ 2>/dev/null || exit 1
+      ;;
+  esac
+}
+
+exit_session() {
+  void-osd -i "$action" -m "$message" -d 5000 2>/dev/null || true
+  if [[ $action != "logout" && $action != "suspend" ]]; then
+    void-state clear "re*-required" 2>/dev/null || true
+  fi
+
+  # For logout/reboot/shutdown, politely close apps first
+  if [[ $action =~ ^(logout|reboot|shutdown)$ ]]; then
+    timeout 2s void-hyprland-window-close-all --wait 2>/dev/null || true
+  fi
+
+  do_power_action
+}
+
+if [[ ${2:-} == "--inhibited" ]]; then
+  exit_session
+elif [[ ${2:-} == "--execute" ]]; then
+  if [[ $action == "shutdown" ]]; then
+    if command -v elogind-inhibit >/dev/null 2>&1; then
+      elogind-inhibit --what=sleep:idle:handle-lid-switch \
+        --who=Omarchy --why="Shutdown in progress" --mode=block \
+        "$0" "$action" --inhibited
+    elif command -v systemd-inhibit >/dev/null 2>&1; then
+      systemd-inhibit --what=sleep:idle:handle-lid-switch \
+        --who=Omarchy --why="Shutdown in progress" --mode=block \
+        "$0" "$action" --inhibited
+    else
+      exit_session
+    fi
+  else
+    exit_session
+  fi
+  status=$?
+  if (( status != 0 )); then
+    void-notification-send -u critical "$failed_title" "$failed_body" 2>/dev/null || true
+    exit "$status"
+  fi
+elif [[ -z ${2:-} ]]; then
+  # Detach from terminal/caller so process survives closing windows
+  nohup "$0" "$action" --execute >/dev/null 2>&1 &
+  disown
+else
+  echo "$usage" >&2
+  exit 2
+fi

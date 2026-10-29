@@ -61,7 +61,7 @@ local shell_shortcuts = nil
 local function shell_shortcut_registered(name)
   if not shell_shortcuts then
     shell_shortcuts = {}
-    local file = io.open(paths.omarchy_path .. "/default/omarchy/shortcuts", "r")
+    local file = io.open(paths.void_path .. "/default/void/shortcuts", "r")
     if file then
       for line in file:lines() do
         local kind, target = line:match("^(%a+)%s+(%S+)%s*$")
@@ -92,20 +92,20 @@ local function command_from(value, description)
     return value
   end
 
-  if value.omarchy then
-    return "omarchy-launch-" .. value.omarchy
+  if value.void or value.omarchy then
+    return "void-launch-" .. (value.void or value.omarchy)
   elseif value.menu then
-    return shell_dispatcher("menu", value.menu, "omarchy-menu toggle " .. shell_quote(value.menu))
+    return shell_dispatcher("menu", value.menu, "void-menu toggle " .. shell_quote(value.menu))
   elseif value.panel then
-    return shell_dispatcher("panel", value.panel, "omarchy-shell shell toggle " .. shell_quote(value.panel))
+    return shell_dispatcher("panel", value.panel, "void-shell shell toggle " .. shell_quote(value.panel))
   elseif value.audio then
-    return shell_dispatcher("audio", value.audio, "omarchy-audio-output-volume " .. shell_quote(value.audio))
+    return shell_dispatcher("audio", value.audio, "void-audio-output-volume " .. shell_quote(value.audio))
   elseif value.brightness then
     local step = value.brightness == "raise" and "+5%" or "5%-"
-    return shell_dispatcher("brightness", value.brightness, "omarchy-brightness-display " .. step)
+    return shell_dispatcher("brightness", value.brightness, "void-brightness-display " .. step)
   elseif value.ipc then
     local target, method = value.ipc:match("^([^.]+)%.(.+)$")
-    return shell_dispatcher("ipc", value.ipc, "omarchy-shell " .. shell_quote(target) .. " " .. shell_quote(method))
+    return shell_dispatcher("ipc", value.ipc, "void-shell " .. shell_quote(target) .. " " .. shell_quote(method))
   elseif value.focus and value.launch then
     return o.launch_sole(value.focus, value.launch)
   elseif value.launch then
@@ -118,9 +118,9 @@ local function command_from(value, description)
     end
   elseif value.tui then
     if value.focus then
-      return "omarchy-launch-or-focus-tui " .. shell_quote(value.tui)
+      return "void-launch-or-focus-tui " .. shell_quote(value.tui)
     else
-      return "omarchy-launch-tui " .. shell_quote(value.tui)
+      return "void-launch-tui " .. shell_quote(value.tui)
     end
   end
 
@@ -174,13 +174,13 @@ function o.launch_terminal()
   local function launch()
     local window = hl.get_active_window()
     if window and window.pid then
-      hl.exec_cmd("omarchy-launch-terminal --pid=" .. window.pid)
+      hl.exec_cmd("void-launch-terminal --pid=" .. window.pid)
     else
-      hl.exec_cmd("omarchy-launch-terminal")
+      hl.exec_cmd("void-launch-terminal")
     end
   end
 
-  o.bind_commands[launch] = "omarchy-launch-terminal"
+  o.bind_commands[launch] = "void-launch-terminal"
   return launch
 end
 
@@ -195,19 +195,19 @@ function o.launch_on_start(command)
 end
 
 function o.launch_webapp(url)
-  return "omarchy-launch-webapp " .. shell_quote(url)
+  return "void-launch-webapp " .. shell_quote(url)
 end
 
 function o.launch_webapp_sole(name, url)
-  return "omarchy-launch-or-focus-webapp " .. shell_quote(name) .. " " .. shell_quote(url)
+  return "void-launch-or-focus-webapp " .. shell_quote(name) .. " " .. shell_quote(url)
 end
 
 function o.launch_sole(match, command)
-  return "omarchy-launch-or-focus " .. shell_quote(match) .. " " .. shell_quote(o.launch(command))
+  return "void-launch-or-focus " .. shell_quote(match) .. " " .. shell_quote(o.launch(command))
 end
 
 function o.bind_toggle(keys, description, toggle, options)
-  o.bind(keys, description, "omarchy-toggle-" .. toggle, options)
+  o.bind(keys, description, "void-toggle-" .. toggle, options)
 end
 
 -- Bind one action to a key's press and another to its release, as for
@@ -268,7 +268,7 @@ function o.bind_hold(keys, press_description, press, release_description, releas
 end
 
 function o.notify(message)
-  return "omarchy-notification-send -u low " .. shell_quote(message)
+  return "void-notification-send -u low " .. shell_quote(message)
 end
 
 -- What makes apps float on their own account, so a floating workspace can

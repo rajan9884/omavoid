@@ -1,9 +1,10 @@
--- Hyprland bootstrap for Omarchy's Lua module path.
+-- Hyprland bootstrap for Void Lua module path.
 
 local home = os.getenv("HOME")
 local reload_prefixes = {
   "default.hypr",
   "hypr",
+  "void.current.theme",
   "omarchy.current.theme",
 }
 
@@ -29,11 +30,12 @@ for _, module in ipairs(modules_to_reload) do
 end
 
 -- Load generated state from ~/.local/state, user modules from ~/.config, and
--- Omarchy defaults from $OMARCHY_PATH.
+-- Void defaults from $VOID_PATH.
+local void_path = os.getenv("VOID_PATH") or os.getenv("OMARCHY_PATH") or "/usr/share/void"
 package.path = home
   .. "/.local/state/?.lua;"
   .. home
   .. "/.config/?.lua;"
-  .. (os.getenv("OMARCHY_PATH") or "/usr/share/omarchy")
+  .. void_path
   .. "/?.lua;"
   .. package.path

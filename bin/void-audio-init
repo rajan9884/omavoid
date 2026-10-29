@@ -70,9 +70,9 @@ if command -v pactl >/dev/null 2>&1; then
 fi
 
 # If Omarchy speaker tuning is installed, ensure its filter-chain host client is running
-tuning_conf="${XDG_CONFIG_HOME:-$HOME/.config}/pipewire/omarchy-speaker-tuning.conf"
+tuning_conf="${XDG_CONFIG_HOME:-$HOME/.config}/pipewire/void-speaker-tuning.conf"
 if [ -f "$tuning_conf" ]; then
-    if ! pgrep -u "$USER" -f "pipewire -c .*omarchy-speaker-tuning.conf" >/dev/null 2>&1; then
+    if ! pgrep -u "$USER" -f "pipewire -c .*void-speaker-tuning.conf" >/dev/null 2>&1; then
         setsid nohup /usr/bin/pipewire -c "$tuning_conf" >/dev/null 2>&1 &
         sleep 0.5
     fi
@@ -90,6 +90,6 @@ if command -v pactl >/dev/null 2>&1; then
 fi
 
 # Start dynamic jack monitor daemon in background if not already running
-if ! pgrep -u "$USER" -f "python3 /usr/local/bin/omarchy-audio-jack-monitor" >/dev/null 2>&1; then
-    setsid nohup python3 /usr/local/bin/omarchy-audio-jack-monitor >/dev/null 2>&1 &
+if ! pgrep -u "$USER" -f "python3 /usr/local/bin/void-audio-jack-monitor" >/dev/null 2>&1; then
+    setsid nohup python3 /usr/local/bin/void-audio-jack-monitor >/dev/null 2>&1 &
 fi

@@ -1,17 +1,19 @@
--- Omarchy's bootstrap keeps path setup out of this user config.
+-- Void bootstrap keeps path setup out of this user config.
 local user = os.getenv("USER") or "user"
 local home = os.getenv("HOME") or ("/home/" .. user)
 local current_path = os.getenv("PATH") or "/usr/local/bin:/usr/bin:/bin"
-local full_path = home .. "/.local/bin:/usr/share/omarchy/bin:" .. current_path
+local void_path = os.getenv("VOID_PATH") or os.getenv("OMARCHY_PATH") or "/usr/share/void"
+local full_path = home .. "/.local/bin:" .. void_path .. "/bin:" .. current_path
 hl.env("PATH", full_path)
-hl.env("OMARCHY_PATH", "/usr/share/omarchy")
+hl.env("VOID_PATH", void_path)
+hl.env("OMARCHY_PATH", void_path)
 
-dofile((os.getenv("OMARCHY_PATH") or "/usr/share/omarchy") .. "/default/hypr/bootstrap.lua")
+dofile(void_path .. "/default/hypr/bootstrap.lua")
 
--- Load Omarchy defaults.
-require("default.hypr.omarchy")
+-- Load Void defaults.
+require("default.hypr.void")
 
--- Personal overrides loaded after Omarchy's defaults.
+-- Personal overrides loaded after Void defaults.
 require("hypr.monitors")
 require("hypr.input")
 require("hypr.bindings")

@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# omarchy:summary=Toggle a full screen desktop: hide the top bar and remove the window gaps together
+# omarchy:args=[toggle|on|off]
+# omarchy:examples=omarchy toggle fullscreen desktop | omarchy toggle fullscreen desktop off | omarchy toggle fullscreen desktop on
+
+ACTION="${1:-toggle}"
+
+case $ACTION in
+  toggle|"")
+    # Only leave full screen when both halves are already in it, so a lone bar
+    # or a lone gap toggle is pulled into line rather than flipped away.
+    if void-toggle-enabled bar-off && void-hyprland-toggle-enabled window-no-gaps; then
+      ACTION="off"
+    else
+      ACTION="on"
+    fi
+    ;;
+  on|off) ;;
+  *)
+    echo "Usage: void-toggle-fullscreen-desktop [toggle|on|off]" >&2
+    exit 1
+    ;;
+esac
+
+void-toggle-bar "$ACTION"
+void-hyprland-toggle window-no-gaps "$ACTION"

@@ -1,6 +1,1 @@
-#!/bin/bash
-
-# omarchy:summary=Toggle notification do-not-disturb mode
-
-state=$(omarchy-shell notifications toggleDnd 2>/dev/null || echo "")
-omarchy-shell -q omarchy.indicators refresh
+void-toggle-notification-silencing

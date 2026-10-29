@@ -4,7 +4,7 @@
 STATE_DIR="/var/lib/backlight"
 USER_STATE=""
 if [ -n "${HOME:-}" ] && [ "$HOME" != "/root" ]; then
-    USER_STATE="${HOME}/.local/state/omarchy/brightness"
+    USER_STATE="${HOME}/.local/state/void/brightness"
 fi
 
 case "${1:-restore}" in

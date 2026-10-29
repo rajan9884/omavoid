@@ -11,10 +11,9 @@ hl.on("hyprland.start", function()
   -- starting session services.
   hl.exec_cmd("dbus-update-activation-environment --systemd --all")
 
-  hl.exec_cmd("omarchy-launch-shell")
-  hl.exec_cmd("omarchy-provision-first-run")
-  hl.exec_cmd("omarchy-powerprofiles-init")
-  hl.exec_cmd(o.launch("omarchy-hyprland-monitor-watch"))
+  hl.exec_cmd("void-launch-shell")
+  hl.exec_cmd("void-powerprofiles-init")
+  hl.exec_cmd(o.launch("void-hyprland-monitor-watch"))
   hl.exec_cmd(o.launch("udiskie --automount --no-notify --no-tray"))
 
   -- Start the herdr server inside the graphical session so its panes inherit
@@ -23,5 +22,5 @@ hl.on("hyprland.start", function()
   hl.exec_cmd(o.launch("herdr server"))
 
   -- Run post-boot hooks after startup config has loaded.
-  hl.exec_cmd("sleep 2 && omarchy-hook post-boot")
+  hl.exec_cmd("sleep 2 && void-hook post-boot")
 end)

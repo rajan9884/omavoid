@@ -25,6 +25,7 @@ hl.env("XDG_SESSION_DESKTOP", "Hyprland")
 hl.env("XCOMPOSEFILE", paths.home .. "/.XCompose")
 
 -- hyprctl setenv doesn't reach keybind dispatcher env; use hl.env.
+hl.env("VOID_PATH", paths.void_path)
 hl.env("OMARCHY_PATH", paths.omarchy_path)
 
 local bin_dir = paths.omarchy_path .. "/bin"

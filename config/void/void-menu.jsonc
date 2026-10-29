@@ -1,0 +1,888 @@
+{
+  "apps": {
+    "icon": "󰀻",
+    "label": "Apps",
+    "aliases": [
+      "app",
+      "applications"
+    ],
+    "provider": "apps"
+  },
+  "appearance": {
+    "icon": "󰏘",
+    "label": "Appearance",
+    "aliases": [
+      "style"
+    ]
+  },
+  "trigger": {
+    "icon": "󱓞",
+    "label": "Trigger"
+  },
+  "setup": {
+    "icon": "",
+    "label": "Setup",
+    "aliases": [
+      "settings"
+    ]
+  },
+  "install": {
+    "icon": "󰉉",
+    "label": "Install"
+  },
+  "remove": {
+    "icon": "󰭌",
+    "label": "Remove",
+    "aliases": [
+      "uninstall"
+    ]
+  },
+  "system": {
+    "icon": "",
+    "label": "System",
+    "aliases": [
+      "power-menu"
+    ]
+  },
+  "system.screensaver": {
+    "icon": "󱄄",
+    "label": "Screensaver",
+    "action": "void-launch-screensaver force"
+  },
+  "system.lock": {
+    "icon": "",
+    "label": "Lock",
+    "action": "void-system-lock"
+  },
+  "system.suspend": {
+    "icon": "󰒲",
+    "label": "Suspend",
+    "when": "! void-toggle-enabled suspend-off && ! void-sleep-disabled",
+    "action": "void-system suspend"
+  },
+  "system.hibernate": {
+    "icon": "󰤁",
+    "label": "Hibernate",
+    "when": "void-hibernation-available && ! void-sleep-disabled",
+    "action": "void-system hibernate"
+  },
+  "system.logout": {
+    "icon": "󰍃",
+    "label": "Logout",
+    "action": "void-system logout"
+  },
+  "system.reboot": {
+    "icon": "󰜉",
+    "label": "Reboot",
+    "action": "void-system reboot"
+  },
+  "system.shutdown": {
+    "icon": "󰐥",
+    "label": "Shutdown",
+    "action": "void-system shutdown"
+  },
+  "appearance.theme": {
+    "icon": "󰸌",
+    "label": "Theme",
+    "aliases": [
+      "theme",
+      "themes"
+    ],
+    "action": "void-shell shell summon omarchy.image-picker '{\"source\":\"themes\"}'"
+  },
+  "appearance.background": {
+    "icon": "",
+    "label": "Background",
+    "aliases": [
+      "background",
+      "wallpaper"
+    ],
+    "action": "background=$(void-theme-bg-switcher); [[ -n $background ]] && void-theme-bg-set \"$background\""
+  },
+  "appearance.font": {
+    "icon": "",
+    "label": "Font",
+    "provider": "fonts"
+  },
+  "appearance.top-bar": {
+    "icon": "󰍜",
+    "label": "Menu Bar"
+  },
+  "appearance.top-bar.hide": {
+    "icon": "󰈉",
+    "label": "Hide Bar",
+    "when": "! void-toggle-enabled bar-off",
+    "action": "void-toggle-bar"
+  },
+  "appearance.top-bar.show": {
+    "icon": "󰈈",
+    "label": "Show Bar",
+    "when": "void-toggle-enabled bar-off",
+    "action": "void-toggle-bar"
+  },
+  "appearance.top-bar.position": {
+    "icon": "",
+    "label": "Position Bar"
+  },
+  "appearance.top-bar.background": {
+    "icon": "󰂵",
+    "label": "Bar Background"
+  },
+  "appearance.top-bar.background.opaque": {
+    "icon": "󰝤",
+    "label": "Opaque Bar",
+    "checked": "[[ $(void-bar background) == \"opaque\" ]]",
+    "action": "void-bar background opaque"
+  },
+  "appearance.top-bar.background.glassy": {
+    "icon": "󰂵",
+    "label": "Glassy Bar",
+    "checked": "[[ $(void-bar background) == \"glassy\" ]]",
+    "action": "void-bar background glassy"
+  },
+  "appearance.top-bar.background.clear": {
+    "icon": "󰝣",
+    "label": "Clear Bar",
+    "checked": "[[ $(void-bar background) == \"none\" ]]",
+    "action": "void-bar background none"
+  },
+  "appearance.top-bar.indicators": {
+    "icon": "󰋽",
+    "label": "Bar Indicators"
+  },
+  "appearance.top-bar.indicators.battery-percentage-on": {
+    "icon": "󰁹",
+    "label": "Show Battery %",
+    "when": "void-hw-laptop && [[ $(void-bar get omarchy.power showPercentage) != true ]]",
+    "action": "void-shell omarchy.power togglePercentage"
+  },
+  "appearance.top-bar.indicators.battery-percentage-off": {
+    "icon": "󰁹",
+    "label": "Hide Battery %",
+    "when": "void-hw-laptop && [[ $(void-bar get omarchy.power showPercentage) == true ]]",
+    "action": "void-shell omarchy.power togglePercentage"
+  },
+  "appearance.top-bar.indicators.clock": {
+    "icon": "󰥔",
+    "label": "Clock"
+  },
+  "appearance.top-bar.indicators.clock.sunday-24h": {
+    "icon": "󰥔",
+    "label": "Sunday 14:30",
+    "when": "[[ $(void-bar position) != \"left\" && $(void-bar position) != \"right\" ]]",
+    "checked": "[[ $(void-bar get omarchy.clock format) == \"dddd HH:mm\" ]]",
+    "action": "void-bar set omarchy.clock format \"dddd HH:mm\""
+  },
+  "appearance.top-bar.indicators.clock.sunday-12h": {
+    "icon": "󰥔",
+    "label": "Sunday 2:30 PM",
+    "when": "[[ $(void-bar position) != \"left\" && $(void-bar position) != \"right\" ]]",
+    "checked": "[[ $(void-bar get omarchy.clock format) == \"dddd h:mm AP\" ]]",
+    "action": "void-bar set omarchy.clock format \"dddd h:mm AP\""
+  },
+  "appearance.top-bar.indicators.clock.sunday-seconds-24h": {
+    "icon": "󰥔",
+    "label": "Sunday 14:30:05",
+    "when": "[[ $(void-bar position) != \"left\" && $(void-bar position) != \"right\" ]]",
+    "checked": "[[ $(void-bar get omarchy.clock format) == \"dddd HH:mm:ss\" ]]",
+    "action": "void-bar set omarchy.clock format \"dddd HH:mm:ss\""
+  },
+  "appearance.top-bar.indicators.clock.sunday-seconds-12h": {
+    "icon": "󰥔",
+    "label": "Sunday 2:30:05 PM",
+    "when": "[[ $(void-bar position) != \"left\" && $(void-bar position) != \"right\" ]]",
+    "checked": "[[ $(void-bar get omarchy.clock format) == \"dddd h:mm:ss AP\" ]]",
+    "action": "void-bar set omarchy.clock format \"dddd h:mm:ss AP\""
+  },
+  "appearance.top-bar.indicators.clock.time-24h": {
+    "icon": "󰥔",
+    "label": "14:30",
+    "when": "[[ $(void-bar position) != \"left\" && $(void-bar position) != \"right\" ]]",
+    "checked": "[[ $(void-bar get omarchy.clock format) == \"HH:mm\" ]]",
+    "action": "void-bar set omarchy.clock format \"HH:mm\""
+  },
+  "appearance.top-bar.indicators.clock.time-12h": {
+    "icon": "󰥔",
+    "label": "2:30 PM",
+    "when": "[[ $(void-bar position) != \"left\" && $(void-bar position) != \"right\" ]]",
+    "checked": "[[ $(void-bar get omarchy.clock format) == \"h:mm AP\" ]]",
+    "action": "void-bar set omarchy.clock format \"h:mm AP\""
+  },
+  "appearance.top-bar.indicators.clock.date-24h": {
+    "icon": "󰥔",
+    "label": "Sun 3 May 14:30",
+    "when": "[[ $(void-bar position) != \"left\" && $(void-bar position) != \"right\" ]]",
+    "checked": "[[ $(void-bar get omarchy.clock format) == \"ddd d MMM HH:mm\" ]]",
+    "action": "void-bar set omarchy.clock format \"ddd d MMM HH:mm\""
+  },
+  "appearance.top-bar.indicators.clock.date-12h": {
+    "icon": "󰥔",
+    "label": "Sun 3 May 2:30 PM",
+    "when": "[[ $(void-bar position) != \"left\" && $(void-bar position) != \"right\" ]]",
+    "checked": "[[ $(void-bar get omarchy.clock format) == \"ddd d MMM h:mm AP\" ]]",
+    "action": "void-bar set omarchy.clock format \"ddd d MMM h:mm AP\""
+  },
+  "appearance.top-bar.indicators.clock.week": {
+    "icon": "󰥔",
+    "label": "3 May W18 2026",
+    "when": "[[ $(void-bar position) != \"left\" && $(void-bar position) != \"right\" ]]",
+    "checked": "[[ $(void-bar get omarchy.clock format) == \"d MMMM 'W'ww yyyy\" ]]",
+    "action": "void-bar set omarchy.clock format \"d MMMM 'W'ww yyyy\""
+  },
+  "appearance.top-bar.indicators.clock.iso": {
+    "icon": "󰥔",
+    "label": "2026-05-03 14:30",
+    "when": "[[ $(void-bar position) != \"left\" && $(void-bar position) != \"right\" ]]",
+    "checked": "[[ $(void-bar get omarchy.clock format) == \"yyyy-MM-dd HH:mm\" ]]",
+    "action": "void-bar set omarchy.clock format \"yyyy-MM-dd HH:mm\""
+  },
+  "appearance.top-bar.indicators.clock.stacked-24h": {
+    "icon": "󰥔",
+    "label": "14 — 30",
+    "when": "[[ $(void-bar position) == \"left\" || $(void-bar position) == \"right\" ]]",
+    "checked": "[[ $(void-bar get omarchy.clock verticalFormat) == $'HH\\n—\\nmm' ]]",
+    "action": "void-bar set omarchy.clock verticalFormat $'HH\\n—\\nmm'"
+  },
+  "appearance.top-bar.indicators.clock.stacked-12h": {
+    "icon": "󰥔",
+    "label": "2 — 30 PM",
+    "when": "[[ $(void-bar position) == \"left\" || $(void-bar position) == \"right\" ]]",
+    "checked": "[[ $(void-bar get omarchy.clock verticalFormat) == $'h\\n—\\nmm\\nAP' ]]",
+    "action": "void-bar set omarchy.clock verticalFormat $'h\\n—\\nmm\\nAP'"
+  },
+  "appearance.top-bar.indicators.clock.stacked-date": {
+    "icon": "󰥔",
+    "label": "03 May W18 '26",
+    "when": "[[ $(void-bar position) == \"left\" || $(void-bar position) == \"right\" ]]",
+    "checked": "[[ $(void-bar get omarchy.clock verticalFormat) == $'dd\\nMMM\\n\\'W\\'ww\\n\\'\\'yy' ]]",
+    "action": "void-bar set omarchy.clock verticalFormat $'dd\\nMMM\\n\\'W\\'ww\\n\\'\\'yy'"
+  },
+  "appearance.top-bar.indicators.clock.stacked-time": {
+    "icon": "󰥔",
+    "label": "14 30",
+    "when": "[[ $(void-bar position) == \"left\" || $(void-bar position) == \"right\" ]]",
+    "checked": "[[ $(void-bar get omarchy.clock verticalFormat) == $'HH\\nmm' ]]",
+    "action": "void-bar set omarchy.clock verticalFormat $'HH\\nmm'"
+  },
+  "appearance.top-bar.position.top": {
+    "icon": "󰁝",
+    "label": "Top Bar",
+    "action": "void-bar position top"
+  },
+  "appearance.top-bar.position.bottom": {
+    "icon": "󰁅",
+    "label": "Bottom Bar",
+    "action": "void-bar position bottom"
+  },
+  "appearance.top-bar.position.left": {
+    "icon": "󰁍",
+    "label": "Left Bar",
+    "action": "void-bar position left"
+  },
+  "appearance.top-bar.position.right": {
+    "icon": "󰁔",
+    "label": "Right Bar",
+    "action": "void-bar position right"
+  },
+  "appearance.windows": {
+    "icon": "󰖲",
+    "label": "Windows"
+  },
+  "appearance.windows.gaps-on": {
+    "icon": "",
+    "label": "Window Gaps On",
+    "when": "void-hyprland-toggle-enabled window-no-gaps",
+    "action": "void-hyprland-window-gaps-toggle"
+  },
+  "appearance.windows.gaps-off": {
+    "icon": "",
+    "label": "Window Gaps Off",
+    "when": "! void-hyprland-toggle-enabled window-no-gaps",
+    "action": "void-hyprland-window-gaps-toggle"
+  },
+  "appearance.windows.corners": {
+    "icon": "󰘇",
+    "label": "Window Corners"
+  },
+  "appearance.windows.corners.theme": {
+    "icon": "󰏘",
+    "label": "Theme Corners",
+    "checked": "[[ $(void-hyprland-corners) == \"theme\" ]]",
+    "action": "void-hyprland-corners theme"
+  },
+  "appearance.windows.corners.sharp": {
+    "icon": "󰝣",
+    "label": "Sharp Corners",
+    "checked": "[[ $(void-hyprland-corners) == \"sharp\" ]]",
+    "action": "void-hyprland-corners sharp"
+  },
+  "appearance.windows.corners.rounded": {
+    "icon": "󰘇",
+    "label": "Rounded Corners",
+    "checked": "[[ $(void-hyprland-corners) == \"rounded\" ]]",
+    "action": "void-hyprland-corners rounded"
+  },
+  "appearance.windows.transparency": {
+    "icon": "󰂵",
+    "label": "Window Opacity"
+  },
+  "appearance.windows.transparency.opaque": {
+    "icon": "󰝤",
+    "label": "Opaque Windows",
+    "checked": "[[ $(void-hyprland-window-transparency) == \"opaque\" ]]",
+    "action": "void-hyprland-window-transparency opaque"
+  },
+  "appearance.windows.transparency.transparent": {
+    "icon": "󰝣",
+    "label": "Transparent Windows",
+    "checked": "[[ $(void-hyprland-window-transparency) == \"transparent\" ]]",
+    "action": "void-hyprland-window-transparency transparent"
+  },
+  "appearance.windows.transparency.glassy": {
+    "icon": "󰂵",
+    "label": "Glassy Windows",
+    "checked": "[[ $(void-hyprland-window-transparency) == \"glassy\" ]]",
+    "action": "void-hyprland-window-transparency glassy"
+  },
+  "appearance.windows.one-window-ratio-on": {
+    "icon": "",
+    "label": "1-Window Ratio On",
+    "when": "! void-hyprland-toggle-enabled single-window-aspect-ratio",
+    "action": "void-hyprland-window-single-square-aspect-toggle"
+  },
+  "appearance.windows.one-window-ratio-off": {
+    "icon": "",
+    "label": "1-Window Ratio Off",
+    "when": "void-hyprland-toggle-enabled single-window-aspect-ratio",
+    "action": "void-hyprland-window-single-square-aspect-toggle"
+  },
+  "appearance.branding": {
+    "icon": "",
+    "iconFont": "omarchy",
+    "label": "Branding"
+  },
+  "appearance.branding.screensaver": {
+    "icon": "󱄄",
+    "label": "Screensaver"
+  },
+  "appearance.branding.screensaver.text": {
+    "icon": "",
+    "label": "Edit Text",
+    "action": "void-branding-screensaver text"
+  },
+  "appearance.branding.screensaver.image": {
+    "icon": "",
+    "label": "Set From Image",
+    "action": "void-branding-screensaver image"
+  },
+  "appearance.branding.screensaver.default": {
+    "icon": "",
+    "label": "Restore Default",
+    "action": "void-branding-screensaver reset"
+  },
+  "appearance.dock": {
+    "icon": "󱂩",
+    "label": "Dock",
+    "when": "[[ $(void-hyprland-workspace-layout-current) == \"floating\" ]]"
+  },
+  "appearance.dock.autohide": {
+    "icon": "󰈉",
+    "label": "Auto-hide Dock",
+    "when": "[[ $(void-dock autohide) == \"off\" ]]",
+    "action": "void-dock autohide on"
+  },
+  "appearance.dock.always-on": {
+    "icon": "󰈈",
+    "label": "Always-on Dock",
+    "when": "[[ $(void-dock autohide) == \"on\" ]]",
+    "action": "void-dock autohide off"
+  },
+  "appearance.dock.position": {
+    "icon": "",
+    "label": "Dock Position"
+  },
+  "appearance.dock.position.top": {
+    "icon": "󰁝",
+    "label": "Top Dock",
+    "checked": "[[ $(void-dock position) == \"top\" ]]",
+    "action": "void-dock position top"
+  },
+  "appearance.dock.position.bottom": {
+    "icon": "󰁅",
+    "label": "Bottom Dock",
+    "checked": "[[ $(void-dock position) == \"bottom\" ]]",
+    "action": "void-dock position bottom"
+  },
+  "appearance.dock.position.left": {
+    "icon": "󰁍",
+    "label": "Left Dock",
+    "checked": "[[ $(void-dock position) == \"left\" ]]",
+    "action": "void-dock position left"
+  },
+  "appearance.dock.position.right": {
+    "icon": "󰁔",
+    "label": "Right Dock",
+    "checked": "[[ $(void-dock position) == \"right\" ]]",
+    "action": "void-dock position right"
+  },
+  "appearance.workspace-layout": {
+    "icon": "󱂬",
+    "label": "Workspace Layout",
+    "title": "Default Workspace Layout"
+  },
+  "appearance.workspace-layout.dwindle": {
+    "icon": "󱓻",
+    "label": "Tiling",
+    "checked": "[[ $(void-hyprland-workspace-layout-default) == \"dwindle\" ]]",
+    "action": "void-hyprland-workspace-layout-default dwindle"
+  },
+  "appearance.workspace-layout.scrolling": {
+    "icon": "󰝥",
+    "label": "Scrolling",
+    "checked": "[[ $(void-hyprland-workspace-layout-default) == \"scrolling\" ]]",
+    "action": "void-hyprland-workspace-layout-default scrolling"
+  },
+  "appearance.workspace-layout.floating": {
+    "icon": "󰔶",
+    "label": "Floating",
+    "checked": "[[ $(void-hyprland-workspace-layout-default) == \"floating\" ]]",
+    "action": "void-hyprland-workspace-layout-default floating"
+  },
+  "appearance.animations-on": {
+    "icon": "󰗘",
+    "label": "Animations On",
+    "when": "void-hyprland-toggle-enabled no-animations",
+    "action": "void-toggle-animations"
+  },
+  "appearance.animations-off": {
+    "icon": "󰗘",
+    "label": "Animations Off",
+    "when": "! void-hyprland-toggle-enabled no-animations",
+    "action": "void-toggle-animations"
+  },
+  "appearance.unlock": {
+    "icon": "󰟵",
+    "label": "Unlock",
+    "aliases": [
+      "unlock"
+    ],
+    "action": "unlock=$(void-plymouth-switcher); if [[ $unlock == default ]]; then void-launch-floating-terminal-with-presentation void-plymouth-reset; elif [[ -n $unlock ]]; then void-launch-floating-terminal-with-presentation \"void-plymouth-set-by-theme $(printf %q \"$unlock\")\"; fi"
+  },
+  "trigger.toggle": {
+    "icon": "󰔎",
+    "label": "Toggle",
+    "aliases": [
+      "toggle",
+      "toggles"
+    ]
+  },
+  "trigger.toggle.idle-lock-on": {
+    "icon": "",
+    "label": "Stay Awake",
+    "when": "[[ ! -f ~/.local/state/void/indicators/stay-awake ]]",
+    "action": "void-toggle-idle"
+  },
+  "trigger.toggle.idle-lock-off": {
+    "icon": "",
+    "label": "Allow Sleep",
+    "when": "[[ -f ~/.local/state/void/indicators/stay-awake ]]",
+    "action": "void-toggle-idle"
+  },
+  "trigger.toggle.notifications-on": {
+    "icon": "󰂛",
+    "label": "Notifications On",
+    "when": "[[ $(void-shell notifications isDnd) == on ]]",
+    "action": "void-toggle-notification-silencing"
+  },
+  "trigger.toggle.notifications-off": {
+    "icon": "󰂛",
+    "label": "Silence Notifications",
+    "when": "[[ $(void-shell notifications isDnd) != on ]]",
+    "action": "void-toggle-notification-silencing"
+  },
+  "trigger.toggle.nightlight-on": {
+    "icon": "󰔎",
+    "label": "Nightlight On",
+    "when": "[[ $(void-toggle-nightlight --status) != *'\"enabled\":true'* ]]",
+    "action": "void-toggle-nightlight"
+  },
+  "trigger.toggle.nightlight-off": {
+    "icon": "󰔎",
+    "label": "Nightlight Off",
+    "when": "[[ $(void-toggle-nightlight --status) == *'\"enabled\":true'* ]]",
+    "action": "void-toggle-nightlight"
+  },
+  "trigger.toggle.screensaver-on": {
+    "icon": "󱄄",
+    "label": "Screensaver On",
+    "when": "void-toggle-enabled screensaver-off",
+    "action": "void-toggle-screensaver"
+  },
+  "trigger.toggle.screensaver-off": {
+    "icon": "󱄄",
+    "label": "Screensaver Off",
+    "when": "! void-toggle-enabled screensaver-off",
+    "action": "void-toggle-screensaver"
+  },
+  "trigger.toggle.crash-capture-on": {
+    "icon": "󱚡",
+    "label": "Crash Capture On",
+    "when": "void-toggle-enabled crash-capture-off",
+    "action": "void-toggle-crash-capture"
+  },
+  "trigger.toggle.crash-capture-off": {
+    "icon": "󱚡",
+    "label": "Crash Capture Off",
+    "when": "! void-toggle-enabled crash-capture-off",
+    "action": "void-toggle-crash-capture"
+  },
+  "trigger.emoji": {
+    "icon": "",
+    "label": "Emoji",
+    "aliases": [
+      "emoji",
+      "emojis"
+    ],
+    "action": "void-menu-emoji"
+  },
+  "trigger.clipboard-history": {
+    "icon": "󰅇",
+    "label": "Clipboard History",
+    "action": "void-shell shell summon omarchy.clipboard"
+  },
+  "trigger.reminder": {
+    "icon": "󰢌",
+    "label": "Reminder",
+    "aliases": [
+      "reminder"
+    ]
+  },
+  "trigger.capture": {
+    "icon": "",
+    "label": "Capture",
+    "aliases": [
+      "capture",
+      "screenshot",
+      "screenrecord",
+      "screen-record",
+      "screenrecording"
+    ]
+  },
+  "trigger.capture.screenshot": {
+    "icon": "",
+    "label": "Screenshot",
+    "action": "void-capture-screenshot"
+  },
+  "trigger.capture.screenrecord.stop": {
+    "icon": "",
+    "label": "Stop Screenrecording",
+    "when": "void-capture-screenrecording --status",
+    "action": "void-capture-screenrecording --stop-recording"
+  },
+  "trigger.capture.screenrecord": {
+    "icon": "",
+    "label": "Screenrecord"
+  },
+  "trigger.capture.text": {
+    "icon": "󰴑",
+    "label": "Text",
+    "action": "void-capture-text"
+  },
+  "trigger.capture.qr": {
+    "icon": "󰐲",
+    "label": "QR Code",
+    "action": "void-capture-qr"
+  },
+  "trigger.capture.color": {
+    "icon": "󰃉",
+    "label": "Color",
+    "action": "pkill hyprpicker || hyprpicker -a"
+  },
+  "trigger.capture.screenrecord.no-audio": {
+    "icon": "",
+    "label": "With no audio",
+    "action": "void-capture-screenrecording"
+  },
+  "trigger.capture.screenrecord.desktop-audio": {
+    "icon": "",
+    "label": "With desktop audio",
+    "action": "void-capture-screenrecording --with-desktop-audio"
+  },
+  "trigger.capture.screenrecord.microphone": {
+    "icon": "",
+    "label": "With desktop + microphone audio",
+    "action": "void-capture-screenrecording --with-desktop-audio --with-microphone-audio"
+  },
+  "trigger.capture.screenrecord.webcam": {
+    "icon": "",
+    "label": "With desktop + microphone audio + webcam",
+    "when": "void-hw-webcam",
+    "action": "void-capture-screenrecording-with-webcam"
+  },
+  "trigger.transcode": {
+    "icon": "󰧸",
+    "label": "Transcode",
+    "action": "void-transcode"
+  },
+  "trigger.share": {
+    "icon": "",
+    "label": "Share",
+    "aliases": [
+      "share"
+    ]
+  },
+  "trigger.hardware": {
+    "icon": "",
+    "label": "Hardware",
+    "aliases": [
+      "hardware",
+      "hw"
+    ]
+  },
+  "trigger.tests": {
+    "icon": "󰓅",
+    "label": "Speed Test"
+  },
+  "trigger.hardware.laptop-display-on": {
+    "icon": "󰛧",
+    "label": "Laptop Display On",
+    "when": "void-hw-laptop && void-hyprland-toggle-enabled internal-monitor-disable",
+    "action": "void-hyprland-monitor-internal toggle"
+  },
+  "trigger.hardware.laptop-display-off": {
+    "icon": "󰛧",
+    "label": "Laptop Display Off",
+    "when": "void-hw-laptop && ! void-hyprland-toggle-enabled internal-monitor-disable",
+    "action": "void-hyprland-monitor-internal toggle"
+  },
+  "trigger.hardware.mirror-display-on": {
+    "icon": "󰍹",
+    "label": "Display Mirroring On",
+    "when": "void-hw-laptop && ! void-hyprland-toggle-enabled internal-monitor-mirror",
+    "action": "void-hyprland-monitor-internal-mirror toggle"
+  },
+  "trigger.hardware.mirror-display-off": {
+    "icon": "󰍹",
+    "label": "Display Mirroring Off",
+    "when": "void-hw-laptop && void-hyprland-toggle-enabled internal-monitor-mirror",
+    "action": "void-hyprland-monitor-internal-mirror toggle"
+  },
+  "trigger.hardware.hybrid-gpu-on": {
+    "icon": "",
+    "label": "Switch to Hybrid GPU",
+    "when": "void-hw-hybrid-gpu && ! grep -q '\"mode\": \"Hybrid\"' /etc/supergfxd.conf",
+    "action": "void-launch-floating-terminal-with-presentation void-toggle-hybrid-gpu"
+  },
+  "trigger.hardware.hybrid-gpu-off": {
+    "icon": "",
+    "label": "Switch to Integrated GPU",
+    "when": "void-hw-hybrid-gpu && grep -q '\"mode\": \"Hybrid\"' /etc/supergfxd.conf",
+    "action": "void-launch-floating-terminal-with-presentation void-toggle-hybrid-gpu"
+  },
+  "trigger.hardware.touchpad-on": {
+    "icon": "󰟸",
+    "label": "Enable Touchpad",
+    "when": "void-hw-touchpad && [[ -f ~/.local/state/void/toggles/hypr/touchpad-disabled-name ]]",
+    "action": "void-toggle-touchpad"
+  },
+  "trigger.hardware.touchpad-off": {
+    "icon": "󰟸",
+    "label": "Disable Touchpad",
+    "when": "void-hw-touchpad && [[ ! -f ~/.local/state/void/toggles/hypr/touchpad-disabled-name ]]",
+    "action": "void-toggle-touchpad"
+  },
+  "trigger.hardware.touchpad-haptics": {
+    "icon": "󰌌",
+    "label": "Touchpad Haptics"
+  },
+  "trigger.hardware.touchpad-haptics.low": {
+    "icon": "󰌌",
+    "label": "low",
+    "when": "void-hw-dell-xps-haptic-touchpad && void-cmd-present dell-xps-touchpad-haptics",
+    "checked": "[[ \"$(dell-xps-touchpad-haptics get)\" == \"low\" ]]",
+    "action": "dell-xps-touchpad-haptics set low"
+  },
+  "trigger.hardware.touchpad-haptics.mid": {
+    "icon": "󰌌",
+    "label": "mid",
+    "when": "void-hw-dell-xps-haptic-touchpad && void-cmd-present dell-xps-touchpad-haptics",
+    "checked": "[[ \"$(dell-xps-touchpad-haptics get)\" == \"mid\" ]]",
+    "action": "dell-xps-touchpad-haptics set mid"
+  },
+  "trigger.hardware.touchpad-haptics.high": {
+    "icon": "󰌌",
+    "label": "high",
+    "when": "void-hw-dell-xps-haptic-touchpad && void-cmd-present dell-xps-touchpad-haptics",
+    "checked": "[[ \"$(dell-xps-touchpad-haptics get)\" == \"high\" ]]",
+    "action": "dell-xps-touchpad-haptics set high"
+  },
+  "trigger.hardware.touchscreen-on": {
+    "icon": "󰆽",
+    "label": "Enable Touchscreen",
+    "when": "void-hw-touchscreen && [[ -f ~/.local/state/void/toggles/hypr/touchscreen-disabled-name ]]",
+    "action": "void-toggle-touchscreen"
+  },
+  "trigger.hardware.touchscreen-off": {
+    "icon": "󰆽",
+    "label": "Disable Touchscreen",
+    "when": "void-hw-touchscreen && [[ ! -f ~/.local/state/void/toggles/hypr/touchscreen-disabled-name ]]",
+    "action": "void-toggle-touchscreen"
+  },
+  "trigger.reminder.set": {
+    "icon": "󰢌",
+    "label": "Set one",
+    "aliases": [
+      "reminder-set",
+      "remind"
+    ],
+    "action": "void-reminder -i"
+  },
+  "trigger.reminder.show": {
+    "icon": "󰢌",
+    "label": "Show all",
+    "action": "void-reminder show"
+  },
+  "trigger.reminder.clear": {
+    "icon": "󰢌",
+    "label": "Clear all",
+    "action": "void-reminder clear"
+  },
+  "trigger.share.clipboard": {
+    "icon": "",
+    "label": "Clipboard",
+    "action": "void-menu-share clipboard"
+  },
+  "trigger.share.file": {
+    "icon": "",
+    "label": "File",
+    "action": "void-menu-share file"
+  },
+  "trigger.share.folder": {
+    "icon": "",
+    "label": "Folder",
+    "action": "void-menu-share folder"
+  },
+  "trigger.share.receive": {
+    "icon": "󰥦",
+    "label": "Receive",
+    "action": "uwsm-app -- localsend"
+  },
+  "trigger.tests.network-speedtest": {
+    "icon": "󰓅",
+    "label": "Network Speed Test",
+    "action": "void-shell shell summon omarchy.speedtest"
+  },
+  "trigger.tests.disk-speedtest": {
+    "icon": "󰋊",
+    "label": "Disk Speed Test",
+    "action": "void-shell shell summon omarchy.disk-speedtest"
+  },
+  "setup.monitors": {
+    "icon": "󰍹",
+    "label": "Monitors",
+    "action": "void-launch-config-editor \"$HOME/.config/hypr/monitors.lua\""
+  },
+  "setup.keybindings": {
+    "icon": "",
+    "label": "Keybindings",
+    "when": "[[ -f ~/.config/hypr/bindings.lua ]]",
+    "action": "void-launch-config-editor \"$HOME/.config/hypr/bindings.lua\""
+  },
+  "setup.input": {
+    "icon": "",
+    "label": "Input",
+    "when": "[[ -f ~/.config/hypr/input.lua ]]",
+    "action": "void-launch-config-editor \"$HOME/.config/hypr/input.lua\""
+  },
+  "setup.network": {
+    "icon": "󰛳",
+    "label": "Network",
+    "aliases": [
+      "network"
+    ]
+  },
+  "setup.network.dns": {
+    "icon": "󰇖",
+    "label": "DNS",
+    "aliases": [
+      "dns"
+    ]
+  },
+  "setup.network.dns.dhcp": {
+    "icon": "󰩟",
+    "label": "DHCP",
+    "checked": "[[ \"$(void-dns)\" == \"DHCP\" ]]",
+    "action": "void-dns DHCP"
+  },
+  "setup.network.dns.cloudflare": {
+    "icon": "󰅟",
+    "label": "Cloudflare",
+    "checked": "[[ \"$(void-dns)\" == \"Cloudflare\" ]]",
+    "action": "void-dns Cloudflare"
+  },
+  "setup.network.dns.google": {
+    "icon": "󰊭",
+    "label": "Google",
+    "checked": "[[ \"$(void-dns)\" == \"Google\" ]]",
+    "action": "void-dns Google"
+  },
+  "setup.network.dns.custom": {
+    "icon": "",
+    "label": "Custom",
+    "checked": "[[ \"$(void-dns)\" == \"Custom\" ]]",
+    "action": "void-launch-floating-terminal-with-presentation 'void-dns Custom'"
+  },
+  "setup.network.qr": {
+    "icon": "󰐲",
+    "label": "QR Code",
+    "aliases": [
+      "wifi-qr"
+    ],
+    "when": "void-network-wifi-connected",
+    "action": "void-shell shell summon omarchy.wifiqr"
+  },
+  "setup.config": {
+    "icon": "",
+    "label": "Config"
+  },
+  "setup.config.git": {
+    "icon": "",
+    "label": "Git",
+    "action": "void-launch-floating-terminal-with-presentation void-setup-git"
+  },
+  "setup.config.hyprland": {
+    "icon": "",
+    "label": "Hyprland",
+    "action": "void-launch-config-editor \"$HOME/.config/hypr/hyprland.conf\""
+  },
+  "setup.config.hyprsunset": {
+    "icon": "",
+    "label": "Hyprsunset",
+    "action": "void-launch-config-editor ~/.config/hypr/hyprsunset.conf && void-restart-hyprsunset"
+  },
+  "setup.config.xcompose": {
+    "icon": "󰞅",
+    "label": "XCompose",
+    "action": "void-launch-config-editor ~/.XCompose && void-restart-xcompose"
+  },
+  "install.package": {
+    "icon": "",
+    "label": "Package",
+    "action": "xdg-terminal-exec --app-id=org.void.terminal void-pkg-install"
+  },
+  "install.webapp": {
+    "icon": "",
+    "label": "Web App",
+    "action": "void-launch-floating-terminal-with-presentation void-webapp-install"
+  },
+  "remove.package": {
+    "icon": "",
+    "label": "Package",
+    "action": "xdg-terminal-exec --app-id=org.void.terminal void-pkg-remove"
+  },
+  "remove.webapp": {
+    "icon": "",
+    "label": "Web App",
+    "action": "void-webapp-remove"
+  }
+}

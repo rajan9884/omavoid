@@ -2,7 +2,7 @@
 -- shell-wide bar / menu / popouts are layer-shell.
 
 -- Keep the bar instant: no layer-shell fade/slide animation.
-hl.layer_rule({ match = { namespace = "omarchy-bar" }, no_anim = true, animation = "none" })
+hl.layer_rule({ match = { namespace = "omarchy-bar|void-bar" }, no_anim = true, animation = "none" })
 
 -- Launcher, image selector, emojis, clipboard overlays, the OSD, reminders, the
 -- Wi-Fi QR code and keyboard-driven panels should pop without compositor layer
