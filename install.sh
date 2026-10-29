@@ -301,9 +301,9 @@ SHIM
     if [ -d "${REPO_DIR}/bin" ]; then
         for b in "${REPO_DIR}"/bin/*; do
             if [ -f "$b" ]; then
-                sudo cp -f "$b" /usr/share/omarchy/bin/
-                sudo chmod +x "/usr/share/omarchy/bin/$(basename "$b")"
-                sudo ln -sf "/usr/share/omarchy/bin/$(basename "$b")" "/usr/local/bin/$(basename "$b")"
+                sudo cp -f "$b" /usr/local/bin/
+                sudo chmod +x "/usr/local/bin/$(basename "$b")"
+                sudo ln -sf "/usr/local/bin/$(basename "$b")" "/usr/share/omarchy/bin/$(basename "$b")"
             fi
         done
     fi
@@ -579,6 +579,11 @@ setup_runit_and_groups() {
     sudo mkdir -p /etc/alsa/conf.d
     [ -f /usr/share/alsa/alsa.conf.d/50-pipewire.conf ] && sudo ln -sf /usr/share/alsa/alsa.conf.d/50-pipewire.conf /etc/alsa/conf.d/
     [ -f /usr/share/alsa/alsa.conf.d/99-pipewire-default.conf ] && sudo ln -sf /usr/share/alsa/alsa.conf.d/99-pipewire-default.conf /etc/alsa/conf.d/
+
+    # Ensure Headphones are always available on Intel SOF Realtek ALC256 (prevent jack detection pin dropout)
+    if [ -f /usr/share/alsa/ucm2/HDA/HiFi-analog.conf ]; then
+        sudo sed -i 's/^[[:space:]]*JackControl "\${var:hpjack}"/# JackControl "\${var:hpjack}"/' /usr/share/alsa/ucm2/HDA/HiFi-analog.conf
+    fi
 
     # Udev sound hardware permissions for audio group (overrides elogind uaccess race condition)
     sudo mkdir -p /etc/udev/rules.d
