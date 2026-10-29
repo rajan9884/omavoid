@@ -618,12 +618,75 @@ deploy_dotfiles() {
     log_ok "Dotfiles deployed to ${TARGET_HOME}."
 }
 
+# 7. Limine Multi-Boot Integration
+setup_limine_bootloader() {
+    log_info "Configuring Limine multi-boot integration..."
+    TARGET_PART="/dev/nvme0n1p6"
+    MOUNT_DIR="/run/media/${TARGET_USER}/OMARCHY_EFI"
+    MOUNTED_BY_SCRIPT=0
+
+    if [ -b "$TARGET_PART" ]; then
+        if ! mountpoint -q "$MOUNT_DIR"; then
+            sudo mkdir -p "$MOUNT_DIR"
+            sudo mount "$TARGET_PART" "$MOUNT_DIR" 2>/dev/null && MOUNTED_BY_SCRIPT=1
+        fi
+
+        if [ -f "$MOUNT_DIR/limine.conf" ]; then
+            sudo mkdir -p "$MOUNT_DIR/void"
+            for img in /boot/vmlinuz-*; do
+                [ -f "$img" ] && sudo cp -f "$img" "$MOUNT_DIR/void/"
+            done
+            for initrd in /boot/initramfs-*.img; do
+                [ -f "$initrd" ] && sudo cp -f "$initrd" "$MOUNT_DIR/void/"
+            done
+            sudo chmod 644 "$MOUNT_DIR/void/"* 2>/dev/null || true
+
+            sudo mkdir -p /etc/kernel.d/post-install
+            cat << 'EOF' | sudo tee /etc/kernel.d/post-install/60-limine >/dev/null
+#!/bin/sh
+VERSION="$1"
+TARGET_PART="/dev/nvme0n1p6"
+MOUNT_DIR="/run/media/rajan/OMARCHY_EFI"
+MOUNTED_BY_HOOK=0
+
+if [ -b "$TARGET_PART" ]; then
+    if ! mountpoint -q "$MOUNT_DIR"; then
+        mkdir -p "$MOUNT_DIR"
+        mount "$TARGET_PART" "$MOUNT_DIR" 2>/dev/null && MOUNTED_BY_HOOK=1
+    fi
+
+    if [ -d "$MOUNT_DIR/void" ]; then
+        [ -f "/boot/vmlinuz-${VERSION}" ] && cp -f "/boot/vmlinuz-${VERSION}" "$MOUNT_DIR/void/"
+        [ -f "/boot/initramfs-${VERSION}.img" ] && cp -f "/boot/initramfs-${VERSION}.img" "$MOUNT_DIR/void/"
+        chmod 644 "$MOUNT_DIR/void/"* 2>/dev/null || true
+    fi
+
+    if [ "$MOUNTED_BY_HOOK" -eq 1 ]; then
+        umount "$MOUNT_DIR" 2>/dev/null || true
+    fi
+fi
+EOF
+            sudo chmod 755 /etc/kernel.d/post-install/60-limine
+
+            if command -v efibootmgr >/dev/null 2>&1; then
+                sudo efibootmgr -o 0001,0003,0002 2>/dev/null || true
+            fi
+            log_ok "Limine bootloader updated with Void Linux entries."
+        fi
+
+        if [ "$MOUNTED_BY_SCRIPT" -eq 1 ]; then
+            sudo umount "$MOUNT_DIR" 2>/dev/null || true
+        fi
+    fi
+}
+
 setup_void_repos
 install_packages
 sync_upstream_omarchy
 install_void_shims
 setup_runit_and_groups
 deploy_dotfiles
+setup_limine_bootloader
 
 echo ""
 echo "======================================================================"
