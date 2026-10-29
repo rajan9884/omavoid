@@ -24,19 +24,34 @@ done
 # Clean up any stale sockets if PipeWire is not running
 if ! pgrep -u "$USER" -x pipewire >/dev/null 2>&1; then
     rm -f "$XDG_RUNTIME_DIR"/pipewire-*.lock "$XDG_RUNTIME_DIR"/pipewire-0* "$XDG_RUNTIME_DIR"/pulse/native 2>/dev/null || true
-    setsid nohup /usr/bin/pipewire >/dev/null 2>&1 &
-    sleep 0.6
+    setsid nohup /usr/bin/pipewire >/dev/null 2>&1 200>&- &
+    sleep 0.5
 fi
 
-# Ensure WirePlumber is running (started by PipeWire context.exec or standalone)
+# Ensure WirePlumber is running:
+# PipeWire spawns wireplumber via context.exec in /etc/pipewire/pipewire.conf.d/10-session-manager.conf.
+# Wait up to 3 seconds for it to appear before attempting a manual fallback start.
+for i in $(seq 1 30); do
+    if pgrep -u "$USER" -x wireplumber >/dev/null 2>&1; then
+        break
+    fi
+    sleep 0.1
+done
 if ! pgrep -u "$USER" -x wireplumber >/dev/null 2>&1; then
-    setsid nohup /usr/bin/wireplumber >/dev/null 2>&1 &
-    sleep 0.4
+    setsid nohup /usr/bin/wireplumber >/dev/null 2>&1 200>&- &
+    sleep 0.3
 fi
 
-# Ensure PipeWire-Pulse is running
+# Ensure PipeWire-Pulse is running:
+# Wait up to 2 seconds for context.exec to appear before fallback start.
+for i in $(seq 1 20); do
+    if pgrep -u "$USER" -x pipewire-pulse >/dev/null 2>&1 || pgrep -u "$USER" -f "pipewire.*pipewire-pulse.conf" >/dev/null 2>&1; then
+        break
+    fi
+    sleep 0.1
+done
 if ! pgrep -u "$USER" -x pipewire-pulse >/dev/null 2>&1 && ! pgrep -u "$USER" -f "pipewire.*pipewire-pulse.conf" >/dev/null 2>&1; then
-    setsid nohup /usr/bin/pipewire -c pipewire-pulse.conf >/dev/null 2>&1 &
+    setsid nohup /usr/bin/pipewire -c pipewire-pulse.conf >/dev/null 2>&1 200>&- &
     sleep 0.3
 fi
 
@@ -57,15 +72,15 @@ fi
 
 # Ensure default audio source is Digital Microphone if present
 if command -v wpctl >/dev/null 2>&1; then
-    dmic_id="$(wpctl status 2>/dev/null | awk '/Digital Microphone/ {gsub(/[^0-9]/, "", $1); if ($1 != "") {print $1; exit}}')"
+    dmic_id="$(timeout 2s wpctl status 2>/dev/null | awk '/Digital Microphone/ {gsub(/[^0-9]/, "", $1); if ($1 != "") {print $1; exit}}')"
     if [ -n "$dmic_id" ]; then
-        wpctl set-default "$dmic_id" >/dev/null 2>&1 || true
+        timeout 2s wpctl set-default "$dmic_id" >/dev/null 2>&1 || true
     fi
 fi
 if command -v pactl >/dev/null 2>&1; then
-    dmic_name="$(pactl list sources short 2>/dev/null | awk '/HiFi__Mic1__source/ {print $2; exit}')"
+    dmic_name="$(timeout 2s pactl list sources short 2>/dev/null | awk '/HiFi__Mic1__source/ {print $2; exit}')"
     if [ -n "$dmic_name" ]; then
-        pactl set-default-source "$dmic_name" >/dev/null 2>&1 || true
+        timeout 2s pactl set-default-source "$dmic_name" >/dev/null 2>&1 || true
     fi
 fi
 
@@ -73,23 +88,23 @@ fi
 tuning_conf="${XDG_CONFIG_HOME:-$HOME/.config}/pipewire/void-speaker-tuning.conf"
 if [ -f "$tuning_conf" ]; then
     if ! pgrep -u "$USER" -f "pipewire -c .*void-speaker-tuning.conf" >/dev/null 2>&1; then
-        setsid nohup /usr/bin/pipewire -c "$tuning_conf" >/dev/null 2>&1 &
+        setsid nohup /usr/bin/pipewire -c "$tuning_conf" >/dev/null 2>&1 200>&- &
         sleep 0.5
     fi
 fi
 
 # Ensure virtual tuning sink is unity volume and default sink is properly assigned
 if command -v pactl >/dev/null 2>&1; then
-    if pactl list sinks short 2>/dev/null | grep -q "omarchy_speaker_tuning"; then
-        pactl set-sink-volume omarchy_speaker_tuning 100% >/dev/null 2>&1 || true
-        current_sink="$(pactl get-default-sink 2>/dev/null || true)"
+    if timeout 2s pactl list sinks short 2>/dev/null | grep -q "omarchy_speaker_tuning"; then
+        timeout 2s pactl set-sink-volume omarchy_speaker_tuning 100% >/dev/null 2>&1 || true
+        current_sink="$(timeout 2s pactl get-default-sink 2>/dev/null || true)"
         if [ "$current_sink" != "omarchy_speaker_tuning" ] && [[ "$current_sink" == *"Speaker"* || "$current_sink" == "auto_null" || -z "$current_sink" ]]; then
-            pactl set-default-sink omarchy_speaker_tuning >/dev/null 2>&1 || true
+            timeout 2s pactl set-default-sink omarchy_speaker_tuning >/dev/null 2>&1 || true
         fi
     fi
 fi
 
 # Start dynamic jack monitor daemon in background if not already running
 if ! pgrep -u "$USER" -f "python3 /usr/local/bin/void-audio-jack-monitor" >/dev/null 2>&1; then
-    setsid nohup python3 /usr/local/bin/void-audio-jack-monitor >/dev/null 2>&1 &
+    setsid nohup python3 /usr/local/bin/void-audio-jack-monitor >/dev/null 2>&1 200>&- &
 fi

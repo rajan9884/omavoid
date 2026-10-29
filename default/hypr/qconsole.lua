@@ -56,12 +56,16 @@ local function cover(side, bottom)
     -- open, and the active border reads as a stray frame around a panel that
     -- is already set apart by the dimming behind it.
     no_border = true,
-
-    on_created_empty = seed,
   })
 
   return true
 end
+
+hl.on("workspace.created", function(ws)
+  if ws and ws.name == CONSOLE and ws.is_empty then
+    hl.exec_cmd(seed)
+  end
+end)
 
 -- One window reads as a console and gets the panel. A second app has turned the
 -- console into a workspace, and a workspace wants the whole width. Only tiled
