@@ -335,13 +335,27 @@ RUN
     cat <<'RC' | sudo tee /etc/rc.local >/dev/null
 #!/bin/sh
 # Ensure sound hardware permissions and ALSA state access for audio group
+(
+    for i in $(seq 1 50); do
+        if [ -e /dev/snd/controlC0 ]; then
+            chmod -R 660 /dev/snd/* 2>/dev/null
+            chgrp -R audio /dev/snd/* 2>/dev/null
+            udevadm trigger --subsystem-match=sound 2>/dev/null
+            break
+        fi
+        sleep 0.2
+    done
+    if [ -d /var/lib/alsa ]; then
+        chgrp -R audio /var/lib/alsa 2>/dev/null
+        chmod -R g+rwX /var/lib/alsa 2>/dev/null
+    fi
+    command -v alsactl >/dev/null 2>&1 && alsactl restore
+) &
+
+# Immediate pass for static nodes
 chmod -R 660 /dev/snd/* 2>/dev/null
 chgrp -R audio /dev/snd/* 2>/dev/null
-if [ -d /var/lib/alsa ]; then
-    chgrp -R audio /var/lib/alsa 2>/dev/null
-    chmod -R g+rwX /var/lib/alsa 2>/dev/null
-fi
-command -v alsactl >/dev/null 2>&1 && alsactl restore &
+
 [ -x /usr/local/bin/void-backlight ] && /usr/local/bin/void-backlight restore &
 RC
     sudo chmod +x /etc/rc.local
