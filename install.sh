@@ -42,12 +42,20 @@ echo "======================================================================"
 
 # 1. Configure Fastly CDN & Hyprland-Void XBPS Repositories
 setup_void_repos() {
-    log_info "Configuring fast Void Linux XBPS repositories..."
+    log_info "Configuring fast Void Linux XBPS repositories and kernel tracking..."
     sudo mkdir -p /etc/xbps.d
     if [ ! -f /etc/xbps.d/hyprland-void.conf ]; then
         echo "repository=https://github.com/void-land/hyprland-void-packages/releases/latest/download/" | sudo tee /etc/xbps.d/hyprland-void.conf >/dev/null
     fi
     echo "repository=https://repo-fastly.voidlinux.org/current" | sudo tee /etc/xbps.d/00-repository-main.conf >/dev/null
+
+    # Route generic kernel packages to upstream mainline series (rolling-release)
+    cat << 'EOF' | sudo tee /etc/xbps.d/kernel.conf >/dev/null
+# Route generic kernel packages to upstream mainline series
+virtualpkg=linux:linux-mainline
+virtualpkg=linux-headers:linux-mainline-headers
+EOF
+
     sudo xbps-install -Suy xbps || true
     sudo xbps-install -Sy
 }
@@ -72,12 +80,20 @@ install_packages() {
         zsh starship fzf zoxide eza bat fd ripgrep jq gum
         btop yazi lazygit calcurse neovim fastfetch git curl unzip vips ffmpegthumbnailer
         greetd tuigreet
+        linux-mainline linux-mainline-headers
         nerd-fonts-symbols-ttf font-jetbrains-mono-ttf noto-fonts-ttf noto-fonts-emoji
     )
 
     for pkg in "${CORE_PKGS[@]}"; do
         sudo xbps-install -y "$pkg" 2>/dev/null || log_warn "Optional package '$pkg' skipped."
     done
+
+    # Purge legacy LTS kernels and clean boot images
+    if xbps-query -l 2>/dev/null | grep -q 'linux6.12'; then
+        sudo xbps-remove -y -F linux6.12 2>/dev/null || true
+    fi
+    sudo vkpurge rm all 2>/dev/null || true
+    sudo update-grub 2>/dev/null || true
 
     HYPR_PKGS=(hyprland hyprpicker xdg-desktop-portal-hyprland quickshell wiremix impala bluetuith)
     for hpkg in "${HYPR_PKGS[@]}"; do
