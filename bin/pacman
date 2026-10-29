@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Compatibility shim translating pacman queries/installs to xbps on Void Linux
+set -euo pipefail
+
+cmd="${1:-}"
+shift || true
+
+case "$cmd" in
+    -Q*|-q*)
+        xbps-query -l | awk '{print $2}' | sed -E 's/-[0-9][^ ]*$//'
+        ;;
+    -S*|-s*)
+        pkgs=()
+        for arg in "$@"; do
+            [[ "$arg" == -* ]] && continue
+            pkgs+=("$arg")
+        done
+        if [ ${#pkgs[@]} -gt 0 ]; then
+            exec xbps-install -y "${pkgs[@]}"
+        fi
+        ;;
+    -R*|-r*)
+        pkgs=()
+        for arg in "$@"; do
+            [[ "$arg" == -* ]] && continue
+            pkgs+=("$arg")
+        done
+        if [ ${#pkgs[@]} -gt 0 ]; then
+            exec xbps-remove -y "${pkgs[@]}"
+        fi
+        ;;
+    *)
+        exit 0
+        ;;
+esac

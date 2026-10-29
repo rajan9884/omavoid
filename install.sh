@@ -71,13 +71,13 @@ install_packages() {
         mesa-dri vulkan-loader
         pipewire wireplumber alsa-pipewire libspa-bluetooth
         pulsemixer alsa-utils playerctl
-        NetworkManager bluez upower inotify-tools socat
+        NetworkManager bluez upower inotify-tools socat power-profiles-daemon
         foot alacritty
         wl-clipboard cliphist wtype
         grim slurp brightnessctl file imv xdg-utils psmisc
         qt6-wayland qt6-declarative qt6-svg qt6-shadertools qt6-imageformats qt6ct
         python3 fontconfig
-        zsh starship fzf zoxide eza bat fd ripgrep jq gum
+        zsh starship fzf zoxide eza bat fd ripgrep jq gum yt-dlp
         btop yazi lazygit calcurse neovim fastfetch git curl unzip vips ffmpegthumbnailer
         greetd tuigreet
         linux-mainline linux-mainline-headers
@@ -319,6 +319,13 @@ RUN
     sudo chmod 775 /var/lib/backlight 2>/dev/null || true
     cat <<'RC' | sudo tee /etc/rc.local >/dev/null
 #!/bin/sh
+# Ensure sound hardware permissions and ALSA state access for audio group
+chmod -R 660 /dev/snd/* 2>/dev/null
+chgrp -R audio /dev/snd/* 2>/dev/null
+if [ -d /var/lib/alsa ]; then
+    chgrp -R audio /var/lib/alsa 2>/dev/null
+    chmod -R g+rwX /var/lib/alsa 2>/dev/null
+fi
 command -v alsactl >/dev/null 2>&1 && alsactl restore &
 [ -x /usr/local/bin/void-backlight ] && /usr/local/bin/void-backlight restore &
 RC
@@ -432,14 +439,43 @@ SUDO
         sudo ln -snf /usr/share/omarchy/bin/omarchy-theme-set-browser-policy /usr/bin/omarchy-theme-set-browser-policy
     fi
 
-    # pacman shim for xbps queries
+    # pacman shim for xbps queries and package operations
     cat <<'SHIM' | sudo tee /usr/local/bin/pacman >/dev/null
 #!/usr/bin/env bash
-if [[ "${1:-}" == -Q* ]]; then
-    xbps-query -l | awk '{print $2}' | sed -E 's/-[0-9][^ ]*$//'
-    exit 0
-fi
-exit 0
+# Compatibility shim translating pacman queries/installs to xbps on Void Linux
+set -euo pipefail
+
+cmd="${1:-}"
+shift || true
+
+case "$cmd" in
+    -Q*|-q*)
+        xbps-query -l | awk '{print $2}' | sed -E 's/-[0-9][^ ]*$//'
+        ;;
+    -S*|-s*)
+        pkgs=()
+        for arg in "$@"; do
+            [[ "$arg" == -* ]] && continue
+            pkgs+=("$arg")
+        done
+        if [ ${#pkgs[@]} -gt 0 ]; then
+            exec xbps-install -y "${pkgs[@]}"
+        fi
+        ;;
+    -R*|-r*)
+        pkgs=()
+        for arg in "$@"; do
+            [[ "$arg" == -* ]] && continue
+            pkgs+=("$arg")
+        done
+        if [ ${#pkgs[@]} -gt 0 ]; then
+            exec xbps-remove -y "${pkgs[@]}"
+        fi
+        ;;
+    *)
+        exit 0
+        ;;
+esac
 SHIM
     sudo chmod +x /usr/local/bin/pacman
 
@@ -474,12 +510,27 @@ setup_runit_and_groups() {
     done
 
     # Enable essential runit services
-    for svc in dbus elogind seatd NetworkManager bluetoothd polkitd acpid; do
+    for svc in dbus elogind seatd NetworkManager bluetoothd polkitd acpid power-profiles-daemon; do
         if [ -d "/etc/sv/${svc}" ] && [ ! -L "/var/service/${svc}" ]; then
             sudo ln -sf "/etc/sv/${svc}" "/var/service/${svc}"
             log_ok "Enabled runit service: ${svc}"
         fi
     done
+
+    # Enable bluetoothd experimental flags for modern BLE/LE Audio profiles
+    if [ -d /etc/sv/bluetoothd ]; then
+        echo 'OPTS="-E"' | sudo tee /etc/sv/bluetoothd/conf >/dev/null
+    fi
+
+    # Configure BlueZ main.conf for automatic connection and pairing recovery
+    if [ -f /etc/bluetooth/main.conf ]; then
+        sudo sed -i 's/^#*AutoEnable *=.*/AutoEnable = true/' /etc/bluetooth/main.conf 2>/dev/null || true
+        sudo sed -i 's/^#*FastConnectable *=.*/FastConnectable = true/' /etc/bluetooth/main.conf 2>/dev/null || true
+        sudo sed -i 's/^#*JustWorksRepairing *=.*/JustWorksRepairing = always/' /etc/bluetooth/main.conf 2>/dev/null || true
+        sudo sed -i 's/^#*PairableTimeout *=.*/PairableTimeout = 0/' /etc/bluetooth/main.conf 2>/dev/null || true
+        sudo sed -i 's/^#*DiscoverableTimeout *=.*/DiscoverableTimeout = 0/' /etc/bluetooth/main.conf 2>/dev/null || true
+        sudo sed -i 's/^#*MultiProfile *=.*/MultiProfile = multiple/' /etc/bluetooth/main.conf 2>/dev/null || true
+    fi
 
     # Enable greetd display manager if installed
     if [ -d /etc/sv/greetd ] && command -v greetd >/dev/null 2>&1; then
@@ -493,17 +544,14 @@ setup_runit_and_groups() {
     [ -f /usr/share/alsa/alsa.conf.d/50-pipewire.conf ] && sudo ln -sf /usr/share/alsa/alsa.conf.d/50-pipewire.conf /etc/alsa/conf.d/
     [ -f /usr/share/alsa/alsa.conf.d/99-pipewire-default.conf ] && sudo ln -sf /usr/share/alsa/alsa.conf.d/99-pipewire-default.conf /etc/alsa/conf.d/
 
-    # Udev sound hardware permissions for audio group
+    # Udev sound hardware permissions for audio group (runs last at 99)
     sudo mkdir -p /etc/udev/rules.d
-    cat <<'UDEV' | sudo tee /etc/udev/rules.d/60-sound.rules >/dev/null
+    cat <<'UDEV' | sudo tee /etc/udev/rules.d/99-sound.rules >/dev/null
+# Guarantee audio group has read/write access to all sound hardware
 SUBSYSTEM=="sound", GROUP="audio", MODE="0660"
-KERNEL=="controlC[0-9]*", GROUP="audio", MODE="0660"
-KERNEL=="pcmC[0-9]*", GROUP="audio", MODE="0660"
-KERNEL=="hwC[0-9]*", GROUP="audio", MODE="0660"
-KERNEL=="midiC[0-9]*", GROUP="audio", MODE="0660"
-KERNEL=="timer", GROUP="audio", MODE="0660"
-KERNEL=="seq", GROUP="audio", MODE="0660"
+KERNEL=="controlC[0-9]*|pcmC[0-9]*|hwC[0-9]*|midiC[0-9]*|timer|seq", SUBSYSTEM=="sound", GROUP="audio", MODE="0660"
 UDEV
+    sudo rm -f /etc/udev/rules.d/60-sound.rules
     sudo udevadm control --reload 2>/dev/null || true
     sudo udevadm trigger --subsystem-match=sound 2>/dev/null || true
 
@@ -515,6 +563,12 @@ context.exec = [
     { path = "/usr/bin/pipewire" args = [ "-c", "pipewire-pulse.conf" ] }
 ]
 CONF
+
+    # Deploy WirePlumber configuration drop-ins
+    sudo mkdir -p /etc/wireplumber/wireplumber.conf.d
+    if [ -d "${REPO_DIR}/config/wireplumber/wireplumber.conf.d" ]; then
+        sudo cp -r "${REPO_DIR}"/config/wireplumber/wireplumber.conf.d/* /etc/wireplumber/wireplumber.conf.d/
+    fi
 }
 
 # 6. Deploy Dotfiles to Target User Home (via Symlinks)
