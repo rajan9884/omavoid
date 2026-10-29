@@ -4,7 +4,10 @@
 # omarchy:group=network
 # omarchy:args=[down|up]
 
-client=${OMARCHY_SPEEDTEST_BINARY:-/usr/lib/omarchy/speedtest}
+client=${VOID_SPEEDTEST_BINARY:-${OMARCHY_SPEEDTEST_BINARY:-/usr/lib/void/speedtest}}
+[[ -x $client ]] || client=/usr/local/bin/void-speedtest
+[[ -x $client ]] || client=$(command -v void-speedtest 2>/dev/null)
+[[ -x $client ]] || client=/usr/lib/omarchy/speedtest
 
 if (( $# != 1 )) || [[ $1 != "down" && $1 != "up" ]]; then
   echo "Usage: void-network-speedtest [down|up]" >&2

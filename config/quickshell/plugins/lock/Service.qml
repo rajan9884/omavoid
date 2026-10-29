@@ -723,7 +723,7 @@ Item {
   // Keep fprintd errors distinguishable from an explicit empty enrollment.
   Process {
     id: fingerprintCheckProc
-    command: ["bash", "-c", "if [[ -f /etc/pam.d/omarchy-lock-fingerprint ]] && command -v fprintd-list >/dev/null 2>&1; then LC_ALL=C fprintd-list \"$USER\" 2>&1; else echo no; fi"]
+    command: ["bash", "-c", "if [[ -f /etc/pam.d/void-lock-fingerprint || -f /etc/pam.d/omarchy-lock-fingerprint ]] && command -v fprintd-list >/dev/null 2>&1; then LC_ALL=C fprintd-list \"$USER\" 2>&1; else echo no; fi"]
     stdout: StdioCollector { id: fingerprintCheckStdout; waitForEnd: true }
     onExited: root.applyFingerprintProbe(fingerprintCheckStdout.text)
   }
@@ -740,7 +740,7 @@ Item {
   Process {
     id: strandedLockCheckProc
     // $PPID is this shell: a crash re-execs in place, so its pid is the one to skip.
-    command: ["bash", "-c", "omarchy-hyprland-session-lock-stranded \"$PPID\""]
+    command: ["bash", "-c", "void-hyprland-session-lock-stranded \"$PPID\""]
     onExited: function(exitCode) {
       // No output to read the lock off yet.
       if (exitCode === 2) return
@@ -755,12 +755,12 @@ Item {
 
   Process {
     id: wakeProcess
-    command: ["bash", "-c", "omarchy-system-wake"]
+    command: ["bash", "-c", "void-system-wake"]
   }
 
   Process {
     id: blankProcess
-    command: ["bash", "-c", "omarchy-brightness-keyboard off; void-brightness-display off"]
+    command: ["bash", "-c", "void-brightness-keyboard off; void-brightness-display off"]
   }
 
   Timer {

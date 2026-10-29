@@ -75,7 +75,7 @@ Item {
       }
 
       if (!nextMinutes) {
-        Quickshell.execDetached([root.omarchyPath + "/bin/omarchy-notification-send", I18n.t("reminders.invalidTitle"), I18n.t("reminders.invalidBody")])
+        Quickshell.execDetached([root.omarchyPath + "/bin/void-notification-send", I18n.t("reminders.invalidTitle"), I18n.t("reminders.invalidBody")])
         return
       }
 

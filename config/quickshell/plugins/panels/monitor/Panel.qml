@@ -314,7 +314,7 @@ Panel {
   }
 
   function setScale(scale) {
-    actionProc.command = ["bash", "-c", "omarchy-hyprland-monitor-scaling " + scale]
+    actionProc.command = ["bash", "-c", "void-hyprland-monitor-scaling " + scale]
     if (!actionProc.running) actionProc.running = true
   }
 
@@ -342,7 +342,7 @@ Panel {
   }
 
   function setTextSize(px) {
-    textScaleProc.command = ["omarchy-display-text-size", String(px)]
+    textScaleProc.command = ["void-display-text-size", String(px)]
     if (!textScaleProc.running) textScaleProc.running = true
   }
 
@@ -394,7 +394,7 @@ Panel {
 
   Process {
     id: stateProc
-    command: ["omarchy-monitor-state"]
+    command: ["void-monitor-state"]
     stdout: StdioCollector {
       waitForEnd: true
       onStreamFinished: {

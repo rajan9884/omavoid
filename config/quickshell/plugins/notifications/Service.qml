@@ -1083,7 +1083,7 @@ Item {
       else if (Markup.hostname(row.source))
         Security.openExternalUrl("https://" + Markup.hostname(row.source) + "/")
       else if (String(row.link || "")) Security.openExternalUrl(String(row.link))
-      else if (String(row.app || "")) Util.execArgv(["omarchy-hyprland-focus-app", String(row.app)])
+      else if (String(row.app || "")) Util.execArgv(["void-hyprland-focus-app", String(row.app)])
     }
     closeToast(key, "activated", instant)
   }
@@ -1309,7 +1309,7 @@ Item {
       "  if [[ -L $file ]]; then rm -f -- \"$file\"; fi\n" +
       "  if [[ -f $file ]]; then chmod 600 -- \"$file\"; elif [[ ! -e $file ]]; then : >\"$file\"; fi\n" +
       "done\n",
-      "omarchy-notifications-state", service.stateDir]
+      "void-notifications-state", service.stateDir]
     onExited: function(code) { service.storeReady = code === 0 }
   }
 

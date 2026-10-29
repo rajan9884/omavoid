@@ -85,7 +85,7 @@ QtObject {
   property FileView languageFile: FileView {
     // OMARCHY_LANGUAGE_FILE overrides the location, as it does for
     // omarchy-i18n, so tests can pin a language whatever the machine uses.
-    path: Quickshell.env("OMARCHY_LANGUAGE_FILE") || (root.configHome + "/omarchy/language")
+    path: Quickshell.env("VOID_LANGUAGE_FILE") || Quickshell.env("OMARCHY_LANGUAGE_FILE") || (root.configHome + "/void/language")
     watchChanges: true
     printErrors: false
     blockLoading: true

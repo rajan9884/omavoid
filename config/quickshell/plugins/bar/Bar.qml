@@ -804,7 +804,7 @@ Item {
     if (look !== "none") glassy = look === "glassy"
     if (look !== glassSyncedLook) {
       glassSyncedLook = look
-      Util.execDetached("omarchy-bar sync-glass")
+      Util.execDetached("void-bar sync-glass")
     }
 
     // Each widget keeps its key while it stays in the layout, wherever it
@@ -1042,9 +1042,9 @@ Item {
   }
 
   // Steps the bar background from clear to glassy to opaque and around. Through
-  // omarchy-bar, which keeps Hyprland's blur behind a glassy bar in step.
+  // void-bar, which keeps Hyprland's blur behind a glassy bar in step.
   function cycleBackground() {
-    Util.execDetached("omarchy-bar background cycle")
+    Util.execDetached("void-bar background cycle")
   }
 
   function moduleDropAtScene(scenePoint, sourceSlot) {
@@ -1513,7 +1513,7 @@ Item {
     if (!requestedTransparent || transparentForegroundProc.running) return
 
     transparentForegroundProc.command = [
-      "omarchy-bar-text-color",
+      "void-bar-text-color",
       root.position,
       String(root.barSize),
       colorHex(root.themeForeground),

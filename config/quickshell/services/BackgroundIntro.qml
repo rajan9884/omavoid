@@ -407,7 +407,7 @@ Item {
 
   Process {
     id: introProc
-    command: ["omarchy-theme-bg-boot-intro"]
+    command: ["void-theme-bg-boot-intro"]
     onExited: {
       root.startupSettled = true
       root.finishStartup()

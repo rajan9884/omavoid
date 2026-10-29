@@ -62,7 +62,7 @@ Item {
   // user's own rows and retitles always win.
   property string language: "en"
   property var menuCatalog: ({})
-  readonly property string languagePath: Quickshell.env("OMARCHY_LANGUAGE_FILE") || ((Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/omarchy/language")
+  readonly property string languagePath: Quickshell.env("VOID_LANGUAGE_FILE") || Quickshell.env("OMARCHY_LANGUAGE_FILE") || ((Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/void/language")
   property var defaultMenuItems: []
   property var userMenuItems: []
   // Whether each file has answered once, loaded or (the user's) missing. At
@@ -322,13 +322,13 @@ Item {
   // shell started shows up without restarting it.
   readonly property var providers: ({
     "fonts": {
-      script: "current=$(omarchy-font-current 2>/dev/null); omarchy-font-list 2>/dev/null | while read -r f; do [[ -z $f ]] && continue; printf '%s\\t%s\\t%s\\n' \"$f\" \"$f\" \"$current\"; done",
+      script: "current=$(void-font-current 2>/dev/null); void-font-list 2>/dev/null | while read -r f; do [[ -z $f ]] && continue; printf '%s\\t%s\\t%s\\n' \"$f\" \"$f\" \"$current\"; done",
       icon: "",
       volatile: true,
-      actionFor: function(value) { return "omarchy-font-set " + Util.shellQuote(value) }
+      actionFor: function(value) { return "void-font-set " + Util.shellQuote(value) }
     },
     "power-profiles": {
-      script: "current=$(powerprofilesctl get 2>/dev/null); omarchy-powerprofiles-list 2>/dev/null | while read -r p; do [[ -z $p ]] && continue; printf '%s\\t%s\\t%s\\n' \"$p\" \"$p\" \"$current\"; done",
+      script: "current=$(powerprofilesctl get 2>/dev/null); void-powerprofiles-list 2>/dev/null | while read -r p; do [[ -z $p ]] && continue; printf '%s\\t%s\\t%s\\n' \"$p\" \"$p\" \"$current\"; done",
       icon: "\udb81\udc0b",
       // Profile names are powerprofilesctl ids; only the label is translated,
       // and the id stays searchable through searchTerms.
@@ -338,14 +338,14 @@ Item {
         if (value === "performance") return Commons.I18n.t("menu.powerProfilePerformance")
         return value
       },
-      actionFor: function(value) { return "omarchy-powerprofiles-set autodetect " + Util.shellQuote(value) }
+      actionFor: function(value) { return "void-powerprofiles-set autodetect " + Util.shellQuote(value) }
     },
     // Kernel names are package names, the same in every language.
     "kernels": {
-      script: "current=$(omarchy-kernel get 2>/dev/null); omarchy-kernel list 2>/dev/null | while read -r k; do [[ -z $k ]] && continue; printf '%s\\t%s\\t%s\\n' \"$k\" \"$k\" \"$current\"; done",
+      script: "current=$(void-kernel get 2>/dev/null); void-kernel list 2>/dev/null | while read -r k; do [[ -z $k ]] && continue; printf '%s\\t%s\\t%s\\n' \"$k\" \"$k\" \"$current\"; done",
       icon: "\uf17c",
       volatile: true,
-      actionFor: function(value) { return "omarchy-kernel set " + Util.shellQuote(value) }
+      actionFor: function(value) { return "void-kernel set " + Util.shellQuote(value) }
     }
   })
 

@@ -577,7 +577,7 @@ Panel {
     }
     if (node.name) {
       Quickshell.execDetached([
-        "omarchy-audio-output-set-default",
+        "void-audio-output-set-default",
         String(node.id !== undefined ? node.id : 0),
         String(node.name)
       ])
@@ -590,7 +590,7 @@ Panel {
     if (node.audio) Pipewire.preferredDefaultAudioSource = node
     if (node.id !== undefined && node.name) {
       Quickshell.execDetached([
-        "omarchy-audio-input-set-default",
+        "void-audio-input-set-default",
         String(node.id),
         String(node.name)
       ])
@@ -711,7 +711,7 @@ Panel {
 
   Process {
     id: sinkAvailabilityProc
-    command: ["omarchy-audio-sink-availability"]
+    command: ["void-audio-sink-availability"]
     stdout: StdioCollector {
       waitForEnd: true
       onStreamFinished: root.updateSinkAvailability(text)
@@ -720,7 +720,7 @@ Panel {
 
   Process {
     id: sourceAvailabilityProc
-    command: ["omarchy-audio-sink-availability", "sources"]
+    command: ["void-audio-sink-availability", "sources"]
     stdout: StdioCollector {
       waitForEnd: true
       onStreamFinished: root.sourceAvailability = Model.parseSinkAvailability(text)
@@ -729,7 +729,7 @@ Panel {
 
   Process {
     id: volumeSinkProc
-    command: ["omarchy-audio-output-sink"]
+    command: ["void-audio-output-sink"]
     stdout: StdioCollector {
       waitForEnd: true
       onStreamFinished: {

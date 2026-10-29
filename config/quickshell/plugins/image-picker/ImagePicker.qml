@@ -333,7 +333,7 @@ Item {
     onTriggered: {
       if (root.opened && root.themeMode && !introPrepare.running) {
         introPrepare.theme = root.nameForPath(root.currentPath())
-        introPrepare.command = ["omarchy-theme-bg-boot-intro", "--prepare-theme", root.nameForPath(root.currentPath())]
+        introPrepare.command = ["void-theme-bg-boot-intro", "--prepare-theme", root.nameForPath(root.currentPath())]
         introPrepare.running = true
       }
     }
@@ -430,7 +430,7 @@ Item {
     if (!name || deleteThemeProc.running) return
     // Keep the user's place in the list once the deleted theme is gone.
     if (name === selectedThemeName()) deleteSelectionPath = ImagePickerModel.replacementSelectionPath(imageArray, selectedIndex, filterText)
-    deleteThemeProc.command = ["omarchy-theme-remove", name]
+    deleteThemeProc.command = ["void-theme-remove", name]
     deleteThemeProc.running = true
   }
 
@@ -463,7 +463,7 @@ Item {
   Process {
     id: themeRowsProc
     property bool queued: false
-    command: [root.omarchyPath + "/bin/omarchy-theme-switcher", "--print-rows"]
+    command: [root.omarchyPath + "/bin/void-theme-switcher", "--print-rows"]
     stdout: StdioCollector {
       onStreamFinished: root.updateThemeRows(String(text || "").trim())
     }

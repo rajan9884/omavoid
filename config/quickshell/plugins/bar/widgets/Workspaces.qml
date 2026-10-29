@@ -37,7 +37,7 @@ BarWidget {
   }
 
   FileView {
-    path: (Quickshell.env("XDG_STATE_HOME") || Quickshell.env("HOME") + "/.local/state") + "/omarchy/monitor-workspaces"
+    path: (Quickshell.env("XDG_STATE_HOME") || Quickshell.env("HOME") + "/.local/state") + "/void/monitor-workspaces"
     watchChanges: true
     printErrors: false
     onFileChanged: reload()
@@ -164,7 +164,7 @@ BarWidget {
     if (id === -1) return
     root.modeProcWorkspace = id
     root.modeProcGeneration = root.modeGeneration
-    modeProc.command = ["omarchy-hyprland-workspace-layout-current", String(id)]
+    modeProc.command = ["void-hyprland-workspace-layout-current", String(id)]
     modeProc.running = true
   }
 
@@ -178,7 +178,7 @@ BarWidget {
   // monitor's bar focuses that monitor first.
   function cycleLayout() {
     if (!root.bar) return
-    var command = "omarchy-hyprland-workspace-layout-toggle"
+    var command = "void-hyprland-workspace-layout-toggle"
     if (root.monitor && !root.monitor.focused) {
       command = "hyprctl dispatch " + Util.shellQuote("hl.dsp.focus({ monitor = \"" + root.monitorName + "\" })") + " >/dev/null && " + command
     }

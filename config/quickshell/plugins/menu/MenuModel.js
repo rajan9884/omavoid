@@ -419,6 +419,20 @@ function displayRow(items, itemOrder, checkedResults, disabledResults, entry, de
 // cached while one expression runs lives in that subshell only, so a lazy
 // memo never survives to the expression after it.
 var GUARD_READERS = [
+  "void-bar background",
+  "void-bar get omarchy.power showPercentage",
+  "void-bar get omarchy.clock format",
+  "void-bar get omarchy.clock verticalFormat",
+  "void-bar position",
+  "void-channel-current",
+  "void-dns",
+  "void-dock autohide",
+  "void-dock position",
+  "void-hyprland-corners",
+  "void-hyprland-window-transparency",
+  "void-hyprland-workspace-layout-default",
+  "void-shell notifications isDnd",
+  "void-toggle-nightlight --status",
   "omarchy-bar background",
   "omarchy-bar get omarchy.power showPercentage",
   "omarchy-bar get omarchy.clock format",
@@ -512,6 +526,10 @@ function guardHelpers() {
     + 'omarchy-pkg-missing() { local p; for p in "$@"; do __omarchy_pkg_has "$p" || return 0; done; return 1; }\n'
     + 'omarchy-cmd-present() { local c; for c in "$@"; do command -v "$c" &>/dev/null || return 1; done; return 0; }\n'
     + 'omarchy-cmd-missing() { local c; for c in "$@"; do command -v "$c" &>/dev/null || return 0; done; return 1; }\n'
+    + 'void-pkg-present() { local p; for p in "$@"; do __omarchy_pkg_has "$p" || return 1; done; return 0; }\n'
+    + 'void-pkg-missing() { local p; for p in "$@"; do __omarchy_pkg_has "$p" || return 0; done; return 1; }\n'
+    + 'void-cmd-present() { local c; for c in "$@"; do command -v "$c" &>/dev/null || return 1; done; return 0; }\n'
+    + 'void-cmd-missing() { local c; for c in "$@"; do command -v "$c" &>/dev/null || return 0; done; return 1; }\n'
 }
 
 // Substitute the captured answer into the expression rather than shadowing

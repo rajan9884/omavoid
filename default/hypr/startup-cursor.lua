@@ -77,7 +77,8 @@ hl.on("config.reloaded", function()
       hl.env("OMARCHY_STARTUP_CURSOR_THEME", void_startup_cursor.xcursor)
       hl.env("OMARCHY_STARTUP_CURSOR_SESSION", os.getenv("HYPRLAND_INSTANCE_SIGNATURE"))
       if cold then
-        hl.env("XCURSOR_PATH", os.getenv("OMARCHY_PATH") .. "/default/hypr/cursors:" .. void_startup_cursor.path)
+        local vpath = os.getenv("VOID_PATH") or os.getenv("OMARCHY_PATH") or "/usr/share/void"
+        hl.env("XCURSOR_PATH", vpath .. "/default/hypr/cursors:" .. void_startup_cursor.path)
         hl.env("XCURSOR_THEME", "void-startup")
       else
         hl.env("XCURSOR_PATH", void_startup_cursor.path)

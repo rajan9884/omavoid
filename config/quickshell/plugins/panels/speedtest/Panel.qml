@@ -99,7 +99,7 @@ Item {
     expectedStop = false
     phase = nextPhase
     stderrText = ""
-    speedTestProc.command = ["omarchy-network-speedtest", nextPhase]
+    speedTestProc.command = ["void-network-speedtest", nextPhase]
     speedTestProc.running = true
     phaseTimer.restart()
   }
@@ -176,7 +176,7 @@ Item {
   // field is the kind, second the SSID (wifi) or device (ethernet).
   Process {
     id: statusProc
-    command: ["omarchy-network-status"]
+    command: ["void-network-status"]
     stdout: StdioCollector {
       waitForEnd: true
       onStreamFinished: {

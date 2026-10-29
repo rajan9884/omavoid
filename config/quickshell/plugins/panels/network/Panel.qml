@@ -542,7 +542,7 @@ Panel {
     // URL: let the browser handle the redirect without trusting portal input.
     // The command pauses a Tailscale exit node and re-checks quickly until the
     // sign-in completes.
-    Quickshell.execDetached(["omarchy-network-captive-portal", Model.captivePortalUrl])
+    Quickshell.execDetached(["void-network-captive-portal", Model.captivePortalUrl])
     close()
   }
 
@@ -581,7 +581,7 @@ Panel {
       dnsProc.running = true
     }
     if (!bandProc.running) {
-      bandProc.command = ["omarchy-network-band"]
+      bandProc.command = ["void-network-band"]
       bandProc.running = true
     }
     // A closed panel has no nearby-network list to fill, and bare refresh()
@@ -746,7 +746,7 @@ Panel {
     if (!band || actionProc.running) return
 
     root.pendingBand = band
-    actionProc.command = ["omarchy-network-band", band]
+    actionProc.command = ["void-network-band", band]
     actionProc.running = true
   }
 
@@ -764,7 +764,7 @@ Panel {
   }
 
   function dnsCommand(provider) {
-    var command = "omarchy-dns"
+    var command = "void-dns"
     if (provider) command += " " + Util.shellQuote(provider)
     return command
   }
@@ -773,7 +773,7 @@ Panel {
     if (!root.bar || !provider || actionProc.running) return
 
     if (provider === "Custom") {
-      var launcher = "omarchy-launch-floating-terminal-with-presentation"
+      var launcher = "void-launch-floating-terminal-with-presentation"
       root.bar.run(launcher + " " + Util.shellQuote(root.dnsCommand(provider)))
       root.close()
       return
@@ -915,7 +915,7 @@ Panel {
   // Pulls everything we want about the active route's interface in one shot.
   Process {
     id: detailsProc
-    command: ["omarchy-network-status", "--verbose"]
+    command: ["void-network-status", "--verbose"]
     stdout: StdioCollector {
       waitForEnd: true
       onStreamFinished: root.updateDetails(text)
@@ -986,7 +986,7 @@ Panel {
     running: root.opened
     onTriggered: {
       if (bandProc.running) return
-      bandProc.command = ["omarchy-network-band"]
+      bandProc.command = ["void-network-band"]
       bandProc.running = true
     }
   }

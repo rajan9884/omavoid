@@ -1620,7 +1620,7 @@ ShellRoot {
       var method = entry.target.slice(dot + 1)
       var service = shell.serviceFor(shell.ipcShortcutServices[target] || "")
       if (!service || !service.runShortcut(method))
-        Util.execArgv(["omarchy-shell", target, method])
+        Util.execArgv(["void-shell", target, method])
     } else if (entry.kind === "brightness") {
       if (!shell.brightnessKeys.handle(entry.target))
         Util.execArgv(["void-brightness-display", entry.target === "raise" ? "+5%" : "5%-"])

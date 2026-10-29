@@ -96,7 +96,7 @@ Item {
 
   Process {
     id: proc
-    command: ["omarchy-disk-speedtest"]
+    command: ["void-disk-speedtest"]
     stdout: SplitParser { onRead: function(line) { root.updateLine(line) } }
     // Exit and stream-finished have no guaranteed order: when a failed exit
     // beat the collector and published the generic message, replace it with

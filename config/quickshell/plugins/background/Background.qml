@@ -218,14 +218,14 @@ Item {
     // A cloned background may not summon the picker in-process, so it takes
     // the IPC route instead.
     if (!root.shell || !root.shell.summon("omarchy.image-picker", payload))
-      Util.execArgv(["omarchy-shell", "shell", "summon", "omarchy.image-picker", payload])
+      Util.execArgv(["void-shell", "shell", "summon", "omarchy.image-picker", payload])
   }
 
-  // omarchy-theme-bg-set tells this service of the new background itself. A
+  // void-theme-bg-set tells this service of the new background itself. A
   // refresh here would start an ordinary transition under an intro's cover.
   Process {
     id: bgSwitchProc
-    command: ["bash", "-c", "background=$(omarchy-theme-bg-switcher); [[ -n $background ]] && omarchy-theme-bg-set \"$background\""]
+    command: ["bash", "-c", "background=$(void-theme-bg-switcher); [[ -n $background ]] && void-theme-bg-set \"$background\""]
   }
 
   Process {

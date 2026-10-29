@@ -209,7 +209,7 @@ Panel {
     Pipewire.preferredDefaultAudioSink = sink
     if (sink.id !== undefined && sink.name) {
       Quickshell.execDetached([
-        "omarchy-audio-output-set-default",
+        "void-audio-output-set-default",
         String(sink.id),
         String(sink.name)
       ])
@@ -265,7 +265,7 @@ Panel {
   }
 
   function deviceCommand(action, address) {
-    return ["omarchy-bluetooth-device", action, address]
+    return ["void-bluetooth-device", action, address]
   }
 
   function runDeviceAction(device, action, pending) {
@@ -635,7 +635,7 @@ Panel {
   // would re-read the old state and undo the first.
   function toggleBluetooth() {
     if (!adapter) return
-    Quickshell.execDetached(["omarchy-bluetooth-power", adapter.enabled ? "off" : "on"])
+    Quickshell.execDetached(["void-bluetooth-power", adapter.enabled ? "off" : "on"])
   }
 
   ShellIpc {

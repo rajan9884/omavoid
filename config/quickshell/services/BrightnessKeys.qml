@@ -91,7 +91,7 @@ Item {
 
   Process {
     id: deviceProc
-    command: ["omarchy-hw-display"]
+    command: ["void-hw-display"]
     running: true
     stdout: StdioCollector {
       waitForEnd: true

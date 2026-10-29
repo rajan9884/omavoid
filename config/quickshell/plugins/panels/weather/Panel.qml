@@ -286,11 +286,11 @@ Panel {
 
   function persistLocation(name, latitude, longitude) {
     if (name && latitude !== null && longitude !== null)
-      locationSaveProc.command = ["omarchy-weather-location", "--set", name, latitude + "," + longitude]
+      locationSaveProc.command = ["void-weather-location", "--set", name, latitude + "," + longitude]
     else if (name)
-      locationSaveProc.command = ["omarchy-weather-location", "--set", name]
+      locationSaveProc.command = ["void-weather-location", "--set", name]
     else
-      locationSaveProc.command = ["omarchy-weather-location", "--clear"]
+      locationSaveProc.command = ["void-weather-location", "--clear"]
     locationSaveProc.running = true
   }
 

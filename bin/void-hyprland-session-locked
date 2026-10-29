@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# void:summary=Returns true if the Hyprland session is currently locked
+
+if command -v loginctl >/dev/null 2>&1; then
+  session_id=$(loginctl session-status 2>/dev/null | head -n 1 | awk '{print $1}')
+  if [[ -n $session_id ]]; then
+    locked=$(loginctl show-session "$session_id" -p LockedHint --value 2>/dev/null)
+    [[ $locked == "yes" ]] && exit 0
+  fi
+fi
+
+if command -v hyprctl >/dev/null 2>&1; then
+  if hyprctl -j layers 2>/dev/null | jq -e '.. | objects | select(.namespace? | test("lock$|hyprlock"))' >/dev/null 2>&1; then
+    exit 0
+  fi
+fi
+
+if pgrep -x hyprlock >/dev/null 2>&1; then
+  exit 0
+fi
+
+exit 1

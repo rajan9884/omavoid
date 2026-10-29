@@ -42,7 +42,7 @@ BarIndicator {
 
   Process {
     id: statusProc
-    command: ["omarchy-sudo-passwordless", "--active"]
+    command: ["void-sudo-passwordless", "--active"]
     onExited: function(exitCode, exitStatus) {
       root.granted = exitCode === 0 && exitStatus === 0
       if (root.refreshPending) Qt.callLater(root.refresh)
@@ -51,10 +51,10 @@ BarIndicator {
 
   Process {
     id: disableProc
-    command: ["omarchy-sudo-passwordless", "--disable"]
+    command: ["void-sudo-passwordless", "--disable"]
     onExited: function(exitCode, exitStatus) {
       if ((exitCode !== 0 || exitStatus !== 0) && root.bar)
-        Util.execArgv(["omarchy-notification-send", I18n.t("bar.passwordlessSudoDisableFailed"), I18n.t("bar.passwordlessSudoDisableFailedBody")])
+        Util.execArgv(["void-notification-send", I18n.t("bar.passwordlessSudoDisableFailed"), I18n.t("bar.passwordlessSudoDisableFailedBody")])
       if (root.indicatorHost) root.indicatorHost.refresh()
       else root.refresh()
     }
@@ -63,6 +63,6 @@ BarIndicator {
   onPressed: function() {
     if (!root.bar || disableProc.running) return
     if (root.granted) disableProc.running = true
-    else root.bar.run("omarchy-launch-floating-terminal-with-presentation omarchy-sudo-passwordless")
+    else root.bar.run("void-launch-floating-terminal-with-presentation void-sudo-passwordless")
   }
 }

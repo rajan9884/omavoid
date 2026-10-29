@@ -21,7 +21,7 @@ local CONSOLE = "special:qconsole"
 -- Omarchy ships without a default agent, and omarchy-agent exits without
 -- opening anything when none is set, so until one is picked this just opens an
 -- empty console.
-local seed = "[workspace " .. CONSOLE .. " silent] omarchy-agent"
+local seed = "[workspace " .. CONSOLE .. " silent] void-agent"
 
 -- Dimming only applies while a special workspace is open, so the console gets
 -- its separation from the workspace underneath without costing anything the
