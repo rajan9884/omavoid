@@ -69,7 +69,7 @@ install_packages() {
         wayland wayland-protocols xorg-server-xwayland
         xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk
         mesa-dri vulkan-loader
-        pipewire wireplumber alsa-pipewire libspa-bluetooth
+        pipewire wireplumber alsa-pipewire libspa-bluetooth lsp-plugins-lv2
         pulsemixer alsa-utils playerctl
         NetworkManager bluez upower inotify-tools socat power-profiles-daemon
         foot alacritty
@@ -154,6 +154,10 @@ sync_upstream_omarchy() {
         sudo mkdir -p /usr/share/omarchy/install/helpers
         sudo cp -r "${REPO_DIR}/install/helpers/"* /usr/share/omarchy/install/helpers/
     fi
+    if [ -d "${REPO_DIR}/default/audio/tunings" ]; then
+        sudo mkdir -p /usr/share/omarchy/default/audio/tunings
+        sudo cp -r "${REPO_DIR}/default/audio/tunings/"* /usr/share/omarchy/default/audio/tunings/
+    fi
 
     # Clean up stale upstream plugins and panels
     sudo rm -rf /usr/share/omarchy/shell/plugins/agents \
@@ -237,14 +241,25 @@ SHIM
     # systemctl shim for suspend/reboot/poweroff
     cat <<'SHIM' | sudo tee /usr/local/bin/systemctl >/dev/null
 #!/usr/bin/env bash
+# systemctl compatibility shim for Void Linux (translates to loginctl/runit)
+set -u
+
+# Check for --user flag: Void does not run systemd user instances
+for arg in "$@"; do
+    if [ "$arg" = "--user" ]; then
+        exit 3
+    fi
+done
+
 cmd="${1:-}"
 case "$cmd" in
     poweroff|power-off) exec loginctl poweroff 2>/dev/null || exec sudo -n poweroff ;;
     reboot) exec loginctl reboot 2>/dev/null || exec sudo -n reboot ;;
     suspend) exec loginctl suspend 2>/dev/null || exec zzz ;;
     hibernate) exec loginctl hibernate 2>/dev/null || exec ZZZ ;;
-    is-active|status) exit 0 ;;
-    *) exit 0 ;;
+    is-system-running) echo "offline"; exit 1 ;;
+    is-active|is-enabled|status) exit 3 ;;
+    *) exit 1 ;;
 esac
 SHIM
     sudo chmod +x /usr/local/bin/systemctl

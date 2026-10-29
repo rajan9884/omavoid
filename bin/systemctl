@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# systemctl compatibility shim for Void Linux (translates to loginctl/runit)
+set -u
+
+# Check for --user flag: Void does not run systemd user instances
+for arg in "$@"; do
+    if [ "$arg" = "--user" ]; then
+        exit 3
+    fi
+done
+
+cmd="${1:-}"
+case "$cmd" in
+    poweroff|power-off) exec loginctl poweroff 2>/dev/null || exec sudo -n poweroff ;;
+    reboot) exec loginctl reboot 2>/dev/null || exec sudo -n reboot ;;
+    suspend) exec loginctl suspend 2>/dev/null || exec zzz ;;
+    hibernate) exec loginctl hibernate 2>/dev/null || exec ZZZ ;;
+    is-system-running) echo "offline"; exit 1 ;;
+    is-active|is-enabled|status) exit 3 ;;
+    *) exit 1 ;;
+esac

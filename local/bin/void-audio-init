@@ -25,3 +25,18 @@ fi
 if ! pgrep -u "$USER" -x pipewire-pulse >/dev/null 2>&1; then
     setsid /usr/bin/pipewire-pulse >/dev/null 2>&1 &
 fi
+
+# Ensure hardware ALSA mixer controls are at 100% (0 dB) so PipeWire software volume has full dynamic range
+if command -v amixer >/dev/null 2>&1; then
+    for card in sofhdadsp 0 1; do
+        amixer -c "$card" set Master 100% unmute >/dev/null 2>&1 || true
+        amixer -c "$card" set Headphone 100% unmute >/dev/null 2>&1 || true
+        amixer -c "$card" set Speaker 100% unmute >/dev/null 2>&1 || true
+    done
+fi
+
+# If omarchy speaker tuning is installed, ensure its filter-chain host client is running
+tuning_conf="${XDG_CONFIG_HOME:-$HOME/.config}/pipewire/omarchy-speaker-tuning.conf"
+if [ -f "$tuning_conf" ] && ! pgrep -u "$USER" -f "pipewire -c .*omarchy-speaker-tuning.conf" >/dev/null 2>&1; then
+    setsid /usr/bin/pipewire -c "$tuning_conf" >/dev/null 2>&1 &
+fi
