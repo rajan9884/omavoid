@@ -17,6 +17,11 @@ card_id="${card_id:-53}"
 
 if [[ "$sink_name" == *"Headphones"* ]]; then
   pactl set-card-profile "$card_id" "HiFi (HDMI1, HDMI2, HDMI3, Headphones, Mic1, Mic2)" 2>/dev/null || true
+  amixer -c sofhdadsp cset name='Dmic0 Capture Switch' on >/dev/null 2>&1 || true
+  amixer -c sofhdadsp cset name='Capture Switch' on >/dev/null 2>&1 || true
+  amixer -c sofhdadsp cset name='Capture Volume' 50,50 >/dev/null 2>&1 || true
+  amixer -c sofhdadsp cset name='Dmic0 Capture Volume' 60,60 >/dev/null 2>&1 || true
+  amixer -c sofhdadsp cset name='PGA2.0 2 Master Capture Volume' 60,60 >/dev/null 2>&1 || true
   for _ in {1..25}; do
     actual_sink="$(pactl list sinks short 2>/dev/null | awk '/HiFi__Headphones__sink/ {print $2; exit}')"
     [[ -n $actual_sink ]] && break
@@ -32,6 +37,11 @@ if [[ "$sink_name" == *"Headphones"* ]]; then
   fi
 elif [[ "$sink_name" == *"Speaker"* || "$sink_name" == "omarchy_speaker_tuning" ]]; then
   pactl set-card-profile "$card_id" "HiFi (HDMI1, HDMI2, HDMI3, Mic1, Mic2, Speaker)" 2>/dev/null || true
+  amixer -c sofhdadsp cset name='Dmic0 Capture Switch' on >/dev/null 2>&1 || true
+  amixer -c sofhdadsp cset name='Capture Switch' on >/dev/null 2>&1 || true
+  amixer -c sofhdadsp cset name='Capture Volume' 50,50 >/dev/null 2>&1 || true
+  amixer -c sofhdadsp cset name='Dmic0 Capture Volume' 60,60 >/dev/null 2>&1 || true
+  amixer -c sofhdadsp cset name='PGA2.0 2 Master Capture Volume' 60,60 >/dev/null 2>&1 || true
   for _ in {1..25}; do
     actual_spk="$(pactl list sinks short 2>/dev/null | awk '/HiFi__Speaker__sink/ {print $2; exit}')"
     [[ -n $actual_spk ]] && break
@@ -71,3 +81,10 @@ LC_ALL=C timeout 2 pactl list sink-inputs 2>/dev/null | awk '
   }' | while read -r input; do
   [[ -n $input ]] && timeout 2 pactl move-sink-input "$input" "$sink_name" 2>/dev/null || true
 done
+
+dmic_name="$(pactl list sources short 2>/dev/null | awk '/HiFi__Mic1__source/ {print $2; exit}')"
+if [[ -n $dmic_name ]]; then
+  pactl set-default-source "$dmic_name" 2>/dev/null || true
+  dmic_id="$(wpctl status 2>/dev/null | awk '/Digital Microphone/ {gsub(/[^0-9]/, "", $1); if ($1 != "") {print $1; exit}}')"
+  [[ -n $dmic_id ]] && wpctl set-default "$dmic_id" 2>/dev/null || true
+fi

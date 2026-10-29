@@ -52,7 +52,26 @@ if command -v amixer >/dev/null 2>&1; then
         amixer -c "$card" set Master 100% unmute >/dev/null 2>&1 || true
         amixer -c "$card" set Headphone 100% unmute >/dev/null 2>&1 || true
         amixer -c "$card" set Speaker 100% unmute >/dev/null 2>&1 || true
+        amixer -c "$card" cset name='Dmic0 Capture Switch' on >/dev/null 2>&1 || true
+        amixer -c "$card" cset name='Capture Switch' on >/dev/null 2>&1 || true
+        amixer -c "$card" cset name='Capture Volume' 50,50 >/dev/null 2>&1 || true
+        amixer -c "$card" cset name='Dmic0 Capture Volume' 60,60 >/dev/null 2>&1 || true
+        amixer -c "$card" cset name='PGA2.0 2 Master Capture Volume' 60,60 >/dev/null 2>&1 || true
     done
+fi
+
+# Ensure default audio source is Digital Microphone if present
+if command -v wpctl >/dev/null 2>&1; then
+    dmic_id="$(wpctl status 2>/dev/null | awk '/Digital Microphone/ {gsub(/[^0-9]/, "", $1); if ($1 != "") {print $1; exit}}')"
+    if [ -n "$dmic_id" ]; then
+        wpctl set-default "$dmic_id" >/dev/null 2>&1 || true
+    fi
+fi
+if command -v pactl >/dev/null 2>&1; then
+    dmic_name="$(pactl list sources short 2>/dev/null | awk '/HiFi__Mic1__source/ {print $2; exit}')"
+    if [ -n "$dmic_name" ]; then
+        pactl set-default-source "$dmic_name" >/dev/null 2>&1 || true
+    fi
 fi
 
 # If Omarchy speaker tuning is installed, ensure its filter-chain host client is running

@@ -1,0 +1,188 @@
+#!/usr/bin/env python3
+"""
+omarchy-speedtest: High-performance network speed measurement client for Omarchy on Void Linux.
+Measures download and upload bandwidth against speed.omarchy.org (or custom server).
+Implements parent-death termination, periodic live throughput reporting, and JSON output mode.
+"""
+
+import sys
+import os
+import time
+import subprocess
+import threading
+import ctypes
+import signal
+import json
+
+# Ensure child processes terminate if the parent shell / launcher is killed
+try:
+    signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+except Exception:
+    pass
+
+try:
+    PR_SET_PDEATHSIG = 1
+    libc = ctypes.CDLL(None)
+    libc.prctl(PR_SET_PDEATHSIG, signal.SIGTERM)
+except Exception:
+    pass
+
+expected_ppid = os.environ.get("OMARCHY_SPEEDTEST_PARENT_PID")
+if expected_ppid and str(os.getppid()) != expected_ppid:
+    if os.getppid() == 1:
+        sys.exit(1)
+
+args = [a for a in sys.argv[1:] if not a.startswith("--")]
+flags = [a for a in sys.argv[1:] if a.startswith("--")]
+
+if len(args) != 1 or args[0] not in ("down", "up"):
+    sys.stderr.write("Usage: omarchy-speedtest [down|up]\n")
+    sys.exit(2)
+
+mode = args[0]
+is_json = "--json" in flags
+
+base_url = os.environ.get("OMARCHY_SPEEDTEST_URL", "https://speed.omarchy.org").rstrip("/")
+if not (base_url.startswith("https://") or base_url.startswith("http://")):
+    sys.stderr.write("Invalid speed test URL\n")
+    sys.exit(1)
+
+try:
+    concurrency = int(os.environ.get("OMARCHY_SPEEDTEST_CONNECTIONS", "4"))
+except ValueError:
+    sys.stderr.write("Invalid connection count\n")
+    sys.exit(1)
+
+concurrency = max(1, min(16, concurrency))
+
+total_bytes = 0
+lock = threading.Lock()
+stop_flag = threading.Event()
+active_procs = []
+procs_lock = threading.Lock()
+
+
+def emit(rate):
+    try:
+        if rate < 10.0:
+            print(f"{rate:.1f}", flush=True)
+        else:
+            print(f"{rate:.0f}", flush=True)
+    except BrokenPipeError:
+        sys.exit(0)
+
+
+def download_worker():
+    global total_bytes
+    url = f"{base_url}/down?bytes=67108864"
+    cmd = [
+        "curl", "-s", "-N",
+        "-H", "User-Agent: Omarchy-Speedtest/1.0 (+https://omarchy.org)",
+        "-H", "Content-Type: application/octet-stream",
+        "-H", "X-Speedtest-Phase: measure",
+        url
+    ]
+    try:
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        with procs_lock:
+            active_procs.append(proc)
+        while not stop_flag.is_set():
+            chunk = proc.stdout.read(65536)
+            if not chunk:
+                break
+            with lock:
+                total_bytes += len(chunk)
+        try:
+            proc.kill()
+            proc.wait()
+        except Exception:
+            pass
+    except Exception:
+        pass
+
+
+def upload_worker():
+    global total_bytes
+    url = f"{base_url}/upload"
+    chunk_size = 1048576  # 1MB
+    payload = b"\x00" * chunk_size
+    cmd = [
+        "curl", "-s",
+        "-H", "User-Agent: Omarchy-Speedtest/1.0 (+https://omarchy.org)",
+        "-H", "Content-Type: application/octet-stream",
+        "-H", "X-Speedtest-Phase: measure",
+        "--data-binary", "@-",
+        url
+    ]
+    try:
+        while not stop_flag.is_set():
+            proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+            with procs_lock:
+                active_procs.append(proc)
+            try:
+                proc.stdin.write(payload)
+                proc.stdin.close()
+            except Exception:
+                pass
+            out, _ = proc.communicate()
+            if b"acceptedBytes" in out:
+                with lock:
+                    total_bytes += chunk_size
+            else:
+                break
+    except Exception:
+        pass
+
+
+workers = []
+worker_fn = download_worker if mode == "down" else upload_worker
+
+for _ in range(concurrency):
+    t = threading.Thread(target=worker_fn, daemon=True)
+    t.start()
+    workers.append(t)
+
+start_time = time.time()
+duration = 5.0
+
+try:
+    while True:
+        time.sleep(0.4)
+        elapsed = time.time() - start_time
+        with lock:
+            current_bytes = total_bytes
+        if elapsed > 0:
+            rate = (current_bytes * 8.0) / elapsed / 1_000_000.0
+            if not is_json:
+                emit(rate)
+        if elapsed >= duration:
+            break
+finally:
+    stop_flag.set()
+    with procs_lock:
+        for p in active_procs:
+            try:
+                p.kill()
+            except Exception:
+                pass
+
+final_elapsed = max(0.001, time.time() - start_time)
+with lock:
+    final_bytes = total_bytes
+
+final_rate = (final_bytes * 8.0) / final_elapsed / 1_000_000.0
+
+try:
+    if is_json:
+        print(json.dumps({
+            "bytes": final_bytes,
+            "seconds": final_elapsed,
+            "mbps": final_rate,
+            "connections": concurrency
+        }))
+    else:
+        emit(final_rate)
+except BrokenPipeError:
+    pass
+
+sys.exit(0)

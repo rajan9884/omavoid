@@ -164,8 +164,6 @@ sync_upstream_omarchy() {
                 /usr/share/omarchy/shell/plugins/dev-gallery \
                 /usr/share/omarchy/shell/plugins/panels/dropbox \
                 /usr/share/omarchy/shell/plugins/panels/tailscale \
-                /usr/share/omarchy/shell/plugins/panels/disk-speedtest \
-                /usr/share/omarchy/shell/plugins/panels/speedtest \
                 /usr/share/omarchy/shell/plugins/panels/elsewhen 2>/dev/null || true
 
     # Link customized shell and menu definitions directly from dotfiles
@@ -306,6 +304,8 @@ SHIM
                 sudo ln -sf "/usr/local/bin/$(basename "$b")" "/usr/share/omarchy/bin/$(basename "$b")"
             fi
         done
+        sudo mkdir -p /usr/lib/omarchy
+        sudo ln -sf /usr/local/bin/omarchy-speedtest /usr/lib/omarchy/speedtest
     fi
 
     # Configure greetd with tuigreet
