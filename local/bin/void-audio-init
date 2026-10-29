@@ -9,6 +9,14 @@ fi
 # Ensure runtime directory exists
 mkdir -p "$XDG_RUNTIME_DIR" 2>/dev/null || true
 
+# Wait up to 5 seconds for ALSA sound hardware node to be accessible
+for i in $(seq 1 50); do
+    if [ -w /dev/snd/controlC0 ] || [ -r /dev/snd/controlC0 ]; then
+        break
+    fi
+    sleep 0.1
+done
+
 # If pipewire is not active, clean up stale sockets and spawn detached session
 if ! pgrep -u "$USER" -x pipewire >/dev/null 2>&1; then
     rm -f "$XDG_RUNTIME_DIR"/pipewire-*.lock "$XDG_RUNTIME_DIR"/pipewire-0* "$XDG_RUNTIME_DIR"/pulse/native 2>/dev/null || true
@@ -16,14 +24,30 @@ if ! pgrep -u "$USER" -x pipewire >/dev/null 2>&1; then
     sleep 0.5
 fi
 
-# WirePlumber and PipeWire-Pulse are usually auto-spawned via context.exec,
-# but verify and launch if either is missing.
+# WirePlumber and PipeWire-Pulse verification
 if ! pgrep -u "$USER" -x wireplumber >/dev/null 2>&1; then
     setsid /usr/bin/wireplumber >/dev/null 2>&1 &
+    sleep 0.5
 fi
 
 if ! pgrep -u "$USER" -x pipewire-pulse >/dev/null 2>&1; then
     setsid /usr/bin/pipewire-pulse >/dev/null 2>&1 &
+fi
+
+# If WirePlumber started prematurely before hardware was available, restart it
+if command -v wpctl >/dev/null 2>&1; then
+    for attempt in $(seq 1 20); do
+        if wpctl status 2>/dev/null | grep -q "sof-hda-dsp"; then
+            break
+        fi
+        sleep 0.2
+    done
+    if ! wpctl status 2>/dev/null | grep -q "sof-hda-dsp"; then
+        pkill -u "$USER" -x wireplumber 2>/dev/null || true
+        sleep 0.5
+        setsid /usr/bin/wireplumber >/dev/null 2>&1 &
+        sleep 1
+    fi
 fi
 
 # Ensure hardware ALSA mixer controls are at 100% (0 dB) so PipeWire software volume has full dynamic range

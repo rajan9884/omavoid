@@ -77,7 +77,7 @@ install_packages() {
         grim slurp brightnessctl file imv xdg-utils psmisc
         qt6-wayland qt6-declarative qt6-svg qt6-shadertools qt6-imageformats qt6ct
         python3 fontconfig
-        zsh starship fzf zoxide eza bat fd ripgrep jq gum yt-dlp
+        zsh starship fzf zoxide eza bat fd ripgrep jq gum yt-dlp nodejs
         btop yazi lazygit calcurse neovim fastfetch git curl unzip vips ffmpegthumbnailer
         greetd tuigreet
         linux-mainline linux-mainline-headers
@@ -559,14 +559,20 @@ setup_runit_and_groups() {
     [ -f /usr/share/alsa/alsa.conf.d/50-pipewire.conf ] && sudo ln -sf /usr/share/alsa/alsa.conf.d/50-pipewire.conf /etc/alsa/conf.d/
     [ -f /usr/share/alsa/alsa.conf.d/99-pipewire-default.conf ] && sudo ln -sf /usr/share/alsa/alsa.conf.d/99-pipewire-default.conf /etc/alsa/conf.d/
 
-    # Udev sound hardware permissions for audio group (runs last at 99)
+    # Udev sound hardware permissions for audio group (overrides elogind uaccess race condition)
     sudo mkdir -p /etc/udev/rules.d
-    cat <<'UDEV' | sudo tee /etc/udev/rules.d/99-sound.rules >/dev/null
-# Guarantee audio group has read/write access to all sound hardware
-SUBSYSTEM=="sound", GROUP="audio", MODE="0660"
-KERNEL=="controlC[0-9]*|pcmC[0-9]*|hwC[0-9]*|midiC[0-9]*|timer|seq", SUBSYSTEM=="sound", GROUP="audio", MODE="0660"
+    cat <<'UDEV' | sudo tee /etc/udev/rules.d/72-sound.rules >/dev/null
+# Ensure sound hardware always belongs to audio group with 0660 mode
+# Remove uaccess so elogind does not revoke access during seat changes or early boot
+SUBSYSTEM=="sound", TAG-="uaccess", GROUP="audio", MODE="0660"
+KERNEL=="controlC[0-9]*", SUBSYSTEM=="sound", TAG-="uaccess", GROUP="audio", MODE="0660"
+KERNEL=="pcmC[0-9]*", SUBSYSTEM=="sound", TAG-="uaccess", GROUP="audio", MODE="0660"
+KERNEL=="hwC[0-9]*", SUBSYSTEM=="sound", TAG-="uaccess", GROUP="audio", MODE="0660"
+KERNEL=="midiC[0-9]*", SUBSYSTEM=="sound", TAG-="uaccess", GROUP="audio", MODE="0660"
+KERNEL=="timer", SUBSYSTEM=="sound", TAG-="uaccess", GROUP="audio", MODE="0660"
+KERNEL=="seq", SUBSYSTEM=="sound", TAG-="uaccess", GROUP="audio", MODE="0660"
 UDEV
-    sudo rm -f /etc/udev/rules.d/60-sound.rules
+    sudo rm -f /etc/udev/rules.d/60-sound.rules /etc/udev/rules.d/99-sound.rules
     sudo udevadm control --reload 2>/dev/null || true
     sudo udevadm trigger --subsystem-match=sound 2>/dev/null || true
 
