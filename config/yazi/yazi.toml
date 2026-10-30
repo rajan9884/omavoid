@@ -38,3 +38,11 @@ rules = [
 	{ mime = "application/pdf", use = [ "open" ] },
 	{ url = "*", use = [ "open" ] },
 ]
+
+[plugin]
+prepend_preloaders = [
+	{ mime = "video/*", run = "video" },
+]
+prepend_previewers = [
+	{ mime = "video/*", run = "video" },
+]

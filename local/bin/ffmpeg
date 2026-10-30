@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Wrapper around ffmpeg to fix FFmpeg 6.1 stream specifier bug with disp:attached_pic in Yazi
+REAL_FFMPEG="/usr/sbin/ffmpeg"
+if [ ! -x "$REAL_FFMPEG" ]; then
+    REAL_FFMPEG="/usr/bin/ffmpeg"
+fi
+
+args=()
+has_attached_pic=0
+for arg in "$@"; do
+    if [ "$arg" = "disp:attached_pic" ]; then
+        args+=("disp:attached_pic?")
+        has_attached_pic=1
+    else
+        args+=("$arg")
+    fi
+done
+
+"$REAL_FFMPEG" "${args[@]}"
+rc=$?
+
+if [ $rc -ne 0 ] && [ $has_attached_pic -eq 1 ]; then
+    # Fallback: retry without map option to safely extract first available frame
+    fallback_args=()
+    skip_next=0
+    for arg in "$@"; do
+        if [ "$arg" = "-map" ]; then
+            skip_next=1
+            continue
+        fi
+        if [ $skip_next -eq 1 ]; then
+            skip_next=0
+            continue
+        fi
+        fallback_args+=("$arg")
+    done
+    exec "$REAL_FFMPEG" "${fallback_args[@]}"
+fi
+
+exit $rc
