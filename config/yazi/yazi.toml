@@ -8,16 +8,18 @@ show_symlink = true
 
 [opener]
 edit = [
-	{ run = 'nvim "$@"', block = true, for = "unix" },
-]
-open = [
-	{ run = 'xdg-open "$@"', desc = "Open", for = "linux" },
+	{ run = '${EDITOR:-nvim} %s', desc = "$EDITOR", block = true, for = "unix" },
 ]
 play = [
-	{ run = 'mpv --force-window "$@"', orphan = true, for = "unix" },
+	{ run = 'mpv --force-window %s', desc = "Play", orphan = true, for = "unix" },
+	{ run = 'xdg-open %s1', desc = "Open", orphan = true, for = "linux" },
 ]
 image = [
-	{ run = 'imv "$@"', orphan = true, for = "unix" },
+	{ run = 'imv %s', desc = "View", orphan = true, for = "unix" },
+	{ run = 'xdg-open %s1', desc = "Open", orphan = true, for = "linux" },
+]
+open = [
+	{ run = 'xdg-open %s1', desc = "Open", for = "linux" },
 ]
 
 [open]
@@ -34,5 +36,5 @@ rules = [
 	{ mime = "application/x-rar", use = [ "open" ] },
 	{ mime = "application/xz", use = [ "open" ] },
 	{ mime = "application/pdf", use = [ "open" ] },
-	{ mime = "*", use = [ "open" ] },
+	{ url = "*", use = [ "open" ] },
 ]
