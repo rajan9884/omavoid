@@ -45,7 +45,10 @@ hl.unbind("SUPER + SHIFT + ALT + X")     -- X Post web app
 
 -- Notifications: Super + Comma dismisses newest, Super + Alt + Comma invokes
 o.rebind("SUPER + comma", "Dismiss last notification", { ipc = "notifications.dismissOne" })
+o.rebind("SUPER + SHIFT + comma", "Dismiss all notifications", { ipc = "notifications.dismissAll" })
+o.rebind("SUPER + CTRL + comma", "Control notifications with keyboard", { ipc = "notifications.keyboard" })
 o.rebind("SUPER + ALT + comma", "Dismiss, invoke, or focus last notification", { ipc = "notifications.act" })
+o.rebind("SUPER + SHIFT + ALT + comma", "Open notification history", { ipc = "notifications.showHistory" })
 
 -- Workspaces 1..10
 for workspace = 1, 10 do

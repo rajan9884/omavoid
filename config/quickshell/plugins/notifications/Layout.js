@@ -9,6 +9,7 @@ var VISIBLE = 3        // cards drawn before the rest just fade out
 var FADE = 0.55        // opacity of the last drawn card in a collapsed deck
 
 function groupKeyFor(row) {
+  if (row && (row.restored || String(row.groupKey || "").startsWith("toast:"))) return "toast:" + String(row.key || "")
   return String(row.groupKey || row.source || row.app || "?")
 }
 

@@ -36,6 +36,17 @@ USAGE
   exit 0
 fi
 
+if [[ ${1:-} == "ipc" ]]; then
+  shift
+fi
+
+if (( $# >= 1 )) && [[ $1 == *.* ]]; then
+  target="${1%%.*}"
+  method="${1#*.}"
+  shift
+  set -- "$target" "$method" "$@"
+fi
+
 (( $# >= 2 )) || fail "Usage: void-shell <target> <method> [args...]"
 if [[ -z ${OMARCHY_PATH:-} ]]; then
   [[ -f /etc/omarchy.conf ]] && . /etc/omarchy.conf

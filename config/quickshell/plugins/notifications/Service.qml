@@ -1318,6 +1318,11 @@ Item {
   Component.onDestruction: flushStore()
 
   function restoreRows(rows, replay) {
+    if (replay) {
+      for (var k = toasts.count - 1; k >= 0; k--) {
+        if (toasts.get(k).restored) service.closeToast(toasts.get(k).key, "dismissed")
+      }
+    }
     // Restore is oldest first; history is newest first. Both insert at zero.
     for (var i = replay ? rows.length - 1 : 0;
          replay ? i >= 0 : i < rows.length; i += replay ? -1 : 1) {
@@ -1328,8 +1333,8 @@ Item {
         // entry deliberately creates a separate card.
         if (!replay) continue
         row.key = nextKey()
-        row.groupKey = Markup.regroup(row)
       }
+      row.groupKey = "toast:" + String(row.key)
       if (!reserveLive(row.key)) break
       showRow(row)
     }
@@ -1363,7 +1368,7 @@ Item {
   function showPlaceholder(summary) {
     var key = "placeholder" + nextKey()
     if (!reserveLive(key)) return
-    var row = Store.normalise({ key: key, app: "omarchy-action", summary: summary, glyph: "\u{f009a}",
+    var row = Store.normalise({ key: key, app: "void-action", summary: summary, glyph: "\u{f009a}",
                                 urgency: NotificationUrgency.Low, ts: Date.now() / 1000 })
     row.duration = lowDuration
     row.restored = true

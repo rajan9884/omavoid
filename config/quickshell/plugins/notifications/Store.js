@@ -34,8 +34,8 @@ function snapshot(n, key, urgencyEnum) {
   var id = Markup.identify(raw)
   var found = Detect.scan(id.summary, id.body)
   // The hint may arrive as a list, which normalise() would read as no string.
-  var argv = Security.parseExecArgv(hints["omarchy-exec-argv"])
-  var actions = Security.parseExecActions(hints["omarchy-actions"])
+  var argv = Security.parseExecArgv(hints["void-exec-argv"] || hints["omarchy-exec-argv"])
+  var actions = Security.parseExecActions(hints["void-actions"] || hints["omarchy-actions"])
   return normalise({
     key: key,
     originalId: n.id || 0,
@@ -43,7 +43,7 @@ function snapshot(n, key, urgencyEnum) {
     senderPid: Number(hints["sender-pid"] || 0) || 0,
     execArgv: argv ? JSON.stringify(argv) : "",
     execActions: actions ? JSON.stringify(actions) : "",
-    glyph: hints["omarchy-glyph"],
+    glyph: hints["void-glyph"] || hints["omarchy-glyph"],
     transient: hints["transient"] === true || hints["transient"] === 1,
     app: raw.app,
     // Else the desktop-entry hint, which names the app's .desktop file and so,
@@ -134,6 +134,7 @@ function restored(entry) {
   row = normalise(row)
   row.duration = row.urgency === 2 ? 0 : RESTORE_GRACE
   row.restored = true
+  row.groupKey = "toast:" + String(row.key || "")
   return row
 }
 
