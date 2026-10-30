@@ -14,7 +14,7 @@ local layouts_dir = paths.state_home .. "/void/workspace-layouts"
 -- them, or load same-named ones from under the home directory instead.
 package.path = paths.state_home .. "/?.lua;" .. package.path
 
-require_all.files(layouts_dir, "omarchy.workspace-layouts", { reload = true })
+require_all.files(layouts_dir, "void.workspace-layouts", { reload = true })
 
 -- With every saved mode known, bring the open windows in line and set up what a
 -- floating workspace needs.

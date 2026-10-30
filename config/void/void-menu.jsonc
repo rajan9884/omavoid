@@ -883,6 +883,6 @@
   "remove.webapp": {
     "icon": "",
     "label": "Web App",
-    "action": "void-webapp-remove"
+    "action": "void-launch-floating-terminal-with-presentation void-webapp-remove"
   }
 }

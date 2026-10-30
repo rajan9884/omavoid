@@ -10,9 +10,7 @@ OLD_ICON_DIR="$HOME/.local/share/applications/icons"
 DESKTOP_DIR="$HOME/.local/share/applications/"
 
 # Always index the launchers, so removal deletes the file that was found rather
-# than a path rebuilt from the displayed name. Installs predating the name
-# validation could nest the launcher inside directories, and those are exactly
-# the ones a reconstructed path cannot reach.
+# than a path rebuilt from the displayed name.
 WEB_APPS=()
 WEB_APP_PATHS=()
 while IFS= read -r -d '' file; do
@@ -22,8 +20,6 @@ while IFS= read -r -d '' file; do
   fi
 done < <(find "$DESKTOP_DIR" -name '*.desktop' -print0 2>/dev/null)
 
-# The launcher matching a chosen name, or empty when nothing was indexed under
-# it (an app removed between the scan and the pick, say).
 path_for_web_app() {
   local wanted="$1" i
   for i in "${!WEB_APPS[@]}"; do
@@ -37,9 +33,15 @@ path_for_web_app() {
 if (( $# == 0 )); then
   if ((${#WEB_APPS[@]})); then
     mapfile -t SORTED_WEB_APPS < <(printf '%s\n' "${WEB_APPS[@]}" | sort)
-    APP_NAME=$(void-menu-select "$(void-i18n webapp.selectRemove 2>/dev/null || echo "Remove Web App")" "${SORTED_WEB_APPS[@]}" -- --width 520 --maxheight 520)
+    if [ -t 0 ] || [ -n "${TERM:-}" ]; then
+      echo -e "\e[32m$(void-i18n webapp.selectRemove 2>/dev/null || echo "Select web app to remove:")\n\e[0m"
+      APP_NAME=$(gum choose --header="Use arrow keys to select, Enter to confirm, Ctrl+C to cancel" "${SORTED_WEB_APPS[@]}")
+    else
+      APP_NAME=$(void-menu-select "$(void-i18n webapp.selectRemove 2>/dev/null || echo "Remove Web App")" "${SORTED_WEB_APPS[@]}" -- --width 875 --maxheight 600)
+    fi
   else
-    void-notification-send -g  "Web Apps" "No web apps installed to remove." 2>/dev/null || echo "No web apps to remove."
+    echo "No web apps installed to remove."
+    sleep 2
     exit 0
   fi
 else
@@ -60,3 +62,4 @@ if [[ ${OMARCHY_REMOVE_NOTIFY:-true} != "false" ]]; then
   void-notification-send -g  "$(void-i18n webapp.removed 2>/dev/null || echo "Removed")" "$APP_NAME"
 fi
 update-desktop-database "$DESKTOP_DIR" &>/dev/null
+echo "Successfully removed $APP_NAME"

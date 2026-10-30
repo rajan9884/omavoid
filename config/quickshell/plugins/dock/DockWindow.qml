@@ -194,10 +194,9 @@ PanelWindow {
   WlrLayershell.namespace: "omarchy-dock"
   WlrLayershell.layer: WlrLayer.Top
   WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-  // Kept clear of the bar's reserved edge, without reserving one of its own:
-  // floating windows go where they are put.
+  // Reserve space when shown so windows (and scratchpad) keep a clean margin above the dock
   exclusionMode: ExclusionMode.Normal
-  exclusiveZone: 0
+  exclusiveZone: window.shown && !window.tucked ? (body.height + window.gap * 2) : 0
 
   anchors {
     top: window.position !== "bottom"
@@ -266,8 +265,18 @@ PanelWindow {
     LayoutMirroring.enabled: false
     LayoutMirroring.childrenInherit: true
 
-    width: slots.implicitWidth
-    height: slots.implicitHeight
+    readonly property int dockPadding: Style.space(4)
+    width: slots.implicitWidth + dockPadding * 2
+    height: slots.implicitHeight + dockPadding * 2
+
+    // Dock container background & subtle border
+    BorderSurface {
+      id: dockFrame
+      anchors.fill: parent
+      radius: Math.min(Style.cornerRadius * 2, height / 2)
+      color: Util.alpha(Commons.Color.popups.background, 0.88)
+      borderSpec: Border.surfaceSpec("popups", "border", Commons.Color.popups.border, Style.normalBorderWidth)
+    }
     // How far the dock is tucked past its edge. Auto-hide slides it, but only
     // while the dock is on screen: arriving on a floating workspace shows it
     // where it belongs at once.
@@ -415,6 +424,14 @@ PanelWindow {
     readonly property int windowCount: modelData ? modelData.windows.length : 0
     property real pulse: 1
 
+    readonly property bool hasActiveWindow: {
+      if (!modelData || !modelData.windows) return false
+      for (var i = 0; i < modelData.windows.length; i++) {
+        if (modelData.windows[i].toplevel && modelData.windows[i].toplevel.activated) return true
+      }
+      return false
+    }
+
     // Slots between where the dragged app was and where it would land step
     // aside to make room; the dragged one follows the pointer.
     readonly property real shift: window.insertIndex >= 0 ? (index >= window.insertIndex ? 1 : -1) * window.slotSize / 2
@@ -515,6 +532,32 @@ PanelWindow {
       transformOrigin: window.popOrigin
 
       Behavior on scale { NumberAnimation { duration: Style.duration(120); easing.type: Easing.OutCubic } }
+    }
+
+    // Running indicator dot / bottom bar
+    Rectangle {
+      id: activeIndicator
+      visible: appSlot.windowCount > 0
+      width: window.vertical ? Style.space(3) : (appSlot.hasActiveWindow ? Style.space(16) : Style.space(5))
+      height: window.vertical ? (appSlot.hasActiveWindow ? Style.space(16) : Style.space(5)) : Style.space(3)
+      radius: Style.space(1.5)
+      color: appSlot.hasActiveWindow ? Commons.Color.accent : Commons.Color.bar.text
+      opacity: appSlot.hasActiveWindow ? 1.0 : 0.75
+
+      anchors.horizontalCenter: window.vertical ? undefined : parent.horizontalCenter
+      anchors.verticalCenter: window.vertical ? parent.verticalCenter : undefined
+      anchors.bottom: window.position === "top" ? undefined : (window.vertical ? undefined : parent.bottom)
+      anchors.top: window.position === "top" ? parent.top : undefined
+      anchors.bottomMargin: Style.space(3)
+      anchors.topMargin: Style.space(3)
+      anchors.left: window.position === "right" ? parent.left : undefined
+      anchors.right: window.position === "left" ? parent.right : undefined
+      anchors.leftMargin: Style.space(3)
+      anchors.rightMargin: Style.space(3)
+
+      Behavior on width { NumberAnimation { duration: Style.duration(150); easing.type: Easing.OutCubic } }
+      Behavior on height { NumberAnimation { duration: Style.duration(150); easing.type: Easing.OutCubic } }
+      Behavior on opacity { NumberAnimation { duration: Style.duration(150) } }
     }
 
     // With animations off it holds still rather than spinning through
