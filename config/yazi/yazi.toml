@@ -5,3 +5,34 @@ sort_dir_first = true
 linemode = "size"
 show_hidden = true
 show_symlink = true
+
+[opener]
+edit = [
+	{ run = 'nvim "$@"', block = true, for = "unix" },
+]
+open = [
+	{ run = 'xdg-open "$@"', desc = "Open", for = "linux" },
+]
+play = [
+	{ run = 'mpv --force-window "$@"', orphan = true, for = "unix" },
+]
+image = [
+	{ run = 'imv "$@"', orphan = true, for = "unix" },
+]
+
+[open]
+rules = [
+	{ name = "*/", use = [ "edit", "open" ] },
+	{ mime = "text/*", use = [ "edit", "open" ] },
+	{ mime = "image/*", use = [ "image", "open" ] },
+	{ mime = "{audio,video}/*", use = [ "play", "open" ] },
+	{ mime = "application/ogg", use = [ "play", "open" ] },
+	{ mime = "application/*zip", use = [ "open" ] },
+	{ mime = "application/x-tar", use = [ "open" ] },
+	{ mime = "application/x-bzip*", use = [ "open" ] },
+	{ mime = "application/x-7z-compressed", use = [ "open" ] },
+	{ mime = "application/x-rar", use = [ "open" ] },
+	{ mime = "application/xz", use = [ "open" ] },
+	{ mime = "application/pdf", use = [ "open" ] },
+	{ mime = "*", use = [ "open" ] },
+]

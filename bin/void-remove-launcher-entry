@@ -84,6 +84,13 @@ if is_user_desktop_file; then
   exit 0
 fi
 
+if package_name="$(xbps-query -o "$desktop_file" 2>/dev/null | cut -d: -f1 | sed 's/-[0-9].*//' | head -1)" && [[ -n $package_name ]]; then
+  display_name="${entry_name:-$desktop_name}"
+  quoted_package="$(printf '%q' "$package_name")"
+  quoted_display="$(printf '%q' "$display_name")"
+  exec void-launch-floating-terminal-with-presentation "echo Uninstalling $quoted_display...; sudo xbps-remove -R $quoted_package"
+fi
+
 if package_name="$(pacman -Qqo "$desktop_file" 2>/dev/null | head -1)" && [[ -n $package_name ]]; then
   display_name="${entry_name:-$desktop_name}"
   quoted_package="$(printf '%q' "$package_name")"

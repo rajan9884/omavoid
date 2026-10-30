@@ -45,7 +45,7 @@ ffd() {
   local files=(${(f)"$(fzf -m --preview='bat --color=always {}')"})
   (( $#files )) && { echo "Delete: $files"; read -q "?Confirm? "; echo; rm -rf $files }
 }
-alias zed='zeditor'
+alias zed='zed-editor'
 alias v='nvim'
 alias qs='~/.local/bin/qshell-ctl'
 alias wifi='~/.local/bin/tui-wifi'
