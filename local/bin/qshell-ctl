@@ -22,21 +22,21 @@ send_ipc() {
     case "$action" in
         toggle)
             if [ "$p1" = "omarchy.apps" ]; then
-                omarchy-shell -q omarchy.dock apps >/dev/null 2>&1 || omarchy-shell -q shell toggle omarchy.menu '{"menu":"apps"}' || true
+                void-shell -q omarchy.dock apps >/dev/null 2>&1 || void-shell -q shell toggle omarchy.menu '{"menu":"apps"}' || true
             elif [ "$p1" = "omarchy.keybinds" ]; then
-                omarchy-menu-keybindings >/dev/null 2>&1 || omarchy-shell -q shell toggle omarchy.menu '{"menu":"keybindings"}' || true
+                void-menu-keybindings >/dev/null 2>&1 || void-shell -q shell toggle omarchy.menu '{"menu":"keybindings"}' || true
             else
-                omarchy-shell -q shell toggle "$p1" "{}" >/dev/null 2>&1 || true
+                void-shell -q shell toggle "$p1" "{}" >/dev/null 2>&1 || true
             fi
             ;;
         summon)
-            omarchy-shell -q shell summon "$p1" "{}" >/dev/null 2>&1 || true
+            void-shell -q shell summon "$p1" "{}" >/dev/null 2>&1 || true
             ;;
         hide)
-            omarchy-shell -q shell hide "$p1" >/dev/null 2>&1 || true
+            void-shell -q shell hide "$p1" >/dev/null 2>&1 || true
             ;;
         lock)
-            omarchy-lock >/dev/null 2>&1 || omarchy-shell -q shell lock >/dev/null 2>&1 || true
+            void-system-lock >/dev/null 2>&1 || void-shell -q shell lock >/dev/null 2>&1 || true
             ;;
     esac
 }

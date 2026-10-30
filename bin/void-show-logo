@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# void:summary=Clear terminal and display branding/logo for presentation wrappers
+# void:hidden=true
+
+clear
+logo_file="${XDG_CONFIG_HOME:-$HOME/.config}/void/branding/logo.txt"
+if [[ ! -f "$logo_file" && -n "$OMARCHY_PATH" && -f "$OMARCHY_PATH/logo.txt" ]]; then
+  logo_file="$OMARCHY_PATH/logo.txt"
+fi
+
+if [[ -f "$logo_file" ]]; then
+  echo -e "\033[32m"
+  cat "$logo_file"
+  echo -e "\033[0m"
+elif command -v fastfetch >/dev/null 2>&1; then
+  fastfetch -s none 2>/dev/null || true
+else
+  echo -e "\033[32m=== Void Linux ===\033[0m"
+fi
+echo

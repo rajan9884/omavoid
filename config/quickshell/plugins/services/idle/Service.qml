@@ -70,7 +70,7 @@ Item {
   function launchScreensaver() {
     root.screensaverStartedThisCycle = true
     screensaverLaunchGraceTimer.restart()
-    runProcess(screensaverProcess, "screensaver", "[[ $(omarchy-shell lock isLocked 2>/dev/null) == \"true\" ]] || omarchy-launch-screensaver")
+    runProcess(screensaverProcess, "screensaver", "[[ $(void-shell lock isLocked 2>/dev/null) == \"true\" ]] || void-launch-screensaver")
   }
 
   function lockSystem(reason) {
@@ -81,7 +81,7 @@ Item {
     root.idledThisCycle = false
     root.screensaverStartedThisCycle = false
     resetScreensaverWindows()
-    runProcess(lockProcess, "lock", "omarchy-system-lock")
+    runProcess(lockProcess, "lock", "void-system-lock")
   }
 
   function startIdleCycle() {
@@ -120,7 +120,7 @@ Item {
     lockTimer.stop()
     screensaverLaunchGraceTimer.stop()
 
-    if (root.idledThisCycle) runProcess(wakeProcess, "wake", "omarchy-system-wake")
+    if (root.idledThisCycle) runProcess(wakeProcess, "wake", "void-system-wake")
 
     root.idledThisCycle = false
     root.screensaverStartedThisCycle = false

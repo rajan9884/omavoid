@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# void:summary=Export active theme gum styling variables
+# void:hidden=true
+
+gum_file="${XDG_STATE_HOME:-$HOME/.local/state}/void/current/theme/gum_env.lua"
+[[ ! -f "$gum_file" ]] && gum_file="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/current/theme/gum_env.lua"
+
+if [[ -f "$gum_file" ]]; then
+  while IFS= read -r line; do
+    if [[ $line =~ hl\.env\(\"([^\"]+)\",[[:space:]]*\"([^\"]*)\"\) ]]; then
+      export "${BASH_REMATCH[1]}=${BASH_REMATCH[2]}"
+    fi
+  done < "$gum_file"
+fi

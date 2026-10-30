@@ -635,7 +635,7 @@ function guardScript(items) {
 // bare call, such as a second command or a shell-expanded payload, is left to
 // bash.
 function summonAction(action) {
-  var match = /^omarchy-shell shell summon ([A-Za-z0-9._-]+)(?: '([^']*)')?$/.exec(String(action || ""))
+  var match = /^(?:omarchy-shell|void-shell) shell summon ([A-Za-z0-9._-]+)(?: '([^']*)')?$/.exec(String(action || ""))
   if (!match) return null
   return { id: match[1], payload: match[2] || "{}" }
 }
