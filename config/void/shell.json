@@ -79,10 +79,12 @@
     "position": "top"
   },
   "dock": {
+    "autohide": true,
     "pinned": [
-      "org.gnome.Nautilus",
       "chromium",
       "foot",
+      "helium",
+      "org.gnome.Nautilus",
       "omacalc",
       "omawrite",
       "X",

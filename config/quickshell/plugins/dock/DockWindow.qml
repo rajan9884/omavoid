@@ -196,7 +196,7 @@ PanelWindow {
   WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
   // Reserve space when shown so windows (and scratchpad) keep a clean margin above the dock
   exclusionMode: ExclusionMode.Normal
-  exclusiveZone: window.shown && !window.tucked ? (body.height + window.gap * 2) : 0
+  exclusiveZone: 0
 
   anchors {
     top: window.position !== "bottom"
@@ -280,7 +280,7 @@ PanelWindow {
     // How far the dock is tucked past its edge. Auto-hide slides it, but only
     // while the dock is on screen: arriving on a floating workspace shows it
     // where it belongs at once.
-    property real tuck: window.tucked ? window.slotSize + window.gap : 0
+    property real tuck: window.tucked ? (height + window.gap * 2) : 0
 
     // Tucking away is quicker than coming back. A gentler curve than
     // Style.easeOut, which crosses the short slide in a frame or two.
