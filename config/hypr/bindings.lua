@@ -3,6 +3,10 @@
 -- Toggle small centered floating window (Super + T)
 o.rebind("SUPER + T", "Toggle floating window", "void-toggle-floating-centered")
 
+-- Toggle HDR display mode (Super + Alt + H / Super + Shift + H)
+o.rebind("SUPER + ALT + H", "Toggle HDR mode", "void-toggle-hdr")
+o.rebind("SUPER + SHIFT + H", "Toggle HDR mode", "void-toggle-hdr")
+
 -- Background switcher (Super + Ctrl + Space / Super + Ctrl + W)
 o.rebind("SUPER + CTRL + SPACE", "Background switcher", { menu = "background" })
 o.rebind("SUPER + CTRL + W", "Background switcher", { menu = "background" })

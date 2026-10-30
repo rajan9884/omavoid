@@ -1,0 +1,36 @@
+#!/bin/bash
+# void:summary=Toggle HDR display mode and color management
+# void:args=[toggle|on|off]
+# void:examples=void-toggle-hdr
+
+FLAG="$HOME/.local/state/void/toggles/hdr-on"
+ACTION="${1:-toggle}"
+
+case "$ACTION" in
+  toggle|"")
+    if [[ -f "$FLAG" ]]; then
+      ACTION="off"
+    else
+      ACTION="on"
+    fi
+    ;;
+  on|off) ;;
+  *)
+    echo "Usage: void-toggle-hdr [toggle|on|off]" >&2
+    exit 1
+    ;;
+esac
+
+mkdir -p "$(dirname "$FLAG")"
+
+if [[ "$ACTION" == "on" ]]; then
+  touch "$FLAG"
+  sed -i -E "s|^monitor = (.*)|monitor = eDP-1, 2880x1800@90.00100, auto, 2, bitdepth, 10, cm, hdr, sdrbrightness, 1.3|" "$HOME/.config/hypr/conf/monitors.conf" 2>/dev/null || true
+  void-restart-hyprctl
+  void-notification-send -u normal -g 󰍹 "HDR Display Mode" "Enabled (10-bit BT.2020 HDR)"
+else
+  rm -f "$FLAG"
+  sed -i -E "s|^monitor = (.*)|monitor = eDP-1, 2880x1800@90.00100, auto, 2, cm, srgb|" "$HOME/.config/hypr/conf/monitors.conf" 2>/dev/null || true
+  void-restart-hyprctl
+  void-notification-send -u normal -g 󰍹 "HDR Display Mode" "Disabled (Standard sRGB)"
+fi
