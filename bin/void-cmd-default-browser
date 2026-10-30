@@ -10,9 +10,11 @@ if [[ -z "$browser" ]]; then
   browser=$(xdg-mime query default x-scheme-handler/https 2>/dev/null)
 fi
 
-# Fallback to chromium if installed, otherwise first available
+# Fallback to helium if installed, then chromium, otherwise first available
 if [[ -z "$browser" || "$browser" != *.desktop ]]; then
-  if command -v chromium &>/dev/null; then
+  if command -v helium-browser &>/dev/null; then
+    browser="helium.desktop"
+  elif command -v chromium &>/dev/null; then
     browser="chromium.desktop"
   elif command -v google-chrome &>/dev/null; then
     browser="google-chrome.desktop"

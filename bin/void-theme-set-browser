@@ -70,7 +70,7 @@ chrome=google-chrome-stable
 void-cmd-present "$chrome" || chrome=google-chrome
 
 browsers_to_refresh=()
-for browser in chromium:chromium "chrome:$chrome" msedge:microsoft-edge-stable brave:brave; do
+for browser in helium:helium-browser chromium:chromium "chrome:$chrome" msedge:microsoft-edge-stable brave:brave; do
   [[ -n ${running_names[${browser%%:*}]:-} ]] && void-cmd-present "${browser#*:}" && browsers_to_refresh+=("${browser#*:}")
 done
 # Match on the binary path: the running process is named plain "brave", and a
