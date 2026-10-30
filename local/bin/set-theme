@@ -1,27 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
-slug="${1:-tokyo-night}"
-THEMES_DIR="$HOME/.config/themes"
 
-if [ ! -d "$THEMES_DIR/$slug" ]; then
-    notify-send "Theme Error" "Unknown theme: $slug"
+theme="${1:-tokyo-night}"
+
+if command -v void-theme-set >/dev/null 2>&1; then
+    exec void-theme-set "$theme"
+elif [ -x /usr/share/void/bin/void-theme-set ]; then
+    exec /usr/share/void/bin/void-theme-set "$theme"
+else
+    echo "Error: void-theme-set not found" >&2
     exit 1
 fi
-
-mkdir -p "$HOME/.local/state/void/current/theme"
-echo "$slug" > "$HOME/.local/state/void/current/theme.name"
-
-cp "$THEMES_DIR/$slug/theme.json" "$HOME/.config/quickshell/theme.json"
-cp "$THEMES_DIR/$slug/colors.toml" "$HOME/.config/quickshell/colors.toml"
-cp "$THEMES_DIR/$slug/shell.toml" "$HOME/.config/quickshell/shell.toml"
-cp "$THEMES_DIR/$slug/colors.toml" "$HOME/.local/state/void/current/theme/colors.toml"
-cp "$THEMES_DIR/$slug/shell.toml" "$HOME/.local/state/void/current/theme/shell.toml"
-
-# If upstream void-theme-set is installed from github.com/omacom/omarchy, invoke it too
-if [ -x /usr/share/void/bin/void-theme-set ]; then
-    /usr/share/void/bin/void-theme-set "$slug" >/dev/null 2>&1 || true
-fi
-
-cp "$THEMES_DIR/$slug/hypr-theme.conf" "$HOME/.config/hypr/conf/theme.conf"
-hyprctl reload >/dev/null 2>&1 || true
-notify-send "Theme Activated" "Switched to $slug"

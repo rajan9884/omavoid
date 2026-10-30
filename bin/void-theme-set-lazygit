@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# omarchy:summary=Apply current theme to Lazygit
+# omarchy:hidden=true
+
+THEME_FILE="$HOME/.local/state/void/current/theme/lazygit.theme.yml"
+LAZYGIT_CONFIG_DIR="$HOME/.config/lazygit"
+LAZYGIT_CONFIG="$LAZYGIT_CONFIG_DIR/config.yml"
+
+mkdir -p "$LAZYGIT_CONFIG_DIR"
+if [[ -f "$THEME_FILE" ]]; then
+  cp "$THEME_FILE" "$LAZYGIT_CONFIG"
+fi

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# omarchy:summary=Cache background switcher thumbnails for the current theme
+
+theme_name=$(cat "$HOME/.local/state/void/current/theme.name" 2>/dev/null)
+
+void-menu-images \
+  --cache-only \
+  "$HOME/.local/state/void/current/theme/backgrounds" \
+  "$HOME/.config/void/backgrounds/$theme_name"

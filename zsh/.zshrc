@@ -77,6 +77,7 @@ fi
 
 if [ -f /usr/share/fzf/key-bindings.zsh ]; then source /usr/share/fzf/key-bindings.zsh; fi
 if [ -f /usr/share/fzf/completion.zsh ]; then source /usr/share/fzf/completion.zsh; fi
+if [ -f "$HOME/.local/state/void/current/theme/fzf.sh" ]; then source "$HOME/.local/state/void/current/theme/fzf.sh"; fi
 # Atuin owns Ctrl-R; fzf keeps Ctrl-T + Alt-C.
 if command -v atuin >/dev/null 2>&1; then eval "$(atuin init zsh --disable-up-arrow)"; fi
 if command -v direnv >/dev/null 2>&1; then eval "$(direnv hook zsh)"; fi

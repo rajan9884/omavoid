@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# omarchy:summary=Apply the current theme keyboard color to supported keyboards
+# omarchy:hidden=true
+
+void-theme-set-keyboard-asus-rog
+void-theme-set-keyboard-f16

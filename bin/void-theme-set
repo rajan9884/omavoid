@@ -559,6 +559,10 @@ visible_theme_commands=(
   void-restart-opencode
   void-restart-helix
   void-theme-set-hunk
+  void-restart-neovim
+  void-theme-set-yazi
+  void-theme-set-lazygit
+  void-theme-set-fastfetch
 )
 
 # Configs other apps read on their next refresh or launch: GTK, the browser

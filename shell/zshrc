@@ -30,6 +30,7 @@ fi
 
 [[ -f /usr/share/fzf/key-bindings.zsh ]] && source /usr/share/fzf/key-bindings.zsh
 [[ -f /usr/share/fzf/completion.zsh ]] && source /usr/share/fzf/completion.zsh
+[[ -f "$HOME/.local/state/void/current/theme/fzf.sh" ]] && source "$HOME/.local/state/void/current/theme/fzf.sh"
 
 # Tool Initializers
 if command -v mise >/dev/null 2>&1; then

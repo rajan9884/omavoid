@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# omarchy:summary=Reload Neovim colorscheme across all running instances
+# omarchy:hidden=true
+
+CURRENT_THEME_PATH="$HOME/.local/state/void/current/theme"
+NEOVIM_THEME="$CURRENT_THEME_PATH/neovim.lua"
+
+[[ -f "$NEOVIM_THEME" ]] || exit 0
+
+colorscheme=$(grep -oP 'colorscheme\s*=\s*"\K[^"]+' "$NEOVIM_THEME" 2>/dev/null || true)
+[[ -n "$colorscheme" ]] || exit 0
+
+# Check if any nvim process is running
+pgrep -x nvim >/dev/null 2>&1 || exit 0
+
+shopt -s nullglob
+sockets=()
+for sock in "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"/nvim.* /tmp/nvim*/*; do
+  if [[ -S "$sock" ]]; then
+    sockets+=("$sock")
+  fi
+done
+
+for sock in "${sockets[@]}"; do
+  timeout 1 nvim --server "$sock" --remote-send "<Esc>:colorscheme $colorscheme<CR>" >/dev/null 2>&1 || true
+  if [[ -f "$HOME/.config/nvim/plugin/after/transparency.lua" ]]; then
+    timeout 1 nvim --server "$sock" --remote-send "<Esc>:luafile ~/.config/nvim/plugin/after/transparency.lua<CR>" >/dev/null 2>&1 || true
+  fi
+done

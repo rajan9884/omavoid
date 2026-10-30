@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# omarchy:summary=Apply current theme to fastfetch
+# omarchy:hidden=true
+
+THEME_FILE="$HOME/.local/state/void/current/theme/fastfetch.jsonc"
+FASTFETCH_DIR="$HOME/.config/fastfetch"
+
+mkdir -p "$FASTFETCH_DIR"
+if [[ -f "$THEME_FILE" ]]; then
+  cp "$THEME_FILE" "$FASTFETCH_DIR/config.jsonc"
+  # Also keep repo copy in sync if different
+  REPO_CONF="$HOME/quattro-void-dotfiles/config/fastfetch/config.jsonc"
+  if [[ -f "$REPO_CONF" && "$(readlink -f "$FASTFETCH_DIR/config.jsonc" 2>/dev/null)" != "$(readlink -f "$REPO_CONF" 2>/dev/null)" ]]; then
+    cp "$THEME_FILE" "$REPO_CONF"
+  fi
+fi
