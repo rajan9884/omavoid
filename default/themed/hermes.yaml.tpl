@@ -1,5 +1,5 @@
-name: omarchy
-description: Omarchy system theme
+name: void
+description: Void system theme
 colors:
   background: "{{ background }}"
   ui_text: "{{ foreground }}"

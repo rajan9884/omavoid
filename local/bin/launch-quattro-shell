@@ -19,7 +19,7 @@ fi
 
 # Clean up stale locks or sockets
 pkill -x quickshell 2>/dev/null || true
-rm -f "$runtime_dir"/omarchy-shell-*.sock "$runtime_dir"/void-shell-*.sock 2>/dev/null || true
+rm -f "$runtime_dir"/void-shell-*.sock 2>/dev/null || true
 sleep 0.3
 
 # Choose shell root: prefer user ~/.config/quickshell, fallback to /usr/share/void/shell

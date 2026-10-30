@@ -42,7 +42,7 @@ Because upstream Omarchy Quattro relies heavily on Arch Linux and systemd user s
 - **`omarchy-lock-password`**: `/etc/pam.d/omarchy-lock-password` configured with `system-auth` for reliable lockscreen authentication.
 - **`omarchy-system`**: Void-native power controller handling logout (`hyprctl dispatch exit`), reboot, shutdown, suspend, and display manager transitions.
 - **`void-audio-init`**: Detached background daemon that cleans stale sockets and guarantees PipeWire and WirePlumber are active before the desktop shell starts.
-- **`void-backlight`**: Saves and restores screen brightness across reboots via `/var/lib/backlight/` and `~/.local/state/omarchy/brightness`.
+- **`void-backlight`**: Saves and restores screen brightness across reboots via `/var/lib/backlight/` and `~/.local/state/void/brightness`.
 
 ---
 
@@ -205,7 +205,7 @@ input = {
 1. **Audio status bar icon shows muted after reboot:**
    PipeWire was likely started after Quickshell. Run `reload-desktop` or press `Super + Shift + R`. The installer ensures `omarchy-launch-shell` starts `void-audio-init` first.
 2. **First-run notifications repeatedly appearing:**
-   Markers are saved in `~/.local/state/omarchy/done/`. Run:
+   Markers are saved in `~/.local/state/void/done/`. Run:
    ```bash
    omarchy-done mark first-run-user
    omarchy-done mark finalize-user

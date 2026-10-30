@@ -34,7 +34,7 @@ if command -v starship >/dev/null 2>&1; then eval "$(starship init zsh)"; fi
 # Hyprland launches GUI apps with cwd=/ — never start an interactive shell at /.
 [[ "$PWD" == "/" ]] && cd "$HOME" >/dev/null 2>&1 || true
 
-# ── Extra aliases (from Arch, non-conflicting with omarchy) ──
+# ── Extra aliases (from Arch, non-conflicting with void) ──
 unalias ff ffd 2>/dev/null
 ff() {
   local files=(${(f)"$(fzf -m --preview='bat --color=always {}')"})

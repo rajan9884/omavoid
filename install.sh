@@ -332,9 +332,9 @@ RC
     sudo chmod +x /etc/rc.shutdown
 
     # Mark Omarchy first-run as completed so repetitive notifications do not pop up on every login
-    mkdir -p "${TARGET_HOME}/.local/state/omarchy/done"
-    touch "${TARGET_HOME}/.local/state/omarchy/done/first-run-user"
-    touch "${TARGET_HOME}/.local/state/omarchy/done/finalize-user"
+    mkdir -p "${TARGET_HOME}/.local/state/void/done"
+    touch "${TARGET_HOME}/.local/state/void/done/first-run-user"
+    touch "${TARGET_HOME}/.local/state/void/done/finalize-user"
 
     # systemd-run shim
     cat <<'SHIM' | sudo tee /usr/local/bin/systemd-run >/dev/null
@@ -589,7 +589,7 @@ CONF
 deploy_dotfiles() {
     log_info "Deploying Quattro-Void dotfiles via symlinks to ${TARGET_HOME}..."
     BACKUP_DIR="${TARGET_HOME}/.config-backup-$(date +%Y%m%d-%H%M%S)"
-    mkdir -p "${TARGET_HOME}/.config" "${TARGET_HOME}/.local/bin" "${TARGET_HOME}/.local/state/omarchy/current/theme" "${TARGET_HOME}/Pictures/Screenshots"
+    mkdir -p "${TARGET_HOME}/.config" "${TARGET_HOME}/.local/bin" "${TARGET_HOME}/.local/state/void/current/theme" "${TARGET_HOME}/Pictures/Screenshots"
 
     # Symlink all configs from REPO_DIR/config to TARGET_HOME/.config
     for item in "${REPO_DIR}"/config/*; do
@@ -666,20 +666,20 @@ deploy_dotfiles() {
     fi
 
     if [ -d "$THEME_SRC" ]; then
-        cp "$THEME_SRC/colors.toml" "${TARGET_HOME}/.local/state/omarchy/current/theme/colors.toml" 2>/dev/null || true
-        cp "$THEME_SRC/shell.lock.toml" "${TARGET_HOME}/.local/state/omarchy/current/theme/shell.lock.toml" 2>/dev/null || true
-        echo "tokyo-night" > "${TARGET_HOME}/.local/state/omarchy/current/theme.name"
+        cp "$THEME_SRC/colors.toml" "${TARGET_HOME}/.local/state/void/current/theme/colors.toml" 2>/dev/null || true
+        cp "$THEME_SRC/shell.lock.toml" "${TARGET_HOME}/.local/state/void/current/theme/shell.lock.toml" 2>/dev/null || true
+        echo "tokyo-night" > "${TARGET_HOME}/.local/state/void/current/theme.name"
         WP=$(find "$THEME_SRC/backgrounds" -name "2-quattro.webp" -o -name "*.webp" 2>/dev/null | head -n1 || true)
         if [ -n "$WP" ]; then
-            ln -sf "$WP" "${TARGET_HOME}/.local/state/omarchy/current/background"
+            ln -sf "$WP" "${TARGET_HOME}/.local/state/void/current/background"
         fi
     fi
 
     # Set up theme hooks for btop and neovim in repo (gitignored)
     mkdir -p "${REPO_DIR}/config/btop/themes"
-    ln -snf "${TARGET_HOME}/.local/state/omarchy/current/theme/btop.theme" "${REPO_DIR}/config/btop/themes/current.theme"
+    ln -snf "${TARGET_HOME}/.local/state/void/current/theme/btop.theme" "${REPO_DIR}/config/btop/themes/current.theme"
     mkdir -p "${REPO_DIR}/config/nvim/lua/plugins"
-    ln -snf "${TARGET_HOME}/.local/state/omarchy/current/theme/neovim.lua" "${REPO_DIR}/config/nvim/lua/plugins/theme.lua"
+    ln -snf "${TARGET_HOME}/.local/state/void/current/theme/neovim.lua" "${REPO_DIR}/config/nvim/lua/plugins/theme.lua"
 
     # Set login shell to zsh if installed
     if command -v zsh >/dev/null 2>&1; then
