@@ -54,3 +54,11 @@ for workspace = 1, 10 do
   o.rebind("SUPER + SHIFT + " .. key, "Move window to workspace " .. workspace, o.workspaces.move_window(workspace))
   o.rebind("SUPER + SHIFT + ALT + " .. key, "Move window silently to workspace " .. workspace, o.workspaces.move_window(workspace, false))
 end
+
+-- Group window switches (Alt + 1..10)
+for index = 1, 9 do
+  hl.unbind("SUPER + ALT + code:" .. tostring(index + 9))
+  o.rebind("ALT + code:" .. tostring(index + 9), "Switch to group window " .. index, hl.dsp.group.active({ index = index }))
+end
+hl.unbind("SUPER + ALT + code:19")
+o.rebind("ALT + code:19", "Switch to group window 10", hl.dsp.group.active({ index = 10 }))

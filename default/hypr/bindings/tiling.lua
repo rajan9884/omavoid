@@ -98,9 +98,10 @@ o.bind("SUPER + CTRL + RIGHT", "Move grouped window focus right", hl.dsp.group.n
 o.bind("SUPER + ALT + mouse_down", "Next window in group", hl.dsp.group.next())
 o.bind("SUPER + ALT + mouse_up", "Previous window in group", hl.dsp.group.prev())
 
-for index = 1, 5 do
-  o.bind("SUPER + ALT + code:" .. tostring(index + 9), "Switch to group window " .. index, hl.dsp.group.active({ index = index }))
+for index = 1, 9 do
+  o.bind("ALT + code:" .. tostring(index + 9), "Switch to group window " .. index, hl.dsp.group.active({ index = index }))
 end
+o.bind("ALT + code:19", "Switch to group window 10", hl.dsp.group.active({ index = 10 }))
 
 o.bind("SUPER + SLASH", "Monitor scaling up", "void-hyprland-monitor-scaling up")
 o.bind("SUPER + ALT + SLASH", "Monitor scaling down", "void-hyprland-monitor-scaling down")
