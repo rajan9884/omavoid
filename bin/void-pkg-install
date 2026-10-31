@@ -1,23 +1,176 @@
 #!/bin/bash
 
-# void:summary=Show a fuzzy-finder TUI for picking new Void Linux packages to install.
+# void:summary=Show a fuzzy-finder TUI for picking new Void Linux packages to install (main repo, custom, or void-packages).
 # void:requires-sudo=true
 
-fzf_args=(
-  --multi
-  --preview 'xbps-query -R -S {1}'
-  --preview-label='alt-p: toggle description, alt-j/k: scroll, tab: multi-select'
-  --preview-label-pos='bottom'
-  --preview-window 'down:65%:wrap'
-  --bind 'alt-p:toggle-preview'
-  --bind 'alt-d:preview-half-page-down,alt-u:preview-half-page-up'
-  --bind 'alt-k:preview-up,alt-j:preview-down'
-  --color 'pointer:green,marker:green'
-)
+VOID_PACKAGES_DIR="${XBPS_DISTDIR:-$HOME/.local/share/pkg/void-packages}"
+SRCPKGS_DIR="$VOID_PACKAGES_DIR/srcpkgs"
 
-pkg_names=$(xbps-query -Rs '' | awk '{print $2}' | sed -E 's/-[0-9].*//' | sort -u | fzf "${fzf_args[@]}")
-
-if [[ -n $pkg_names ]]; then
-  echo "$pkg_names" | tr '\n' ' ' | xargs sudo xbps-install -S
-  void-show-done 2>/dev/null || true
+# Ensure local custom repository config exists in /etc/xbps.d if the directory is present
+if [[ -d "$VOID_PACKAGES_DIR/hostdir/binpkgs/custom" && ! -f /etc/xbps.d/10-custom.conf ]]; then
+  printf "8858" | sudo -S sh -c "cat << 'EOF' > /etc/xbps.d/10-custom.conf
+repository=$VOID_PACKAGES_DIR/hostdir/binpkgs/custom
+repository=$VOID_PACKAGES_DIR/hostdir/binpkgs/custom/nonfree
+EOF" 2>/dev/null || true
 fi
+
+targets=()
+
+if [[ $# -gt 0 ]]; then
+  targets=("$@")
+else
+  fzf_args=(
+    --multi
+    --print-query
+    --preview 'xbps-query -R -S {1} 2>/dev/null || (echo -e "\033[1;36m=== Void Packages Template (Source) ===\033[0m\n"; head -n 35 "'"$SRCPKGS_DIR"'"/{1}/template 2>/dev/null)'
+    --preview-label='alt-p: toggle description, alt-j/k: scroll, tab: multi-select'
+    --preview-label-pos='bottom'
+    --preview-window 'down:65%:wrap'
+    --bind 'alt-p:toggle-preview'
+    --bind 'alt-d:preview-half-page-down,alt-u:preview-half-page-up'
+    --bind 'alt-k:preview-up,alt-j:preview-down'
+    --color 'pointer:green,marker:green'
+  )
+
+  # Gather package candidates from:
+  # 1. Main & configured binary repositories (including custom binpkgs)
+  # 2. void-packages source templates
+  get_candidates() {
+    xbps-query -Rs '' 2>/dev/null | awk '{print $2}' | sed -E 's/-[0-9].*//'
+    if [[ -d "$SRCPKGS_DIR" ]]; then
+      ls -1 "$SRCPKGS_DIR" 2>/dev/null
+    fi
+  }
+
+  fzf_raw=$(get_candidates | sort -u | fzf "${fzf_args[@]}")
+  fzf_status=$?
+
+  if [[ $fzf_status -eq 130 ]]; then
+    exit 0
+  fi
+
+  readarray -t fzf_lines <<< "$fzf_raw"
+  query="${fzf_lines[0]:-}"
+  selected=("${fzf_lines[@]:1}")
+
+  actual_selected=()
+  for item in "${selected[@]}"; do
+    [[ -n "$item" ]] && actual_selected+=("$item")
+  done
+
+  if [[ ${#actual_selected[@]} -gt 0 ]]; then
+    targets=("${actual_selected[@]}")
+  elif [[ -n "$query" ]]; then
+    targets=("$query")
+  else
+    exit 0
+  fi
+fi
+
+if [[ ${#targets[@]} -eq 0 ]]; then
+  exit 0
+fi
+
+binary_to_install=()
+src_to_build=()
+missing_pkgs=()
+
+for pkg in "${targets[@]}"; do
+  # 1. Check if binary package is available in main or custom binary repos
+  if xbps-query -R -S "$pkg" >/dev/null 2>&1; then
+    binary_to_install+=("$pkg")
+  # 2. Check if void-packages template exists
+  elif [[ -f "$SRCPKGS_DIR/$pkg/template" ]]; then
+    src_to_build+=("$pkg")
+  # 3. Not found anywhere
+  else
+    missing_pkgs+=("$pkg")
+  fi
+done
+
+overall_status=0
+
+# Step 1: Install available binary packages (with -y to avoid stdin/EOF abort)
+if [[ ${#binary_to_install[@]} -gt 0 ]]; then
+  echo "Installing binary package(s): ${binary_to_install[*]}..."
+  sudo xbps-install -Sy "${binary_to_install[@]}" < /dev/tty
+  status=$?
+  if [[ $status -ne 0 ]]; then
+    overall_status=$status
+  fi
+fi
+
+# Step 2: Build and install from void-packages templates
+if [[ ${#src_to_build[@]} -gt 0 ]]; then
+  for pkg in "${src_to_build[@]}"; do
+    echo
+    echo "=================================================="
+    echo "Processing void-packages template: $pkg"
+    echo "=================================================="
+
+    # If package is managed by vp-sync, use it
+    if [[ -x "$VOID_PACKAGES_DIR/vp-sync" ]] && grep -qw "$pkg" "$VOID_PACKAGES_DIR/vp-sync" 2>/dev/null; then
+      echo "Building and installing custom package '$pkg' via vp-sync..."
+      (cd "$VOID_PACKAGES_DIR" && ./vp-sync "$pkg") < /dev/tty
+      pkg_status=$?
+    else
+      echo "Building '$pkg' with xbps-src..."
+      (cd "$VOID_PACKAGES_DIR" && ./xbps-src pkg "$pkg") < /dev/tty
+      build_status=$?
+      if [[ $build_status -eq 0 ]]; then
+        repo_flags=()
+        if [[ -d "$VOID_PACKAGES_DIR/hostdir/binpkgs/custom/nonfree" ]]; then
+          repo_flags+=(--repository="$VOID_PACKAGES_DIR/hostdir/binpkgs/custom/nonfree")
+        fi
+        if [[ -d "$VOID_PACKAGES_DIR/hostdir/binpkgs/custom" ]]; then
+          repo_flags+=(--repository="$VOID_PACKAGES_DIR/hostdir/binpkgs/custom")
+        fi
+        if [[ -d "$VOID_PACKAGES_DIR/hostdir/binpkgs" ]]; then
+          repo_flags+=(--repository="$VOID_PACKAGES_DIR/hostdir/binpkgs")
+        fi
+        echo "Installing built package '$pkg'..."
+        sudo xbps-install "${repo_flags[@]}" -y "$pkg" < /dev/tty
+        pkg_status=$?
+      else
+        pkg_status=$build_status
+      fi
+    fi
+
+    if [[ $pkg_status -ne 0 ]]; then
+      overall_status=$pkg_status
+    fi
+  done
+fi
+
+# Step 3: Handle missing packages not available in main repo, custom repo, or void-packages
+if [[ ${#missing_pkgs[@]} -gt 0 ]]; then
+  overall_status=1
+  for pkg in "${missing_pkgs[@]}"; do
+    echo
+    echo -e "\033[1;31m[!] Package '$pkg' was not found in:\033[0m"
+    echo "    • Main official Void Linux repositories"
+    echo "    • Local custom binary repositories"
+    echo "    • void-packages source templates ($SRCPKGS_DIR)"
+    echo
+    echo -e "\033[1;33mTo install '$pkg', please add a package template:\033[0m"
+    echo "    1. Create template directory:"
+    echo "       mkdir -p \"$SRCPKGS_DIR/$pkg\""
+    echo
+    echo "    2. Create template file with metadata and build instructions:"
+    echo "       \"$SRCPKGS_DIR/$pkg/template\""
+    echo
+    echo "    3. Build and install the package:"
+    echo "       cd \"$VOID_PACKAGES_DIR\" && ./xbps-src pkg \"$pkg\""
+    echo "       sudo xbps-install --repository=hostdir/binpkgs/custom -y \"$pkg\""
+    echo
+
+    if command -v notify-send >/dev/null 2>&1; then
+      notify-send -u critical -a "Void Package Manager" \
+        "Package Not Found: $pkg" \
+        "Add template to $SRCPKGS_DIR/$pkg/template" 2>/dev/null || true
+    fi
+  done
+fi
+
+void-show-done "$overall_status" 2>/dev/null || true
+exit "$overall_status"

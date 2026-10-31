@@ -49,6 +49,13 @@ setup_void_repos() {
     fi
     echo "repository=https://repo-fastly.voidlinux.org/current" | sudo tee /etc/xbps.d/00-repository-main.conf >/dev/null
 
+    if [ -d "$HOME/.local/share/pkg/void-packages/hostdir/binpkgs/custom" ]; then
+        cat << EOF | sudo tee /etc/xbps.d/10-custom.conf >/dev/null
+repository=$HOME/.local/share/pkg/void-packages/hostdir/binpkgs/custom
+repository=$HOME/.local/share/pkg/void-packages/hostdir/binpkgs/custom/nonfree
+EOF
+    fi
+
     # Route generic kernel packages to upstream mainline series (rolling-release)
     cat << 'EOF' | sudo tee /etc/xbps.d/kernel.conf >/dev/null
 # Route generic kernel packages to upstream mainline series
