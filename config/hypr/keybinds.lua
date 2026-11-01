@@ -138,7 +138,8 @@ hl.bind(mainMod .. " + CTRL + SHIFT + Space", hl.dsp.exec_cmd("void-theme-switch
 -- ── Toggles (HDR, Nightlight, Screensaver, WARP, DND) ──
 hl.bind(mainMod .. " + ALT + H", hl.dsp.exec_cmd("void-toggle-hdr"), { description = "Toggle HDR" })
 hl.bind(mainMod .. " + ALT + N", hl.dsp.exec_cmd("void-toggle-nightlight"), { description = "Toggle nightlight" })
-hl.bind(mainMod .. " + CTRL + ALT + S", hl.dsp.exec_cmd("void-toggle-screensaver"), { description = "Screensaver" })
+hl.bind(mainMod .. " + CTRL + ALT + S", hl.dsp.exec_cmd("void-launch-screensaver force"), { description = "Screensaver" })
+hl.bind(mainMod .. " + SHIFT + Escape", hl.dsp.exec_cmd("void-launch-screensaver force"), { description = "Screensaver" })
 hl.bind(mainMod .. " + CTRL + ALT + N", hl.dsp.exec_cmd("void-toggle-notification-silencing"), { description = "Toggle notification DND" })
 
 -- ── Notifications Control ──

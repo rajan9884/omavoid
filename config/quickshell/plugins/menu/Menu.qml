@@ -36,7 +36,7 @@ Item {
     { name: "Install Packages", iconGlyph: "󰉉", comment: "Search & install Void packages", cmd: "void-launch-floating-terminal-with-presentation void-pkg-install" },
     { name: "Remove Packages", iconGlyph: "󰭌", comment: "Search & remove installed packages", cmd: "void-launch-floating-terminal-with-presentation void-pkg-remove" },
     { name: "Lock System", iconGlyph: "󰌾", comment: "Lock display immediately", cmd: "void-system-lock" },
-    { name: "Screensaver", iconGlyph: "󰍹", comment: "Run ttfx screensaver", cmd: "void-toggle-screensaver" },
+    { name: "Screensaver", iconGlyph: "󰍹", comment: "Run ttfx screensaver", cmd: "void-launch-screensaver force" },
     { name: "Suspend", iconGlyph: "󰤄", comment: "Sleep system", cmd: "loginctl suspend 2>/dev/null || zzz" },
     { name: "Hibernate", iconGlyph: "󰋊", comment: "Hibernate system", cmd: "loginctl hibernate 2>/dev/null || ZZZ" },
     { name: "Logout", iconGlyph: "󰍃", comment: "Exit Hyprland session", cmd: "hyprctl dispatch exit" },

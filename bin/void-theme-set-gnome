@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# void:summary=Apply current theme to GNOME / GTK color scheme and icon settings
+
+if [[ -z ${DBUS_SESSION_BUS_ADDRESS:-} ]]; then
+  exit 0
+fi
+
+THEME_DIR="$HOME/.local/state/void/current/theme"
+COLORS_FILE="$THEME_DIR/colors.toml"
+
+mode=$(void-theme-color --file "$COLORS_FILE" mode 2>/dev/null || echo "dark")
+
+if [[ $mode == "light" ]]; then
+  gsettings set org.gnome.desktop.interface color-scheme "prefer-light" 2>/dev/null || true
+  gsettings set org.gnome.desktop.interface gtk-theme "Adwaita" 2>/dev/null || true
+else
+  gsettings set org.gnome.desktop.interface color-scheme "prefer-dark" 2>/dev/null || true
+  gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark" 2>/dev/null || true
+fi
+
+GNOME_ICONS_THEME="$HOME/.local/state/void/current/theme/icons.theme"
+if [[ -f $GNOME_ICONS_THEME ]]; then
+  gsettings set org.gnome.desktop.interface icon-theme "$(cat "$GNOME_ICONS_THEME")" 2>/dev/null || true
+fi

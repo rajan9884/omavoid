@@ -50,11 +50,14 @@ FAILED_THEME_COMMANDS=()
 # policy asks for a sudo password on stdin when it is a terminal.
 run_parallel() {
   local command index
-  local -a commands=("$@") pids=()
+  local -a commands=() pids=()
 
-  for command in "${commands[@]}"; do
-    "$command" <&0 8>&- &
-    pids+=("$!")
+  for command in "$@"; do
+    if command -v "$command" >/dev/null 2>&1; then
+      "$command" <&0 8>&- &
+      commands+=("$command")
+      pids+=("$!")
+    fi
   done
 
   for index in "${!pids[@]}"; do
@@ -560,24 +563,17 @@ flock -u 9
 visible_theme_commands=(
   void-restart-terminal
   void-theme-set-foot
-  void-theme-set-tmux
   void-restart-btop
-  void-restart-helix
-  void-theme-set-hunk
   void-restart-neovim
   void-theme-set-yazi
-  void-theme-set-lazygit
   void-theme-set-fastfetch
+  void-theme-set-zed
 )
 
 # Configs other apps read on their next refresh or launch: GTK, the browser
 # policy, editors, and the input method.
 other_theme_commands=(
   void-theme-set-gnome
-  void-theme-set-browser
-  void-theme-set-zed
-  void-theme-set-obsidian
-  void-theme-set-fcitx5
 )
 
 theme_still_current() {
