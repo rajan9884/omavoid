@@ -17,6 +17,10 @@ hl.env("ELECTRON_OZONE_PLATFORM_HINT", "wayland")
 hl.env("OZONE_PLATFORM", "wayland")
 hl.env("XDG_SESSION_TYPE", "wayland")
 
+-- Aggressive heap and memory arena optimization
+hl.env("MALLOC_ARENA_MAX", "2")
+hl.env("MALLOC_TRIM_THRESHOLD_", "131072")
+
 -- Allow better support for screen sharing (Google Meet, Discord, etc).
 hl.env("XDG_CURRENT_DESKTOP", "Hyprland")
 hl.env("XDG_SESSION_DESKTOP", "Hyprland")

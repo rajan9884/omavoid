@@ -83,7 +83,7 @@ install_packages() {
         wl-clipboard cliphist wtype
         grim slurp brightnessctl file imv xdg-utils psmisc
         qt6-wayland qt6-declarative qt6-svg qt6-shadertools qt6-imageformats qt6ct
-        python3 fontconfig
+        python3 python3-dbus fontconfig
         zsh starship fzf zoxide eza bat fd ripgrep jq gum yt-dlp nodejs
         btop yazi lazygit calcurse neovim fastfetch git curl unzip vips ffmpegthumbnailer
         greetd tuigreet
@@ -525,12 +525,20 @@ setup_runit_and_groups() {
 
     # Configure BlueZ main.conf for automatic connection and pairing recovery
     if [ -f /etc/bluetooth/main.conf ]; then
+        sudo sed -i 's/^#*Name *=.*/Name = void/' /etc/bluetooth/main.conf 2>/dev/null || true
         sudo sed -i 's/^#*AutoEnable *=.*/AutoEnable = true/' /etc/bluetooth/main.conf 2>/dev/null || true
+        sudo sed -i 's/^#*AlwaysPairable *=.*/AlwaysPairable = true/' /etc/bluetooth/main.conf 2>/dev/null || true
         sudo sed -i 's/^#*FastConnectable *=.*/FastConnectable = true/' /etc/bluetooth/main.conf 2>/dev/null || true
         sudo sed -i 's/^#*JustWorksRepairing *=.*/JustWorksRepairing = always/' /etc/bluetooth/main.conf 2>/dev/null || true
         sudo sed -i 's/^#*PairableTimeout *=.*/PairableTimeout = 0/' /etc/bluetooth/main.conf 2>/dev/null || true
         sudo sed -i 's/^#*DiscoverableTimeout *=.*/DiscoverableTimeout = 0/' /etc/bluetooth/main.conf 2>/dev/null || true
         sudo sed -i 's/^#*MultiProfile *=.*/MultiProfile = multiple/' /etc/bluetooth/main.conf 2>/dev/null || true
+    fi
+
+    # Optimize glibc memory arenas to prevent memory bloat across multithreaded daemons
+    if [ -f /etc/environment ]; then
+        grep -q 'MALLOC_ARENA_MAX' /etc/environment || echo 'MALLOC_ARENA_MAX=2' | sudo tee -a /etc/environment >/dev/null
+        grep -q 'MALLOC_TRIM_THRESHOLD_' /etc/environment || echo 'MALLOC_TRIM_THRESHOLD_=131072' | sudo tee -a /etc/environment >/dev/null
     fi
 
     # Enable greetd display manager if installed
