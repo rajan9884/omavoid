@@ -111,7 +111,7 @@ if [[ ${#src_to_build[@]} -gt 0 ]]; then
     # If package is managed by vp-sync, use it
     if [[ -x "$VOID_PACKAGES_DIR/vp-sync" ]] && grep -qw "$pkg" "$VOID_PACKAGES_DIR/vp-sync" 2>/dev/null; then
       echo "Building and installing custom package '$pkg' via vp-sync..."
-      (cd "$VOID_PACKAGES_DIR" && ./vp-sync "$pkg") < /dev/tty
+      (cd "$VOID_PACKAGES_DIR" && ./vp-sync --skip-sync "$pkg") < /dev/tty
       pkg_status=$?
     else
       echo "Building '$pkg' with xbps-src..."
