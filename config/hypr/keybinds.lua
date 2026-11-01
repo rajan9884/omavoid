@@ -47,7 +47,8 @@ hl.bind(mainMod .. " + CTRL + V", hl.dsp.exec_cmd("void-shell shell toggle omarc
 -- ── Core Applications ──
 hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd("foot"), { description = "Terminal" })
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("helium-browser"), { description = "Browser" })
-hl.bind(mainMod .. " + SHIFT + B", hl.dsp.exec_cmd("helium-browser --incognito"), { description = "Private Browser" })
+hl.bind(mainMod .. " + SHIFT + B", hl.dsp.exec_cmd("helium-browser"), { description = "Browser" })
+hl.bind(mainMod .. " + SHIFT + ALT + B", hl.dsp.exec_cmd("helium-browser --incognito"), { description = "Private Browser" })
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd("thunar"), { description = "File Manager" })
 hl.bind(mainMod .. " + SHIFT + F", hl.dsp.exec_cmd("foot -e yazi"), { description = "Yazi File Manager" })
 hl.bind(mainMod .. " + SHIFT + T", hl.dsp.exec_cmd("foot -e btop"), { description = "System Monitor" })
@@ -57,7 +58,8 @@ hl.bind(mainMod .. " + SHIFT + M", hl.dsp.exec_cmd("foot -e cliamp"), { descript
 hl.bind(mainMod .. " + ALT + P", hl.dsp.exec_cmd("foot -e void-pkg-install"), { description = "Package installer" })
 hl.bind(mainMod .. " + ALT + R", hl.dsp.exec_cmd("foot -e void-pkg-remove"), { description = "Package remover" })
 
--- ── Keybindings Search ──
+-- ── Keybindings Search & Cheatsheet ──
+hl.bind(mainMod .. " + K", hl.dsp.exec_cmd("void-menu-keybindings"), { description = "Keybindings cheatsheet" })
 hl.bind(mainMod .. " + slash", hl.dsp.exec_cmd("void-menu-keybindings"), { description = "Keybindings menu" })
 
 -- ── Window Management ──
@@ -78,6 +80,30 @@ hl.bind(mainMod .. " + SHIFT + Left", hl.dsp.window.move({ direction = "l" }), {
 hl.bind(mainMod .. " + SHIFT + Right", hl.dsp.window.move({ direction = "r" }), { description = "Move right" })
 hl.bind(mainMod .. " + SHIFT + Up", hl.dsp.window.move({ direction = "u" }), { description = "Move up" })
 hl.bind(mainMod .. " + SHIFT + Down", hl.dsp.window.move({ direction = "d" }), { description = "Move down" })
+
+-- ── Window Resizing (Super + - / =) ──
+hl.bind(mainMod .. " + minus", hl.dsp.window.resize({ x = -100, y = 0, relative = true }), { repeating = true, description = "Shrink window width" })
+hl.bind(mainMod .. " + equal", hl.dsp.window.resize({ x = 100, y = 0, relative = true }), { repeating = true, description = "Expand window width" })
+hl.bind(mainMod .. " + SHIFT + minus", hl.dsp.window.resize({ x = 0, y = -100, relative = true }), { repeating = true, description = "Shrink window height" })
+hl.bind(mainMod .. " + SHIFT + equal", hl.dsp.window.resize({ x = 0, y = 100, relative = true }), { repeating = true, description = "Expand window height" })
+hl.bind(mainMod .. " + ALT + minus", hl.dsp.window.resize({ x = -25, y = 0, relative = true }), { repeating = true, description = "Shrink window width (fine)" })
+hl.bind(mainMod .. " + ALT + equal", hl.dsp.window.resize({ x = 25, y = 0, relative = true }), { repeating = true, description = "Expand window width (fine)" })
+hl.bind(mainMod .. " + SHIFT + ALT + minus", hl.dsp.window.resize({ x = 0, y = -25, relative = true }), { repeating = true, description = "Shrink window height (fine)" })
+hl.bind(mainMod .. " + SHIFT + ALT + equal", hl.dsp.window.resize({ x = 0, y = 25, relative = true }), { repeating = true, description = "Expand window height (fine)" })
+hl.bind(mainMod .. " + CTRL + minus", hl.dsp.window.resize({ x = -300, y = 0, relative = true }), { repeating = true, description = "Shrink window width (coarse)" })
+hl.bind(mainMod .. " + CTRL + equal", hl.dsp.window.resize({ x = 300, y = 0, relative = true }), { repeating = true, description = "Expand window width (coarse)" })
+
+-- Keycode fallbacks for minus (code:20) and equal (code:21)
+hl.bind(mainMod .. " + code:20", hl.dsp.window.resize({ x = -100, y = 0, relative = true }), { repeating = true, description = "Shrink window width" })
+hl.bind(mainMod .. " + code:21", hl.dsp.window.resize({ x = 100, y = 0, relative = true }), { repeating = true, description = "Expand window width" })
+hl.bind(mainMod .. " + SHIFT + code:20", hl.dsp.window.resize({ x = 0, y = -100, relative = true }), { repeating = true, description = "Shrink window height" })
+hl.bind(mainMod .. " + SHIFT + code:21", hl.dsp.window.resize({ x = 0, y = 100, relative = true }), { repeating = true, description = "Expand window height" })
+
+-- ── Window & Workspace Cycling ──
+hl.bind("ALT + Tab", hl.dsp.window.cycle_next(), { description = "Focus next window" })
+hl.bind("ALT + SHIFT + Tab", hl.dsp.window.cycle_next({ next = false }), { description = "Focus previous window" })
+hl.bind(mainMod .. " + Tab", hl.dsp.exec_cmd("void-workspace-cycle next"), { description = "Next occupied workspace" })
+hl.bind(mainMod .. " + SHIFT + Tab", hl.dsp.exec_cmd("void-workspace-cycle prev"), { description = "Previous occupied workspace" })
 
 -- ── Workspace Layouts (Dwindle, Scrolling, Floating) ──
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("void-hyprland-workspace-layout-toggle"), { description = "Cycle workspace layout forward" })
@@ -120,7 +146,7 @@ hl.bind(mainMod .. " + SHIFT + ALT + comma", hl.dsp.exec_cmd("void-shell notific
 
 -- ── System Lock & Exit ──
 hl.bind(mainMod .. " + CTRL + L", hl.dsp.exec_cmd("void-system-lock"), { description = "Lock system" })
-hl.bind(mainMod .. " + Escape", hl.dsp.exec_cmd("void-shell shell toggle omarchy.power"), { description = "Power menu" })
+hl.bind(mainMod .. " + Escape", hl.dsp.exec_cmd("void-shell shell toggle omarchy.menu '{\"menu\":\"system\"}'"), { description = "System menu" })
 
 -- ── Volume / Brightness / Media Keys ──
 hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("void-audio-output-volume up"), { repeating = true, locked = true, description = "Volume up" })

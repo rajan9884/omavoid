@@ -82,21 +82,23 @@ Item {
     width: root.trackWidth
     height: root.trackHeight
     anchors.centerIn: parent
-    radius: root.rounded ? height / 2 : 0
+    radius: root.rounded ? Math.min(Style.cornerRadius, 4) : 0
     color: root.checked
       ? Style.selectedFillFor(root.foreground, root.accent)
       : Style.normalFillFor(root.foreground, root.accent)
     borderSpec: Border.controlSpec(root.checked ? "selected" : "normal", root.foreground, root.accent)
+    border.width: 1
+    border.color: root.checked ? root.accent : Qt.rgba(root.foreground.r, root.foreground.g, root.foreground.b, 0.4)
 
     Behavior on color { ColorAnimation { duration: Style.duration(120) } }
 
     Rectangle {
       width: root.knobSize
       height: root.knobSize
-      radius: root.rounded ? height / 2 : 0
+      radius: root.rounded ? Math.max(1, Math.min(Style.cornerRadius - 1, 2)) : 0
       x: root.checked !== root.mirrored ? track.width - width - root.knobInset : root.knobInset
       anchors.verticalCenter: parent.verticalCenter
-      color: root.checked ? Style.selectedStateColor(root.foreground, root.accent) : Qt.darker(root.foreground, 1.25)
+      color: root.checked ? Style.selectedStateColor(root.foreground, root.accent) : Qt.rgba(root.foreground.r, root.foreground.g, root.foreground.b, 0.85)
 
       Behavior on x { NumberAnimation { duration: Style.duration(120); easing.type: Easing.OutCubic } }
       Behavior on color { ColorAnimation { duration: Style.duration(120) } }

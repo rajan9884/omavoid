@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Update Void Linux system packages
+echo "=== Void Linux System Update ==="
+sudo xbps-install -Su
+echo
+echo "Update complete. Press Enter to close."
+read -r
