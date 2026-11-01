@@ -12,20 +12,9 @@ alias vsv='sudo vsv'
 alias vp-sync='XBPS_DISTDIR="$HOME/.local/share/pkg/void-packages" "$HOME/.local/share/pkg/void-packages/vp-sync"'
 export XBPS_DISTDIR="$HOME/.local/share/pkg/void-packages"
 
-# --- History control (zsh equivalent) ---
-HISTCONTROL=ignoreboth
-HISTSIZE=32768
-HISTFILESIZE="${HISTSIZE}"
-HISTFILE=~/.zsh_history
-setopt appendhistory inc_append_history share_history
-
-# --- Environment ---
+# --- Environment & Aliases ---
 source "$OMARCHY_PATH/default/bash/envs"
-
-# --- Aliases ---
 source "$OMARCHY_PATH/default/bash/aliases"
-
-# --- Functions ---
 for f in $OMARCHY_PATH/default/bash/fns/*; do source "$f"; done
 
 # ── Prompt (starship, themed via ~/.config/starship.toml) ──
@@ -51,8 +40,6 @@ alias qs='~/.local/bin/qshell-ctl'
 alias wifi='~/.local/bin/tui-wifi'
 alias bt='~/.local/bin/tui-bluetooth'
 alias audio='~/.local/bin/tui-audio'
-osd='bash ~/hyprQT/config/hypr/scripts/delete-opencode-sessions.sh'
-alias pi-session-del='bash ~/hyprQT/config/hypr/scripts/delete-pi-sessions.sh'
 alias ll='eza -lah --icons=auto --git'
 alias la='eza -a --icons=auto'
 alias ls='eza --icons=auto'
@@ -146,10 +133,6 @@ ZSH_HIGHLIGHT_STYLES[alias]='fg=white'
 ZSH_HIGHLIGHT_STYLES[path]='fg=245'
 ZSH_HIGHLIGHT_STYLES[comment]='fg=240'
 ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=245'
-
-export PATH="$HOME/.local/bin:$PATH"
-# theme controller
-theme() { python3 "$HOME/.config/theme/bin/theme.py" "$@"; }
 
 function fe() {
     local file

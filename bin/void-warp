@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# void:summary=On-demand Cloudflare WARP service toggle
+set -euo pipefail
+
+cmd="${1:-toggle}"
+
+case "$cmd" in
+    start|on|up)
+        echo "Starting Cloudflare warp-svc..."
+        if [ ! -L /var/service/warp-svc ]; then
+            sudo ln -sf /etc/sv/warp-svc /var/service/
+        fi
+        sudo rm -f /etc/sv/warp-svc/down
+        sudo sv up warp-svc
+        sleep 1
+        warp-cli status || true
+        ;;
+    stop|off|down)
+        echo "Stopping Cloudflare warp-svc to free memory..."
+        sudo touch /etc/sv/warp-svc/down
+        sudo sv down warp-svc 2>/dev/null || true
+        sudo rm -f /var/service/warp-svc
+        echo "warp-svc stopped."
+        ;;
+    status)
+        if pgrep -x warp-svc >/dev/null 2>&1; then
+            echo "warp-svc is RUNNING"
+            warp-cli status || true
+        else
+            echo "warp-svc is STOPPED"
+        fi
+        ;;
+    toggle)
+        if pgrep -x warp-svc >/dev/null 2>&1; then
+            "$0" off
+        else
+            "$0" on
+        fi
+        ;;
+    *)
+        echo "Usage: void-warp [on|off|status|toggle]"
+        exit 1
+        ;;
+esac

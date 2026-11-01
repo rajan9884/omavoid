@@ -41,6 +41,7 @@ require("default.hypr.nvidia")
 
 hl.config({
   xwayland = {
+    enabled = false,
     force_zero_scaling = true,
   },
 
