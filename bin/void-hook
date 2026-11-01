@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# void:summary=Run a named hook from ~/.config/void/hooks/<name> and ~/.config/void/hooks/<name>.d/.
+# void:args=[name] [args...]
+
+set -e
+
+if (( $# < 1 )); then
+  echo "Usage: void-hook [name] [args...]"
+  exit 1
+fi
+
+HOOK=$1
+
+if [[ -z $HOOK || $HOOK == */* || $HOOK == "." || $HOOK == ".." ]]; then
+  echo "Invalid hook name: $HOOK" >&2
+  exit 2
+fi
+
+HOOK_PATH="$HOME/.config/void/hooks/$1"
+HOOK_DIR="$HOOK_PATH.d"
+shift
+
+if [[ -f $HOOK_PATH ]]; then
+  bash "$HOOK_PATH" "$@" || echo "Hook failed: $HOOK_PATH"
+fi
+
+if [[ -d $HOOK_DIR ]]; then
+  for hook in "$HOOK_DIR"/*; do
+    [[ -f $hook ]] || continue
+    [[ $hook == *.sample ]] && continue
+    bash "$hook" "$@" || echo "Hook failed: $hook"
+  done
+fi

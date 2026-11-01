@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# void:summary=Apply window transparency / glass settings to terminal configs if enabled
+exit 0

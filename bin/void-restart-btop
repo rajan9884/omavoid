@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# void:summary=Reload btop configuration
+
+pkill -SIGUSR2 -x btop 2>/dev/null || true

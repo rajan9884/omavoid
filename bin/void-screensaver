@@ -31,6 +31,15 @@ wait_for_terminal_resize() {
 
 wait_for_terminal_resize
 
+wait_for_focus() {
+  local deadline=$((SECONDS + 3))
+  while ((SECONDS < deadline)) && ! screensaver_in_focus; do
+    sleep 0.05
+  done
+}
+
+wait_for_focus
+
 screensaver_file="${XDG_CONFIG_HOME:-$HOME/.config}/void/branding/screensaver.txt"
 [[ -f "$screensaver_file" ]] || screensaver_file="${XDG_CONFIG_HOME:-$HOME/.config}/omarchy/branding/screensaver.txt"
 [[ -f "$screensaver_file" ]] || screensaver_file="${OMARCHY_PATH:-/usr/share/void}/logo.txt"
