@@ -588,11 +588,6 @@
     "label": "Text",
     "action": "void-capture-text"
   },
-  "trigger.capture.qr": {
-    "icon": "󰐲",
-    "label": "QR Code",
-    "action": "void-capture-qr"
-  },
   "trigger.capture.color": {
     "icon": "󰃉",
     "label": "Color",
@@ -618,13 +613,6 @@
     "label": "With desktop + microphone audio + webcam",
     "when": "void-hw-webcam",
     "action": "void-capture-screenrecording-with-webcam"
-  },
-  "trigger.share": {
-    "icon": "",
-    "label": "Share",
-    "aliases": [
-      "share"
-    ]
   },
   "trigger.hardware": {
     "icon": "",
@@ -687,35 +675,10 @@
     "label": "Clear all",
     "action": "void-reminder clear"
   },
-  "trigger.share.clipboard": {
-    "icon": "",
-    "label": "Clipboard",
-    "action": "void-menu-share clipboard"
-  },
-  "trigger.share.file": {
-    "icon": "",
-    "label": "File",
-    "action": "void-menu-share file"
-  },
-  "trigger.share.folder": {
-    "icon": "",
-    "label": "Folder",
-    "action": "void-menu-share folder"
-  },
-  "trigger.share.receive": {
-    "icon": "󰥦",
-    "label": "Receive",
-    "action": "uwsm-app -- localsend"
-  },
   "trigger.tests.network-speedtest": {
     "icon": "󰓅",
     "label": "Network Speed Test",
     "action": "void-shell shell summon omarchy.speedtest"
-  },
-  "trigger.tests.disk-speedtest": {
-    "icon": "󰋊",
-    "label": "Disk Speed Test",
-    "action": "void-shell shell summon omarchy.disk-speedtest"
   },
   "setup.monitors": {
     "icon": "󰍹",

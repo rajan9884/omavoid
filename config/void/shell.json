@@ -17,23 +17,6 @@
       ],
       "centerEnd": [
         {
-          "cities": [
-            {
-              "name": "Los Angeles",
-              "zone": "America/Los_Angeles"
-            },
-            {
-              "name": "Paris",
-              "zone": "Europe/Paris"
-            },
-            {
-              "name": "Tokyo",
-              "zone": "Asia/Tokyo"
-            }
-          ],
-          "id": "omarchy.elsewhen"
-        },
-        {
           "id": "omarchy.weather"
         },
         {
