@@ -1,2 +1,5 @@
 #!/usr/bin/env bash
-exec foot "$@"
+# Launch floating terminal with presentation wrapper
+cmd="$*"
+presentation_script="$cmd; code=\$?; if (( code != 130 )); then void-show-done \$code 2>/dev/null || true; fi"
+exec foot --app-id=floating-terminal --title="Void Linux" -e bash -c "$presentation_script"

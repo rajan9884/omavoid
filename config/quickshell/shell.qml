@@ -1250,7 +1250,22 @@ ShellRoot {
 
   function toggle(pluginId, payloadJson) {
     var id = shell.pluginRegistry.resolveEnabledId(pluginId)
-    return isPluginOpen(id) ? hide(id) : summon(id, payloadJson)
+    var loader = panelLoaders[id]
+    if (isPluginOpen(id)) {
+      if (id === "omarchy.menu") {
+        try {
+          var p = payloadJson ? JSON.parse(payloadJson) : {}
+          var current = loader && loader.item ? loader.item.currentMode : ""
+          var targetMode = p.mode || (p.menu === "system" || p.initialMenu === "system" ? "system" : "apps")
+          if (current && targetMode && current !== targetMode) {
+            summon(id, payloadJson)
+            return true
+          }
+        } catch (e) {}
+      }
+      return hide(id)
+    }
+    return summon(id, payloadJson)
   }
 
   // Map of pluginId -> Loader, populated by the Instantiator delegate below.

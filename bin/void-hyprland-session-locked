@@ -1,0 +1,3 @@
+#!/bin/bash
+# Returns 0 if session is locked, 1 otherwise
+pgrep -x hyprlock >/dev/null 2>&1

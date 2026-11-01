@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# void:summary=Show completion or failure status prompt and wait for user keypress
+# void:args=[exit_code]
+# void:hidden=true
+
+code="${1:-0}"
+echo
+if (( code == 0 )); then
+  if command -v gum >/dev/null 2>&1; then
+    gum style --foreground 2 "✓ Done! Press any key to close..."
+  else
+    echo -e "\033[32m✓ Done! Press any key to close...\033[0m"
+  fi
+else
+  if command -v gum >/dev/null 2>&1; then
+    gum style --foreground 1 "✗ Failed (exit code $code). Press any key to close..."
+  else
+    echo -e "\033[31m✗ Failed (exit code $code). Press any key to close...\033[0m"
+  fi
+fi
+
+read -n 1 -s -r 2>/dev/null || read -r 2>/dev/null || true

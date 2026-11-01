@@ -13,6 +13,7 @@ Item {
   property var manifest: null
 
   property bool showing: false
+  property bool opened: showing
   property string query: ""
   property int selected: 0
   property string currentMode: "apps" // "apps", "system", "select"
@@ -21,12 +22,10 @@ Item {
   property string selectionFile: ""
   property string doneFile: ""
   property int menuWidth: 460
-  property int menuHeight: 520
 
   readonly property color bg: Commons.Color.menu.background
   readonly property color fg: Commons.Color.menu.text
   readonly property color borderCol: Commons.Color.menu.border
-  readonly property color scrimCol: Commons.Color.menu.scrim
   readonly property color selectedBg: Commons.Color.menu.selectedBackground
   readonly property color selectedFg: Commons.Color.menu.selectedText
   readonly property color faintFg: Qt.rgba(root.fg.r, root.fg.g, root.fg.b, 0.6)
@@ -34,6 +33,8 @@ Item {
   readonly property string fontFamily: Commons.Style.font.menuFamily
 
   readonly property var systemMenuItems: [
+    { name: "Install Packages", iconGlyph: "󰉉", comment: "Search & install Void packages", cmd: "void-launch-floating-terminal-with-presentation void-pkg-install" },
+    { name: "Remove Packages", iconGlyph: "󰭌", comment: "Search & remove installed packages", cmd: "void-launch-floating-terminal-with-presentation void-pkg-remove" },
     { name: "Lock System", iconGlyph: "󰌾", comment: "Lock display immediately", cmd: "void-system-lock" },
     { name: "Screensaver", iconGlyph: "󰍹", comment: "Run ttfx screensaver", cmd: "void-toggle-screensaver" },
     { name: "Suspend", iconGlyph: "󰤄", comment: "Sleep system", cmd: "loginctl suspend 2>/dev/null || zzz" },
@@ -57,21 +58,19 @@ Item {
       root.dmenuPrompt = payload.prompt || "Select"
       root.dmenuOptions = payload.options || []
       root.menuWidth = payload.width ? Math.max(380, payload.width) : 560
-      root.menuHeight = payload.maxHeight ? Math.min(600, payload.maxHeight) : 500
     } else if (payload.menu === "system" || payload.initialMenu === "system") {
       root.currentMode = "system"
       root.menuWidth = 440
-      root.menuHeight = 440
     } else {
       root.currentMode = "apps"
       root.menuWidth = 460
-      root.menuHeight = 520
       if (root.shell && root.shell.appLibrary && typeof root.shell.appLibrary.refreshIcons === "function") {
         root.shell.appLibrary.refreshIcons()
       }
     }
 
     root.showing = true
+    root.opened = true
     Qt.callLater(function() {
       if (searchInput) {
         searchInput.text = ""
@@ -85,10 +84,14 @@ Item {
       Quickshell.execDetached(["touch", root.doneFile])
     }
     root.showing = false
+    root.opened = false
     root.query = ""
     root.selected = 0
     root.selectionFile = ""
     root.doneFile = ""
+    if (root.shell && typeof root.shell.hide === "function") {
+      root.shell.hide("omarchy.menu")
+    }
   }
 
   function toggle(payloadJson) {
@@ -119,6 +122,91 @@ Item {
     return score - name.length * 0.1
   }
 
+  function scoreApp(app, q) {
+    if (!app || !q) return 1
+    var qLower = q.toLowerCase()
+    var name = (app.name || "").toLowerCase()
+    var exec = (app.execString || "").toLowerCase()
+    var generic = (app.genericName || "").toLowerCase()
+    var comment = (app.comment || "").toLowerCase()
+
+    // 1. Exact name match
+    if (name === qLower) return 100000
+
+    // 2. Name starts with query
+    if (name.indexOf(qLower) === 0) return 50000 - name.length * 10
+
+    // 3. Word in name starts with query
+    var words = name.split(/[\s\-_]+/)
+    for (var w = 0; w < words.length; w++) {
+      if (words[w].indexOf(qLower) === 0) {
+        return 40000 - name.length * 10
+      }
+    }
+
+    // 4. Executable binary starts with query
+    var execBin = exec.split(" ")[0].split("/").pop()
+    if (execBin.indexOf(qLower) === 0) return 35000 - execBin.length * 10
+
+    // 5. Name contains query
+    var nameIdx = name.indexOf(qLower)
+    if (nameIdx !== -1) return 30000 - nameIdx * 100 - name.length * 10
+
+    // 6. Generic name starts with or contains query
+    if (generic.indexOf(qLower) === 0) return 20000 - generic.length * 10
+    if (generic.indexOf(qLower) !== -1) return 15000 - generic.length * 10
+
+    // 7. Fuzzy match on app name
+    var fn = root.fuzzyScore(name, qLower)
+    if (fn >= 0) return 10000 + fn
+
+    // 8. Exec contains query
+    if (exec.indexOf(qLower) !== -1) return 5000
+
+    // 9. Comment contains query
+    if (comment.indexOf(qLower) !== -1) return 2000
+
+    // 10. Fuzzy match on generic name or exec
+    var fg = root.fuzzyScore(generic + " " + execBin, qLower)
+    if (fg >= 0) return 1000 + fg
+
+    // 11. Fuzzy match on entire metadata
+    var ft = root.fuzzyScore(name + " " + generic + " " + comment + " " + exec, qLower)
+    if (ft >= 0) return 100 + ft
+
+    return -1
+  }
+
+  function scoreSystem(item, q) {
+    if (!item || !q) return 1
+    var qLower = q.toLowerCase()
+    var name = (item.name || "").toLowerCase()
+    var comment = (item.comment || "").toLowerCase()
+
+    if (name === qLower) return 100000
+    if (name.indexOf(qLower) === 0) return 50000 - name.length * 10
+    var nameIdx = name.indexOf(qLower)
+    if (nameIdx !== -1) return 30000 - nameIdx * 100
+    if (comment.indexOf(qLower) !== -1) return 10000
+    var f = root.fuzzyScore(name + " " + comment, qLower)
+    return f >= 0 ? 1000 + f : -1
+  }
+
+  function scoreSelect(label, subtext, q) {
+    if (!q) return 1
+    var qLower = q.toLowerCase()
+    var l = (label || "").toLowerCase()
+    var st = (subtext || "").toLowerCase()
+
+    if (l === qLower) return 100000
+    if (l.indexOf(qLower) === 0) return 50000 - l.length * 10
+    var lIdx = l.indexOf(qLower)
+    if (lIdx !== -1) return 30000 - lIdx * 100
+    if (st.indexOf(qLower) !== -1) return 10000
+    var f = root.fuzzyScore(l + " " + st, qLower)
+    return f >= 0 ? 1000 + f : -1
+  }
+
   function getIconSource(iconName) {
     var val = String(iconName || "").trim()
     if (!val) return ""
@@ -135,9 +223,21 @@ Item {
 
   readonly property var allApps: {
     if (!DesktopEntries || !DesktopEntries.applications) return []
-    return DesktopEntries.applications.values.filter(function(a) {
+    var list = DesktopEntries.applications.values.filter(function(a) {
       return a && !a.noDisplay && !a.hidden && a.name
     })
+    var seen = {}
+    var deduped = []
+    for (var i = 0; i < list.length; i++) {
+      var app = list[i]
+      var normName = (app.name || "").trim().toLowerCase()
+      var execBin = (app.execString || "").trim().split(" ")[0].split("/").pop().toLowerCase()
+      var key = normName + "::" + execBin
+      if (seen[key]) continue
+      seen[key] = true
+      deduped.push(app)
+    }
+    return deduped
   }
 
   readonly property var filteredItems: {
@@ -149,9 +249,8 @@ Item {
       if (apps.length === 0) return []
       for (var i = 0; i < apps.length; i++) {
         var app = apps[i]
-        var target = (app.name || "") + " " + (app.genericName || "") + " " + (app.comment || "") + " " + (app.execString || "")
-        var s = root.fuzzyScore(target, q)
-        if (s >= 0) scored.push({ item: app, score: s, kind: "app" })
+        var s = q.length === 0 ? 1 : root.scoreApp(app, q)
+        if (s >= 0) scored.push({ item: app, score: s })
       }
       if (q.length === 0) {
         scored.sort(function(a, b) {
@@ -166,10 +265,10 @@ Item {
       var items = root.systemMenuItems
       for (var j = 0; j < items.length; j++) {
         var item = items[j]
-        var s2 = root.fuzzyScore(item.name + " " + item.comment, q)
-        if (s2 >= 0) scored.push({ item: item, score: s2, kind: "system" })
+        var s2 = q.length === 0 ? 1 : root.scoreSystem(item, q)
+        if (s2 >= 0) scored.push({ item: item, score: s2 })
       }
-      scored.sort(function(a, b) { return b.score - a.score })
+      if (q.length > 0) scored.sort(function(a, b) { return b.score - a.score })
       return scored.map(function(s) { return s.item })
 
     } else if (root.currentMode === "select") {
@@ -181,14 +280,21 @@ Item {
         var label = parts.length > 2 ? parts[1] : (parts.length > 1 ? parts[0] : raw)
         var subtext = parts.length > 2 ? parts[2] : (parts.length > 1 ? parts[1] : "")
         var obj = { raw: raw, glyph: glyph, label: label, subtext: subtext }
-        var s3 = root.fuzzyScore(label + " " + subtext, q)
-        if (s3 >= 0) scored.push({ item: obj, score: s3, kind: "select" })
+        var s3 = q.length === 0 ? 1 : root.scoreSelect(label, subtext, q)
+        if (s3 >= 0) scored.push({ item: obj, score: s3 })
       }
       if (q.length > 0) scored.sort(function(a, b) { return b.score - a.score })
       return scored.map(function(s) { return s.item })
     }
 
     return []
+  }
+
+  onFilteredItemsChanged: {
+    root.selected = 0
+    if (itemListView) {
+      itemListView.positionViewAtIndex(0, ListView.Beginning)
+    }
   }
 
   function launchCurrent() {
@@ -235,25 +341,41 @@ Item {
 
     color: "transparent"
 
+    onVisibleChanged: {
+      if (visible && searchInput) {
+        Qt.callLater(function() {
+          searchInput.forceActiveFocus()
+        })
+      }
+    }
+
     MouseArea {
       anchors.fill: parent
       onClicked: root.close()
-
-      Rectangle {
-        anchors.fill: parent
-        color: root.scrimCol
-      }
     }
 
     Rectangle {
       id: menuBox
       anchors.centerIn: parent
       width: root.menuWidth
-      height: root.menuHeight
       radius: root.cornerRadius
       color: root.bg
       border.color: root.borderCol
       border.width: 1
+
+      readonly property int maxVisibleCount: root.currentMode === "select" ? 10 : 8
+      readonly property int itemRowHeight: root.currentMode === "select" ? 40 : 48
+      readonly property int currentItemCount: root.filteredItems ? root.filteredItems.length : 0
+      readonly property int displayCount: Math.min(currentItemCount, maxVisibleCount)
+      readonly property int listContentHeight: currentItemCount === 0 ? (root.query.length > 0 ? 44 : 0) : (displayCount * itemRowHeight)
+      readonly property int calculatedHeight: 110 + listContentHeight
+
+      height: calculatedHeight
+
+      Behavior on height {
+        enabled: root.showing
+        NumberAnimation { duration: 120; easing.type: Easing.OutCubic }
+      }
 
       MouseArea {
         anchors.fill: parent
@@ -356,12 +478,21 @@ Item {
         ListView {
           id: itemListView
           width: parent.width
-          height: parent.height - 44 - 10 - footerRow.height - 10
+          height: Math.max(0, menuBox.height - 110)
           clip: true
           model: root.filteredItems
           currentIndex: root.selected
           spacing: 2
           boundsBehavior: Flickable.StopAtBounds
+
+          Text {
+            anchors.centerIn: parent
+            text: "No matching results"
+            font.family: root.fontFamily
+            font.pixelSize: 13
+            color: root.faintFg
+            visible: root.filteredItems.length === 0 && root.query.length > 0
+          }
 
           onCurrentIndexChanged: {
             if (currentIndex >= 0 && currentIndex < count) {
@@ -467,7 +598,15 @@ Item {
             MouseArea {
               anchors.fill: parent
               hoverEnabled: true
-              onEntered: root.selected = index
+              property int lastX: -1
+              property int lastY: -1
+              onPositionChanged: function(mouse) {
+                if (lastX >= 0 && (Math.abs(mouse.x - lastX) > 4 || Math.abs(mouse.y - lastY) > 4)) {
+                  root.selected = index
+                }
+                lastX = mouse.x
+                lastY = mouse.y
+              }
               onClicked: {
                 root.selected = index
                 root.launchCurrent()
