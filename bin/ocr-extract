@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# ──────────────────────────────────────────────
+#   OCR text extraction
+#   Selects a screen region with slurp, runs tesseract on the
+#   captured PNG, copies the recognized text to the clipboard,
+#   and shows a desktop notification with the result.
+# ──────────────────────────────────────────────
+
+set -euo pipefail
+
+export PATH="$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:$PATH"
+TESSERACT="$(command -v tesseract 2>/dev/null || command -v tesseract-ocr 2>/dev/null || echo tesseract)"
+
+TMP_PNG="$(mktemp -t ocr-XXXXXX.png)"
+trap 'rm -f "$TMP_PNG"' EXIT
+
+if ! grim -g "$(slurp -d)" "$TMP_PNG" 2>/dev/null; then
+    notify-send "OCR" "Screenshot cancelled" -u low
+    exit 0
+fi
+
+TEXT="$("$TESSERACT" "$TMP_PNG" stdout -l "${OMARCHY_OCR_LANGS:-eng}" --dpi 300 -c preserve_interword_spaces=1 2>/dev/null | sed -e 's/[[:space:]]\+$//' -e '/^$/d' || true)"
+
+if [[ -z "$TEXT" ]]; then
+    wl-copy --clear 2>/dev/null || true
+    notify-send "OCR" "No text detected" -u low
+    exit 0
+fi
+
+printf '%s' "$TEXT" | wl-copy
+
+PREVIEW="$(printf '%s' "$TEXT" | head -c 200)"
+[[ ${#TEXT} -gt 200 ]] && PREVIEW="${PREVIEW}…"
+[[ -z "$PREVIEW" ]] && PREVIEW="(${#TEXT} chars)"
+
+notify-send -u low "OCR — copied to clipboard" -- "$PREVIEW"

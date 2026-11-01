@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Theme background intro helper (clean no-op when animated video intros not present)
+exit 0

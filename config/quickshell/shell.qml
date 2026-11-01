@@ -1635,7 +1635,7 @@ ShellRoot {
 
   FileView {
     id: shortcutsFile
-    path: shell.omarchyPath + "/default/void/shortcuts"
+    path: shell.omarchyPath + "/config/shortcuts"
     watchChanges: true
     onFileChanged: reload()
   }

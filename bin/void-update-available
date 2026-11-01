@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Check if xbps updates are available in Void Linux
+set -euo pipefail
+
+# xbps-install -nuM prints packages that would be updated
+updates=$(xbps-install -nuM 2>/dev/null || true)
+if [[ -n "$updates" ]]; then
+    exit 0
+else
+    exit 1
+fi
