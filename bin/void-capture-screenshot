@@ -1,27 +1,51 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# omarchy:summary=Take a screenshot
+# omarchy:summary=Take a screenshot (fullscreen or region)
 # omarchy:group=capture
-# omarchy:args=[smart|region|windows|fullscreen|scroll] [copy|save]
-# omarchy:examples=omarchy screenshot | omarchy capture screenshot region
-# omarchy:aliases=omarchy screenshot
+# omarchy:args=[smart|region|windows|fullscreen|full] [copy|save]
+# omarchy:examples=void-capture-screenshot | void-capture-screenshot fullscreen
 
-if [[ -n ${OMARCHY_SCREENSHOT_DIR:-} && -z ${OMASNAP_SCREENSHOT_DIR:-} ]]; then
-  export OMASNAP_SCREENSHOT_DIR="$OMARCHY_SCREENSHOT_DIR"
-fi
+set -euo pipefail
 
-# --notify announces saved shots with Open and Edit buttons instead of a
-# preview. Omasnap reads that toast's text from this catalog itself:
-#   void-i18n capture.screenshotSaved, void-i18n capture.screenshotSavedCopied,
-#   void-i18n capture.screenshotOpen, void-i18n capture.screenshotEdit
-omasnap_args=(--notify)
+# If the argument is an existing image file (e.g. from clipboard manager), open with viewer
+for arg in "$@"; do
+  if [[ -f "$arg" && "$arg" =~ \.(png|jpg|jpeg|webp)$ ]]; then
+    exec imv "$arg"
+  fi
+done
+
+SCREENSHOT_DIR="${OMARCHY_SCREENSHOT_DIR:-${OMASNAP_SCREENSHOT_DIR:-$HOME/Pictures/Screenshots}}"
+mkdir -p "$SCREENSHOT_DIR"
+filename="$SCREENSHOT_DIR/screenshot-$(date +%Y-%m-%d_%H-%M-%S).png"
+
+is_fullscreen=0
 for arg in "$@"; do
   case "$arg" in
-    copy) omasnap_args+=(--copy) ;;
-    save) omasnap_args+=(--save) ;;
-    slurp) ;;
-    *) omasnap_args+=("$arg") ;;
+    fullscreen|full)
+      is_fullscreen=1
+      ;;
   esac
 done
 
-exec omasnap "${omasnap_args[@]}"
+if (( is_fullscreen )); then
+  grim "$filename" || exit 1
+else
+  # Interactive region selection
+  geometry=$(slurp -d -b "#00000088" -c "#88c0d0" 2>/dev/null || true)
+  if [[ -z "$geometry" ]]; then
+    exit 0
+  fi
+  grim -g "$geometry" "$filename" || exit 1
+fi
+
+if [[ -f "$filename" ]]; then
+  # Copy to Wayland clipboard with proper image/png MIME type
+  wl-copy -t image/png < "$filename"
+
+  # Show notification with thumbnail
+  if command -v void-notification-send >/dev/null 2>&1; then
+    void-notification-send -g "󰄄" -i "$filename" "Screenshot captured" "Saved to Pictures/Screenshots and copied to clipboard"
+  elif command -v notify-send >/dev/null 2>&1; then
+    notify-send -i "$filename" "Screenshot captured" "Saved to Pictures/Screenshots and copied to clipboard"
+  fi
+fi
