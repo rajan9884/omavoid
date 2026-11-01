@@ -15,6 +15,13 @@ Item {
   property bool showing: false
   property string query: ""
   property int selected: 0
+  property string currentMode: "apps" // "apps", "system", "select"
+  property string dmenuPrompt: ""
+  property var dmenuOptions: []
+  property string selectionFile: ""
+  property string doneFile: ""
+  property int menuWidth: 460
+  property int menuHeight: 520
 
   readonly property color bg: Commons.Color.menu.background
   readonly property color fg: Commons.Color.menu.text
@@ -26,9 +33,44 @@ Item {
   readonly property int cornerRadius: Commons.Style.cornerRadius
   readonly property string fontFamily: Commons.Style.font.menuFamily
 
+  readonly property var systemMenuItems: [
+    { name: "Lock System", iconGlyph: "󰌾", comment: "Lock display immediately", cmd: "void-system-lock" },
+    { name: "Screensaver", iconGlyph: "󰍹", comment: "Run ttfx screensaver", cmd: "void-toggle-screensaver" },
+    { name: "Suspend", iconGlyph: "󰤄", comment: "Sleep system", cmd: "loginctl suspend 2>/dev/null || zzz" },
+    { name: "Hibernate", iconGlyph: "󰋊", comment: "Hibernate system", cmd: "loginctl hibernate 2>/dev/null || ZZZ" },
+    { name: "Logout", iconGlyph: "󰍃", comment: "Exit Hyprland session", cmd: "hyprctl dispatch exit" },
+    { name: "Reboot", iconGlyph: "󰜉", comment: "Restart computer", cmd: "sudo reboot 2>/dev/null || loginctl reboot" },
+    { name: "Shutdown", iconGlyph: "󰐥", comment: "Power off computer", cmd: "sudo poweroff 2>/dev/null || loginctl poweroff" }
+  ]
+
   function open(payloadJson) {
+    var payload = {}
+    try { payload = JSON.parse(payloadJson || "{}") } catch (e) { payload = {} }
+
     root.query = ""
     root.selected = 0
+    root.selectionFile = payload.selectionFile || ""
+    root.doneFile = payload.doneFile || ""
+
+    if (payload.mode === "select") {
+      root.currentMode = "select"
+      root.dmenuPrompt = payload.prompt || "Select"
+      root.dmenuOptions = payload.options || []
+      root.menuWidth = payload.width ? Math.max(380, payload.width) : 560
+      root.menuHeight = payload.maxHeight ? Math.min(600, payload.maxHeight) : 500
+    } else if (payload.menu === "system" || payload.initialMenu === "system") {
+      root.currentMode = "system"
+      root.menuWidth = 440
+      root.menuHeight = 440
+    } else {
+      root.currentMode = "apps"
+      root.menuWidth = 460
+      root.menuHeight = 520
+      if (root.shell && root.shell.appLibrary && typeof root.shell.appLibrary.refreshIcons === "function") {
+        root.shell.appLibrary.refreshIcons()
+      }
+    }
+
     root.showing = true
     Qt.callLater(function() {
       if (searchInput) {
@@ -39,9 +81,14 @@ Item {
   }
 
   function close() {
+    if (root.currentMode === "select" && root.doneFile) {
+      Quickshell.execDetached(["touch", root.doneFile])
+    }
     root.showing = false
     root.query = ""
     root.selected = 0
+    root.selectionFile = ""
+    root.doneFile = ""
   }
 
   function toggle(payloadJson) {
@@ -53,8 +100,8 @@ Item {
   function ping() { return "ok" }
 
   function fuzzyScore(name, q) {
-    name = name.toLowerCase()
-    q = q.toLowerCase()
+    name = (name || "").toLowerCase()
+    q = (q || "").toLowerCase()
     if (q.length === 0) return 1
     if (name.indexOf(q) === 0) return 1000 - name.length
     var si = 0, score = 0, consec = 0
@@ -72,6 +119,20 @@ Item {
     return score - name.length * 0.1
   }
 
+  function getIconSource(iconName) {
+    var val = String(iconName || "").trim()
+    if (!val) return ""
+    if (root.shell && root.shell.appLibrary && typeof root.shell.appLibrary.iconSource === "function") {
+      var s = root.shell.appLibrary.iconSource(val)
+      if (s) return s
+    }
+    if (val.indexOf("file://") === 0) return val
+    if (val.charAt(0) === "/") return "file://" + val
+    var p = Quickshell.iconPath(val, true)
+    if (p) return p
+    return ""
+  }
+
   readonly property var allApps: {
     if (!DesktopEntries || !DesktopEntries.applications) return []
     return DesktopEntries.applications.values.filter(function(a) {
@@ -79,93 +140,138 @@ Item {
     })
   }
 
-  readonly property var filteredApps: {
+  readonly property var filteredItems: {
     var q = root.query.trim()
-    var apps = root.allApps
-    if (apps.length === 0) return []
-
     var scored = []
-    for (var i = 0; i < apps.length; i++) {
-      var app = apps[i]
-      var searchTarget = (app.name || "") + " " + (app.genericName || "") + " " + (app.comment || "") + " " + (app.execString || "")
-      var s = root.fuzzyScore(searchTarget, q)
-      if (s >= 0) scored.push({ app: app, score: s })
+
+    if (root.currentMode === "apps") {
+      var apps = root.allApps
+      if (apps.length === 0) return []
+      for (var i = 0; i < apps.length; i++) {
+        var app = apps[i]
+        var target = (app.name || "") + " " + (app.genericName || "") + " " + (app.comment || "") + " " + (app.execString || "")
+        var s = root.fuzzyScore(target, q)
+        if (s >= 0) scored.push({ item: app, score: s, kind: "app" })
+      }
+      if (q.length === 0) {
+        scored.sort(function(a, b) {
+          return (a.item.name || "").toLowerCase().localeCompare((b.item.name || "").toLowerCase())
+        })
+      } else {
+        scored.sort(function(a, b) { return b.score - a.score })
+      }
+      return scored.map(function(s) { return s.item })
+
+    } else if (root.currentMode === "system") {
+      var items = root.systemMenuItems
+      for (var j = 0; j < items.length; j++) {
+        var item = items[j]
+        var s2 = root.fuzzyScore(item.name + " " + item.comment, q)
+        if (s2 >= 0) scored.push({ item: item, score: s2, kind: "system" })
+      }
+      scored.sort(function(a, b) { return b.score - a.score })
+      return scored.map(function(s) { return s.item })
+
+    } else if (root.currentMode === "select") {
+      var rawOptions = root.dmenuOptions
+      for (var k = 0; k < rawOptions.length; k++) {
+        var raw = String(rawOptions[k] || "")
+        var parts = raw.split("\t")
+        var glyph = parts.length > 2 ? parts[0] : ""
+        var label = parts.length > 2 ? parts[1] : (parts.length > 1 ? parts[0] : raw)
+        var subtext = parts.length > 2 ? parts[2] : (parts.length > 1 ? parts[1] : "")
+        var obj = { raw: raw, glyph: glyph, label: label, subtext: subtext }
+        var s3 = root.fuzzyScore(label + " " + subtext, q)
+        if (s3 >= 0) scored.push({ item: obj, score: s3, kind: "select" })
+      }
+      if (q.length > 0) scored.sort(function(a, b) { return b.score - a.score })
+      return scored.map(function(s) { return s.item })
     }
 
-    var byName = function(a, b) {
-      return (a.app.name || "").toLowerCase().localeCompare((b.app.name || "").toLowerCase())
-    }
-
-    if (q.length === 0) {
-      scored.sort(byName)
-    } else {
-      scored.sort(function(a, b) {
-        return b.score - a.score || byName(a, b)
-      })
-    }
-
-    return scored.slice(0, 40).map(function(x) { return x.app })
-  }
-
-  onFilteredAppsChanged: {
-    if (root.selected >= root.filteredApps.length) {
-      root.selected = Math.max(0, root.filteredApps.length - 1)
-    }
+    return []
   }
 
   function launchCurrent() {
-    if (root.filteredApps.length === 0) return
-    var idx = Math.min(Math.max(0, root.selected), root.filteredApps.length - 1)
-    var app = root.filteredApps[idx]
-    if (app && typeof app.execute === "function") {
+    if (root.filteredItems.length === 0) return
+    var cur = root.filteredItems[root.selected]
+    if (!cur) return
+
+    if (root.currentMode === "apps") {
+      var appId = cur.id || ""
+      var appName = cur.name || ""
+      root.showing = false
+      if (root.shell && root.shell.appLibrary && typeof root.shell.appLibrary.launch === "function") {
+        root.shell.appLibrary.launch(appId, appName)
+      } else {
+        Quickshell.execDetached(cur.execString)
+      }
       root.close()
-      app.execute()
+
+    } else if (root.currentMode === "system") {
+      var cmd = cur.cmd || ""
+      root.showing = false
+      if (cmd) Quickshell.execDetached(["bash", "-c", cmd])
+      root.close()
+
+    } else if (root.currentMode === "select") {
+      var val = cur.raw || cur.label || ""
+      root.showing = false
+      if (root.selectionFile && root.doneFile) {
+        Quickshell.execDetached(["sh", "-c", "printf '%s' \"$1\" > \"$2\"; touch \"$3\"", "_", val, root.selectionFile, root.doneFile])
+      }
+      root.close()
     }
   }
 
-  Ui.OverlayWindow {
-    id: overlay
-    shown: root.showing
+  PanelWindow {
+    id: window
+    visible: root.showing
+    width: Screen.width
+    height: Screen.height
+
+    WlrLayershell.layer: WlrLayer.Overlay
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
     WlrLayershell.namespace: "omarchy-menu"
 
-    Rectangle {
-      anchors.fill: parent
-      color: root.scrimCol
+    color: "transparent"
 
-      MouseArea {
+    MouseArea {
+      anchors.fill: parent
+      onClicked: root.close()
+
+      Rectangle {
         anchors.fill: parent
-        onClicked: root.close()
+        color: root.scrimCol
       }
     }
 
     Rectangle {
-      id: card
+      id: menuBox
       anchors.centerIn: parent
-      width: Math.min(680, overlay.width - 40)
-      height: Math.min(520, overlay.height - 80)
+      width: root.menuWidth
+      height: root.menuHeight
       radius: root.cornerRadius
       color: root.bg
       border.color: root.borderCol
       border.width: 1
-      clip: true
 
       MouseArea {
         anchors.fill: parent
-        // Prevent clicks inside card from dismissing the overlay
+        onClicked: function(mouse) { mouse.accepted = true }
       }
 
       Column {
         anchors.fill: parent
         anchors.margins: 14
-        spacing: 12
+        spacing: 10
 
-        // Search Bar Row
+        // Search Bar Container
         Rectangle {
           width: parent.width
           height: 44
-          radius: Math.max(6, root.cornerRadius - 4)
-          color: Qt.rgba(root.fg.r, root.fg.g, root.fg.b, 0.06)
-          border.color: searchInput.activeFocus ? root.selectedBg : Qt.rgba(root.fg.r, root.fg.g, root.fg.b, 0.15)
+          radius: Math.max(4, root.cornerRadius - 4)
+          color: Qt.rgba(root.fg.r, root.fg.g, root.fg.b, 0.05)
+          border.color: searchInput.activeFocus ? root.selectedBg : Qt.rgba(root.fg.r, root.fg.g, root.fg.b, 0.12)
           border.width: 1
 
           Row {
@@ -176,9 +282,9 @@ Item {
 
             Text {
               anchors.verticalCenter: parent.verticalCenter
-              text: ""
+              text: root.currentMode === "system" ? "󰐥" : (root.currentMode === "select" ? "󰘔" : "󰍉")
               font.family: root.fontFamily
-              font.pixelSize: 15
+              font.pixelSize: 16
               color: root.faintFg
             }
 
@@ -186,16 +292,16 @@ Item {
               id: searchInput
               anchors.verticalCenter: parent.verticalCenter
               width: parent.width - 32
-              text: root.query
+              clip: true
+              color: root.fg
               font.family: root.fontFamily
               font.pixelSize: 14
-              color: root.fg
-              clip: true
-              selectByMouse: true
+              selectionColor: root.selectedBg
+              selectedTextColor: root.selectedFg
+              focus: true
 
               Text {
-                anchors.fill: parent
-                text: "Search applications..."
+                text: root.currentMode === "system" ? "System actions..." : (root.currentMode === "select" ? (root.dmenuPrompt + "...") : "Type to search...")
                 font.family: parent.font.family
                 font.pixelSize: parent.font.pixelSize
                 color: root.faintFg
@@ -214,30 +320,30 @@ Item {
                   root.close()
                   event.accepted = true
                 } else if (event.key === Qt.Key_Down) {
-                  if (root.filteredApps.length > 0) {
-                    root.selected = (root.selected + 1) % root.filteredApps.length
-                    appListView.positionViewAtIndex(root.selected, ListView.Contain)
+                  if (root.filteredItems.length > 0) {
+                    root.selected = (root.selected + 1) % root.filteredItems.length
+                    itemListView.positionViewAtIndex(root.selected, ListView.Contain)
                   }
                   event.accepted = true
                 } else if (event.key === Qt.Key_Up) {
-                  if (root.filteredApps.length > 0) {
-                    root.selected = (root.selected - 1 + root.filteredApps.length) % root.filteredApps.length
-                    appListView.positionViewAtIndex(root.selected, ListView.Contain)
+                  if (root.filteredItems.length > 0) {
+                    root.selected = (root.selected - 1 + root.filteredItems.length) % root.filteredItems.length
+                    itemListView.positionViewAtIndex(root.selected, ListView.Contain)
                   }
                   event.accepted = true
                 } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
                   root.launchCurrent()
                   event.accepted = true
                 } else if (event.key === Qt.Key_PageDown) {
-                  if (root.filteredApps.length > 0) {
-                    root.selected = Math.min(root.selected + 6, root.filteredApps.length - 1)
-                    appListView.positionViewAtIndex(root.selected, ListView.Contain)
+                  if (root.filteredItems.length > 0) {
+                    root.selected = Math.min(root.selected + 6, root.filteredItems.length - 1)
+                    itemListView.positionViewAtIndex(root.selected, ListView.Contain)
                   }
                   event.accepted = true
                 } else if (event.key === Qt.Key_PageUp) {
-                  if (root.filteredApps.length > 0) {
+                  if (root.filteredItems.length > 0) {
                     root.selected = Math.max(root.selected - 6, 0)
-                    appListView.positionViewAtIndex(root.selected, ListView.Contain)
+                    itemListView.positionViewAtIndex(root.selected, ListView.Contain)
                   }
                   event.accepted = true
                 }
@@ -246,13 +352,13 @@ Item {
           }
         }
 
-        // Application List
+        // List View
         ListView {
-          id: appListView
+          id: itemListView
           width: parent.width
-          height: parent.height - 44 - 12 - footerRow.height - 12
+          height: parent.height - 44 - 10 - footerRow.height - 10
           clip: true
-          model: root.filteredApps
+          model: root.filteredItems
           currentIndex: root.selected
           spacing: 2
           boundsBehavior: Flickable.StopAtBounds
@@ -269,8 +375,8 @@ Item {
 
             readonly property bool isSelected: index === root.selected
 
-            width: appListView.width
-            height: 48
+            width: itemListView.width
+            height: root.currentMode === "select" ? 38 : 46
             radius: Math.max(4, root.cornerRadius - 6)
             color: isSelected ? root.selectedBg : "transparent"
 
@@ -280,33 +386,39 @@ Item {
               anchors.rightMargin: 10
               spacing: 12
 
-              // Icon or Letter Fallback
+              // Icon Column
               Item {
                 anchors.verticalCenter: parent.verticalCenter
-                width: 30
-                height: 30
+                width: 28
+                height: 28
 
+                // For Applications
                 Image {
-                  id: iconImg
+                  id: appIconImg
                   anchors.fill: parent
-                  sourceSize: Qt.size(30, 30)
-                  source: (modelData && modelData.icon) ? Quickshell.iconPath(modelData.icon, true) : ""
-                  visible: status === Image.Ready
+                  sourceSize: Qt.size(28, 28)
+                  source: root.currentMode === "apps" ? root.getIconSource(modelData ? modelData.icon : "") : ""
+                  visible: root.currentMode === "apps" && status === Image.Ready
                   fillMode: Image.PreserveAspectFit
                 }
 
+                // Fallback glyph/letter or System/Select glyph
                 Rectangle {
                   anchors.fill: parent
                   radius: 6
-                  color: isSelected ? Qt.rgba(root.selectedFg.r, root.selectedFg.g, root.selectedFg.b, 0.2) : Qt.rgba(root.fg.r, root.fg.g, root.fg.b, 0.1)
-                  visible: !iconImg.visible
+                  color: isSelected ? Qt.rgba(root.selectedFg.r, root.selectedFg.g, root.selectedFg.b, 0.2) : Qt.rgba(root.fg.r, root.fg.g, root.fg.b, 0.08)
+                  visible: !appIconImg.visible
 
                   Text {
                     anchors.centerIn: parent
-                    text: (modelData && modelData.name && modelData.name.length > 0) ? modelData.name.charAt(0).toUpperCase() : "?"
+                    text: {
+                      if (root.currentMode === "system") return modelData.iconGlyph || "󰐥"
+                      if (root.currentMode === "select") return modelData.glyph || "󰘔"
+                      return (modelData && modelData.name && modelData.name.length > 0) ? modelData.name.charAt(0).toUpperCase() : "?"
+                    }
                     color: isSelected ? root.selectedFg : root.fg
                     font.family: root.fontFamily
-                    font.pixelSize: 14
+                    font.pixelSize: (root.currentMode === "system" || root.currentMode === "select") ? 16 : 13
                     font.bold: true
                   }
                 }
@@ -315,12 +427,16 @@ Item {
               // Text Labels
               Column {
                 anchors.verticalCenter: parent.verticalCenter
-                width: parent.width - 42
+                width: parent.width - 40
                 spacing: 2
 
                 Text {
                   width: parent.width
-                  text: (modelData && modelData.name) ? modelData.name : ""
+                  text: {
+                    if (root.currentMode === "system") return modelData.name || ""
+                    if (root.currentMode === "select") return modelData.label || ""
+                    return (modelData && modelData.name) ? modelData.name : ""
+                  }
                   color: isSelected ? root.selectedFg : root.fg
                   font.family: root.fontFamily
                   font.pixelSize: 13
@@ -330,8 +446,16 @@ Item {
 
                 Text {
                   width: parent.width
-                  visible: !!(modelData && (modelData.genericName || modelData.comment))
-                  text: (modelData && (modelData.genericName || modelData.comment)) ? (modelData.genericName || modelData.comment) : ""
+                  visible: {
+                    if (root.currentMode === "system") return !!modelData.comment
+                    if (root.currentMode === "select") return !!modelData.subtext
+                    return !!(modelData && (modelData.genericName || modelData.comment))
+                  }
+                  text: {
+                    if (root.currentMode === "system") return modelData.comment || ""
+                    if (root.currentMode === "select") return modelData.subtext || ""
+                    return (modelData && (modelData.genericName || modelData.comment)) ? (modelData.genericName || modelData.comment) : ""
+                  }
                   color: isSelected ? Qt.rgba(root.selectedFg.r, root.selectedFg.g, root.selectedFg.b, 0.75) : root.faintFg
                   font.family: root.fontFamily
                   font.pixelSize: 10
@@ -367,7 +491,7 @@ Item {
           }
 
           Text {
-            text: "↵ Launch"
+            text: "↵ Select / Launch"
             font.family: root.fontFamily
             font.pixelSize: 10
             color: root.faintFg

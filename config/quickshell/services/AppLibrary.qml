@@ -253,7 +253,7 @@ Item {
 
   Timer {
     id: launchDelay
-    interval: 2000
+    interval: 500
     onTriggered: {
       if (root.toplevelCount() > root.launchToplevelCount || ToplevelManager.activeToplevel !== root.launchActiveToplevel) return
       root.launchOsdOpen = true
