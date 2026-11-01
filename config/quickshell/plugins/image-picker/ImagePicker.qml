@@ -12,8 +12,8 @@ import "ImagePickerModel.js" as ImagePickerModel
 Item {
   id: root
 
-  // Injected by omarchy-shell; defaults to the session OMARCHY_PATH.
-  property string omarchyPath: Quickshell.env("OMARCHY_PATH")
+  // Injected by omarchy-shell; defaults to the session OMARCHY_PATH or VOID_PATH.
+  property string omarchyPath: Quickshell.env("VOID_PATH") || Quickshell.env("OMARCHY_PATH") || "/usr/share/void"
   property string stateHome: Quickshell.env("HOME") + "/.local/state"
   property string userThemesPath: Quickshell.env("HOME") + "/.config/void/themes"
   property string imageDirs: Quickshell.env("OMARCHY_IMAGE_SELECTOR_DIRS") || Quickshell.env("OMARCHY_IMAGE_SELECTOR_DIR") || Quickshell.env("OMARCHY_STOCK_BACKGROUNDS_DIR") || (stateHome + "/void/current/theme/backgrounds")

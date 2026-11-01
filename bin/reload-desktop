@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 set -u
+
 hyprctl reload >/dev/null 2>&1 || true
-setsid "${HOME:-/home/${USER:-$(id -un)}}/.local/bin/launch-quattro-shell" >/dev/null 2>&1 &
-command -v notify-send >/dev/null 2>&1 && notify-send "Quattro Shell" "Reloaded Quickshell & Hyprland" || true
+
+# Terminate existing quickshell instances
+killall quickshell 2>/dev/null || true
+sleep 0.2
+
+# Launch quickshell daemonized
+quickshell -d -n -p /usr/share/void/shell >/dev/null 2>&1 || true
+
+command -v notify-send >/dev/null 2>&1 && notify-send "Desktop" "Reloaded Quickshell & Hyprland" || true
