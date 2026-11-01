@@ -220,19 +220,9 @@ reapply_active_dns_connections() {
 }
 
 reload_dns_stack() {
-  if systemctl is-active --quiet NetworkManager.service 2>/dev/null; then
-    # Load the updated NetworkManager config first, then reapply the active
-    # profiles. A single conf,dns-full reload here pushes the old active DNS
-    # settings, making the shell toggle appear one selection behind.
-    nmcli general reload conf >/dev/null 2>&1 || systemctl reload NetworkManager.service 2>/dev/null || true
+  if nmcli general status >/dev/null 2>&1; then
+    nmcli general reload conf >/dev/null 2>&1 || true
     reapply_active_dns_connections
-  fi
-
-  systemctl reload systemd-resolved.service 2>/dev/null || systemctl restart systemd-resolved.service
-
-  if systemctl is-active --quiet NetworkManager.service 2>/dev/null; then
-    # A resolved reload/restart can leave per-link DNS stale or empty; ask
-    # NetworkManager to publish DNS after resolved has reread its config.
     nmcli general reload dns-full >/dev/null 2>&1 || true
   fi
 }
