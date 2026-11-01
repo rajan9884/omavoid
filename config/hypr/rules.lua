@@ -53,6 +53,15 @@ hl.window_rule({
 
 -- Media Floating
 hl.window_rule({
+  name = "float-terminal-dialog",
+  match = { class = "^(floating-terminal|org.void.terminal|org.omarchy.terminal)$" },
+  float = true,
+  center = true,
+  size = { 920, 620 },
+})
+
+hl.window_rule({
+  name = "media-float",
   name = "media-float",
   match = { class = "^(imv|mpv)$" },
   float = true,

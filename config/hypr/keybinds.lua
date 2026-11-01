@@ -54,9 +54,11 @@ hl.bind(mainMod .. " + SHIFT + F", hl.dsp.exec_cmd("foot -e yazi"), { descriptio
 hl.bind(mainMod .. " + SHIFT + T", hl.dsp.exec_cmd("foot -e btop"), { description = "System Monitor" })
 hl.bind(mainMod .. " + SHIFT + M", hl.dsp.exec_cmd("foot -e cliamp"), { description = "Music Player" })
 
--- ── Package Menus ──
-hl.bind(mainMod .. " + ALT + P", hl.dsp.exec_cmd("foot -e void-pkg-install"), { description = "Package installer" })
-hl.bind(mainMod .. " + ALT + R", hl.dsp.exec_cmd("foot -e void-pkg-remove"), { description = "Package remover" })
+-- ── Package & App Management ──
+hl.bind(mainMod .. " + I", hl.dsp.exec_cmd("void-launch-floating-terminal-with-presentation void-pkg-install"), { description = "Package installer" })
+hl.bind(mainMod .. " + SHIFT + I", hl.dsp.exec_cmd("void-launch-floating-terminal-with-presentation void-pkg-remove"), { description = "Package remover" })
+hl.bind(mainMod .. " + ALT + P", hl.dsp.exec_cmd("void-launch-floating-terminal-with-presentation void-pkg-install"), { description = "Package installer" })
+hl.bind(mainMod .. " + ALT + R", hl.dsp.exec_cmd("void-launch-floating-terminal-with-presentation void-pkg-remove"), { description = "Package remover" })
 
 -- ── Keybindings Search & Cheatsheet ──
 hl.bind(mainMod .. " + K", hl.dsp.exec_cmd("void-menu-keybindings"), { description = "Keybindings cheatsheet" })
