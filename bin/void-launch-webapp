@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+# omarchy:summary=Launch a URL as a web app in the default supported browser
+# omarchy:args=<url>
+
+URL="${1:-}"
+if [ -z "$URL" ]; then
+  echo "Usage: void-launch-webapp <url> [extra-browser-flags...]" >&2
+  exit 1
+fi
+shift
+
+# Pick an available Chromium-based browser that supports app mode
+BROWSER=""
+if command -v helium-browser >/dev/null 2>&1; then
+  BROWSER="helium-browser"
+elif command -v chromium >/dev/null 2>&1; then
+  BROWSER="chromium"
+elif command -v google-chrome >/dev/null 2>&1; then
+  BROWSER="google-chrome"
+elif command -v brave-browser >/dev/null 2>&1; then
+  BROWSER="brave-browser"
+fi
+
+if [ -n "$BROWSER" ]; then
+  exec "$BROWSER" --app="$URL" "$@"
+else
+  exec xdg-open "$URL"
+fi
