@@ -220,7 +220,7 @@ Item {
   }
 
   function openApps() {
-    appGrid.open()
+    Quickshell.execDetached(["void-shell", "shell", "toggle", "omarchy.menu", "{\"menu\":\"root\"}"])
   }
 
   readonly property var pinnedKeys: root.pendingPins || DockModel.pinnedIds(root.dockConfig, root.defaultDockConfig)
@@ -349,7 +349,6 @@ Item {
 
     // The layout commands call this after changing a workspace's mode.
     function refresh(): void { root.refresh() }
-    function apps(): void { appGrid.toggle() }
   }
 
   // An app dragged out of the app grid: the grid holds the pointer and
@@ -393,11 +392,5 @@ Item {
         dock: root
       }
     }
-  }
-
-  AppGrid {
-    id: appGrid
-    appLibrary: root.appLibrary
-    dock: root
   }
 }

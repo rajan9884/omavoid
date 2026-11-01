@@ -22,7 +22,7 @@ send_ipc() {
     case "$action" in
         toggle)
             if [ "$p1" = "omarchy.apps" ]; then
-                void-shell -q omarchy.dock apps >/dev/null 2>&1 || void-shell -q shell toggle omarchy.menu '{"menu":"apps"}' || true
+                void-shell -q shell toggle omarchy.menu '{"menu":"root"}' || true
             elif [ "$p1" = "omarchy.keybinds" ]; then
                 void-menu-keybindings >/dev/null 2>&1 || void-shell -q shell toggle omarchy.menu '{"menu":"keybindings"}' || true
             else
