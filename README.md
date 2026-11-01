@@ -98,8 +98,7 @@ sudo reboot
 ### Shell & System Controls
 | Shortcut | Action |
 | :--- | :--- |
-| `SUPER + Space` | Unified Omarchy Menu (Search, Apps, Settings) |
-| `SUPER + Alt + Space` | Applications Grid Overlay |
+| `SUPER + Space` | Unified Void Menu (Search, Apps, Settings) |
 | `SUPER + Esc` | Power & Session Menu (Lock, Logout, Suspend, Reboot, Shutdown) |
 | `SUPER + Ctrl + Space` | Wallpaper Switcher |
 | `SUPER + Shift + Ctrl + Space` | Theme Switcher (23 dynamic themes) |
