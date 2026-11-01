@@ -36,7 +36,7 @@ monitor_is_internal() {
 }
 
 use_apple_display() {
-  void-hyprland-monitor-focused-apple "$monitor"
+  command -v void-hyprland-monitor-focused-apple >/dev/null 2>&1 && void-hyprland-monitor-focused-apple "$monitor"
 }
 
 use_ddc_display() {
@@ -121,7 +121,7 @@ else
 
   # Apply non-uniform step size: 1% steps if at or below 5%, otherwise set an
   # absolute target percentage to avoid raw backlight rounding causing uneven OSD steps.
-  if [[ $step == "+5%" ]]; then
+  if [[ $step == "+5%" || $step == "up" ]]; then
     if (( current < 5 )); then
       (( target = current + 1 ))
     else
@@ -130,7 +130,7 @@ else
 
     (( target > 100 )) && target=100
     step="$target%"
-  elif [[ $step == "5%-" ]]; then
+  elif [[ $step == "5%-" || $step == "-5%" || $step == "down" ]]; then
     if (( current <= 5 )); then
       (( target = current - 1 ))
     else

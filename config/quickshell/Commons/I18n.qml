@@ -93,7 +93,7 @@ QtObject {
   }
 
   property FileView englishCatalogFile: FileView {
-    path: root.omarchyPath + "/default/i18n/en/shell.json"
+    path: root.omarchyPath + "/config/i18n/en/shell.json"
     watchChanges: true
     printErrors: false
     blockLoading: true
@@ -101,7 +101,7 @@ QtObject {
   }
 
   property FileView languageCatalogFile: FileView {
-    path: root.omarchyPath + "/default/i18n/" + root.language + "/shell.json"
+    path: root.omarchyPath + "/config/i18n/" + root.language + "/shell.json"
     watchChanges: true
     printErrors: false
     blockLoading: true
@@ -109,7 +109,7 @@ QtObject {
   }
 
   property FileView registryFile: FileView {
-    path: root.omarchyPath + "/default/i18n/locales.json"
+    path: root.omarchyPath + "/config/i18n/locales.json"
     watchChanges: true
     printErrors: false
     blockLoading: true

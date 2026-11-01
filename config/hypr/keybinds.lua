@@ -138,7 +138,10 @@ hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true, des
 hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true, description = "Previous track" })
 hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true, description = "Play/pause" })
 
--- Screenshot
+-- Screenshot & OCR
 hl.bind("Print", hl.dsp.exec_cmd("void-capture-screenshot"), { description = "Screenshot fullscreen" })
 hl.bind(mainMod .. " + Print", hl.dsp.exec_cmd("void-capture-region"), { description = "Screenshot region" })
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("void-capture-region"), { description = "Screenshot region" })
+hl.bind(mainMod .. " + CTRL + Print", hl.dsp.exec_cmd("ocr-extract"), { description = "OCR region to clipboard" })
+hl.bind(mainMod .. " + ALT + Print", hl.dsp.exec_cmd("ocr-extract"), { description = "OCR region to clipboard" })
+hl.bind(mainMod .. " + SHIFT + O", hl.dsp.exec_cmd("ocr-extract"), { description = "OCR region to clipboard" })

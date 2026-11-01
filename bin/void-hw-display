@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# omarchy:summary=Print the most likely display backlight device.
+# omarchy:examples=void-hw-display
+
+backlight_path="${VOID_BACKLIGHT_PATH:-${OMARCHY_BACKLIGHT_PATH:-/sys/class/backlight}}"
+
+usable() {
+  local skip
+  [[ -n $1 && $1 != appletb_backlight ]] || return 1
+  return 0
+}
+
+device=""
+for candidate in "$backlight_path"/intel_backlight "$backlight_path"/amdgpu_bl* "$backlight_path"/acpi_video* "$backlight_path"/*; do
+  if [[ -e $candidate ]] && usable "${candidate##*/}"; then
+    device="${candidate##*/}"
+    break
+  fi
+done
+
+if [[ -n $device ]]; then
+  printf '%s\n' "$device"
+else
+  exit 1
+fi
