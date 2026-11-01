@@ -619,11 +619,6 @@
     "when": "void-hw-webcam",
     "action": "void-capture-screenrecording-with-webcam"
   },
-  "trigger.transcode": {
-    "icon": "󰧸",
-    "label": "Transcode",
-    "action": "void-transcode"
-  },
   "trigger.share": {
     "icon": "",
     "label": "Share",
@@ -667,66 +662,11 @@
     "when": "void-hw-laptop && void-hyprland-toggle-enabled internal-monitor-mirror",
     "action": "void-hyprland-monitor-internal-mirror toggle"
   },
-  "trigger.hardware.hybrid-gpu-on": {
-    "icon": "",
-    "label": "Switch to Hybrid GPU",
-    "when": "void-hw-hybrid-gpu && ! grep -q '\"mode\": \"Hybrid\"' /etc/supergfxd.conf",
-    "action": "void-launch-floating-terminal-with-presentation void-toggle-hybrid-gpu"
-  },
-  "trigger.hardware.hybrid-gpu-off": {
-    "icon": "",
-    "label": "Switch to Integrated GPU",
-    "when": "void-hw-hybrid-gpu && grep -q '\"mode\": \"Hybrid\"' /etc/supergfxd.conf",
-    "action": "void-launch-floating-terminal-with-presentation void-toggle-hybrid-gpu"
-  },
-  "trigger.hardware.touchpad-on": {
-    "icon": "󰟸",
-    "label": "Enable Touchpad",
-    "when": "void-hw-touchpad && [[ -f ~/.local/state/void/toggles/hypr/touchpad-disabled-name ]]",
-    "action": "void-toggle-touchpad"
-  },
   "trigger.hardware.touchpad-off": {
     "icon": "󰟸",
     "label": "Disable Touchpad",
     "when": "void-hw-touchpad && [[ ! -f ~/.local/state/void/toggles/hypr/touchpad-disabled-name ]]",
     "action": "void-toggle-touchpad"
-  },
-  "trigger.hardware.touchpad-haptics": {
-    "icon": "󰌌",
-    "label": "Touchpad Haptics"
-  },
-  "trigger.hardware.touchpad-haptics.low": {
-    "icon": "󰌌",
-    "label": "low",
-    "when": "void-hw-dell-xps-haptic-touchpad && void-cmd-present dell-xps-touchpad-haptics",
-    "checked": "[[ \"$(dell-xps-touchpad-haptics get)\" == \"low\" ]]",
-    "action": "dell-xps-touchpad-haptics set low"
-  },
-  "trigger.hardware.touchpad-haptics.mid": {
-    "icon": "󰌌",
-    "label": "mid",
-    "when": "void-hw-dell-xps-haptic-touchpad && void-cmd-present dell-xps-touchpad-haptics",
-    "checked": "[[ \"$(dell-xps-touchpad-haptics get)\" == \"mid\" ]]",
-    "action": "dell-xps-touchpad-haptics set mid"
-  },
-  "trigger.hardware.touchpad-haptics.high": {
-    "icon": "󰌌",
-    "label": "high",
-    "when": "void-hw-dell-xps-haptic-touchpad && void-cmd-present dell-xps-touchpad-haptics",
-    "checked": "[[ \"$(dell-xps-touchpad-haptics get)\" == \"high\" ]]",
-    "action": "dell-xps-touchpad-haptics set high"
-  },
-  "trigger.hardware.touchscreen-on": {
-    "icon": "󰆽",
-    "label": "Enable Touchscreen",
-    "when": "void-hw-touchscreen && [[ -f ~/.local/state/void/toggles/hypr/touchscreen-disabled-name ]]",
-    "action": "void-toggle-touchscreen"
-  },
-  "trigger.hardware.touchscreen-off": {
-    "icon": "󰆽",
-    "label": "Disable Touchscreen",
-    "when": "void-hw-touchscreen && [[ ! -f ~/.local/state/void/toggles/hypr/touchscreen-disabled-name ]]",
-    "action": "void-toggle-touchscreen"
   },
   "trigger.reminder.set": {
     "icon": "󰢌",
@@ -845,11 +785,6 @@
     "icon": "",
     "label": "Config"
   },
-  "setup.config.git": {
-    "icon": "",
-    "label": "Git",
-    "action": "void-launch-floating-terminal-with-presentation void-setup-git"
-  },
   "setup.config.hyprland": {
     "icon": "",
     "label": "Hyprland",
@@ -859,11 +794,6 @@
     "icon": "",
     "label": "Hyprsunset",
     "action": "void-launch-config-editor ~/.config/hypr/hyprsunset.conf && void-restart-hyprsunset"
-  },
-  "setup.config.xcompose": {
-    "icon": "󰞅",
-    "label": "XCompose",
-    "action": "void-launch-config-editor ~/.XCompose && void-restart-xcompose"
   },
   "install.package": {
     "icon": "",

@@ -56,9 +56,6 @@
           "id": "omarchy.keyboard-layout"
         },
         {
-          "id": "omarchy.agents"
-        },
-        {
           "id": "omarchy.bluetooth"
         },
         {
@@ -81,14 +78,9 @@
   "dock": {
     "autohide": true,
     "pinned": [
-      "chromium",
-      "foot",
       "helium",
-      "org.gnome.Nautilus",
-      "omacalc",
-      "omawrite",
-      "X",
-      "YouTube"
+      "foot",
+      "org.gnome.Nautilus"
     ],
     "position": "bottom"
   },

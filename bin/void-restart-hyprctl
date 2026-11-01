@@ -1,5 +1,14 @@
 #!/bin/bash
 
-# omarchy:summary=Reload hyprland configuration (used by the Omarchy theme switching).
+# Reload hyprland configuration
 
-hyprctl reload >/dev/null
+XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+
+if [ ! -S "$XDG_RUNTIME_DIR/hypr/${HYPRLAND_INSTANCE_SIGNATURE:-}/.socket.sock" ]; then
+    sig=$(ls -t "$XDG_RUNTIME_DIR/hypr/" 2>/dev/null | grep -E '^.+_.+_.+' | head -n1)
+    if [ -n "$sig" ]; then
+        export HYPRLAND_INSTANCE_SIGNATURE="$sig"
+    fi
+fi
+
+hyprctl reload >/dev/null 2>&1 || true
