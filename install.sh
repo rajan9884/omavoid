@@ -109,45 +109,41 @@ install_packages() {
     log_ok "Core packages installed."
 }
 
-# 3. Synchronize Official Omarchy Quattro Assets
-sync_upstream_omarchy() {
-    log_info "Synchronizing Omarchy Quattro assets and linking system defaults to dotfiles..."
-    sudo mkdir -p /usr/share/omarchy /usr/share/fonts/omarchy
+# 3. Synchronize Void Quattro Assets
+sync_dotfiles_assets() {
+    log_info "Synchronizing Quattro-Void assets and linking system defaults to dotfiles..."
+    sudo mkdir -p /usr/share/void
 
-    # Deploy official fonts
-    if [ -f "${REPO_DIR}/default/fonts/omarchy/omarchy.ttf" ]; then
-        sudo cp "${REPO_DIR}/default/fonts/omarchy/omarchy.ttf" /usr/share/fonts/omarchy/
-    elif [ -f "${REPO_DIR}/fonts/omarchy/omarchy.ttf" ]; then
-        sudo cp "${REPO_DIR}/fonts/omarchy/omarchy.ttf" /usr/share/fonts/omarchy/
-    fi
+    # Unify /usr/share/void directly with dotfiles
+    sudo rm -rf /usr/share/void/bin \
+                /usr/share/void/config \
+                /usr/share/void/default \
+                /usr/share/void/install \
+                /usr/share/void/shell \
+                /usr/share/void/themes 2>/dev/null || true
 
-    # Unify /usr/share/omarchy directly with dotfiles to keep system default 1:1 identical with ~/.config and dotfiles
-    sudo rm -rf /usr/share/omarchy/bin \
-                /usr/share/omarchy/config \
-                /usr/share/omarchy/default \
-                /usr/share/omarchy/install \
-                /usr/share/omarchy/shell \
-                /usr/share/omarchy/themes \
-                /usr/share/omarchy/shell.tmp.* 2>/dev/null || true
-
-    sudo ln -sfn "${REPO_DIR}/bin" /usr/share/omarchy/bin
-    sudo ln -sfn "${REPO_DIR}/config" /usr/share/omarchy/config
-    sudo ln -sfn "${REPO_DIR}/default" /usr/share/omarchy/default
-    sudo ln -sfn "${REPO_DIR}/install" /usr/share/omarchy/install
-    sudo ln -sfn "${REPO_DIR}/config/quickshell" /usr/share/omarchy/shell
-    sudo ln -sfn "${REPO_DIR}/themes" /usr/share/omarchy/themes
+    sudo ln -sfn "${REPO_DIR}/bin" /usr/share/void/bin
+    sudo ln -sfn "${REPO_DIR}/config" /usr/share/void/config
+    sudo ln -sfn "${REPO_DIR}/default" /usr/share/void/default
+    sudo ln -sfn "${REPO_DIR}/install" /usr/share/void/install
+    sudo ln -sfn "${REPO_DIR}/config/quickshell" /usr/share/void/shell
+    sudo ln -sfn "${REPO_DIR}/themes" /usr/share/void/themes
 
     # Grant user ownership
-    sudo chown -R "${TARGET_USER}:${TARGET_USER}" /usr/share/omarchy "${REPO_DIR}"
+    sudo chown -R "${TARGET_USER}:${TARGET_USER}" /usr/share/void "${REPO_DIR}"
 
+    # Deploy JetBrainsMono Nerd Font if present in repo
+    if [ -d "${REPO_DIR}/fonts/JetBrainsMono" ]; then
+        sudo mkdir -p /usr/share/fonts/JetBrainsMono
+        sudo cp -f "${REPO_DIR}/fonts/JetBrainsMono/"*.ttf /usr/share/fonts/JetBrainsMono/ 2>/dev/null || true
+    fi
     sudo fc-cache -fv >/dev/null 2>&1 || true
     chmod +x "${REPO_DIR}/bin/"* 2>/dev/null || true
-    sudo ln -sfn /usr/share/omarchy/shell /usr/share/omarchy/shell/qs
 
     # Clean dangling symlinks in /usr/local/bin
     sudo find /usr/local/bin -xtype l -delete 2>/dev/null || true
 
-    # Symlink official omarchy helper scripts to /usr/local/bin
+    # Symlink helper scripts to /usr/local/bin
     if [ -d "${REPO_DIR}/bin" ]; then
         for b in "${REPO_DIR}/bin/"*; do
             [ -x "$b" ] && sudo ln -sf "$b" "/usr/local/bin/$(basename "$b")" 2>/dev/null || true
@@ -159,34 +155,19 @@ sync_upstream_omarchy() {
         sudo ln -sf "$(command -v quickshell)" /usr/local/bin/qs
     fi
 
-    # Ensure omarchy-launch-shell initializes audio before starting Quickshell
-    if [ -f "${REPO_DIR}/bin/omarchy-launch-shell" ]; then
-        if ! grep -q "void-audio-init" "${REPO_DIR}/bin/omarchy-launch-shell"; then
-            sed -i '/run_shell() {/a \  command -v void-audio-init >/dev/null 2>&1 && void-audio-init' "${REPO_DIR}/bin/omarchy-launch-shell"
-        fi
-    fi
-
-    # Ensure omarchy-restart-audio supports Void Linux natively without systemd
-    if [ -f "${REPO_DIR}/bin/omarchy-restart-audio" ]; then
-        if ! grep -q "void-audio-init" "${REPO_DIR}/bin/omarchy-restart-audio"; then
-            sed -i '/restart_audio_services() {/a \  if ! command -v systemctl >/dev/null 2>&1 || ! systemctl --user is-system-running >/dev/null 2>&1; then pkill -9 -u "$USER" -x pipewire 2>/dev/null || true; pkill -9 -u "$USER" -x wireplumber 2>/dev/null || true; pkill -9 -u "$USER" -f "pipewire -c .*omarchy-speaker-tuning.conf" 2>/dev/null || true; sleep 0.5; void-audio-init; return 0; fi' "${REPO_DIR}/bin/omarchy-restart-audio"
-        fi
-    fi
-
-    log_ok "Official assets synchronized and unified with dotfiles."
+    log_ok "Void assets synchronized and unified with dotfiles."
 }
 
-# 4. Install Void Linux Compatibility Shims
+# 4. Install Void Linux Environment and Shims
 install_void_shims() {
-    log_info "Installing Void Linux compatibility shims and environment variables..."
-    sudo mkdir -p /usr/local/bin /etc/pam.d /etc/profile.d /etc/sudoers.d
+    log_info "Configuring Void Linux environment and desktop integration..."
+    sudo mkdir -p /usr/local/bin /etc/pam.d /etc/profile.d
 
-    echo "OMARCHY_PATH=/usr/share/omarchy" | sudo tee /etc/omarchy.conf >/dev/null
-    echo "export OMARCHY_PATH=/usr/share/omarchy" | sudo tee /etc/profile.d/omarchy.sh >/dev/null
-    sudo chmod +x /etc/profile.d/omarchy.sh
+    echo "export VOID_PATH=/usr/share/void" | sudo tee /etc/profile.d/void.sh >/dev/null
+    sudo chmod +x /etc/profile.d/void.sh
 
-    # PAM service required by Omarchy Quattro lockscreen
-    cat <<'PAM' | sudo tee /etc/pam.d/omarchy-lock-password >/dev/null
+    # PAM service for lockscreen
+    cat <<'PAM' | sudo tee /etc/pam.d/void-lock-password >/dev/null
 auth include system-auth
 PAM
 
@@ -207,32 +188,6 @@ done
 exec "$@"
 SHIM
     sudo chmod +x /usr/local/bin/systemd-cat
-
-    # systemctl shim for suspend/reboot/poweroff
-    cat <<'SHIM' | sudo tee /usr/local/bin/systemctl >/dev/null
-#!/usr/bin/env bash
-# systemctl compatibility shim for Void Linux (translates to loginctl/runit)
-set -u
-
-# Check for --user flag: Void does not run systemd user instances
-for arg in "$@"; do
-    if [ "$arg" = "--user" ]; then
-        exit 3
-    fi
-done
-
-cmd="${1:-}"
-case "$cmd" in
-    poweroff|power-off) exec loginctl poweroff 2>/dev/null || exec sudo -n poweroff ;;
-    reboot) exec loginctl reboot 2>/dev/null || exec sudo -n reboot ;;
-    suspend) exec loginctl suspend 2>/dev/null || exec zzz ;;
-    hibernate) exec loginctl hibernate 2>/dev/null || exec ZZZ ;;
-    is-system-running) echo "offline"; exit 1 ;;
-    is-active|is-enabled|status) exit 3 ;;
-    *) exit 1 ;;
-esac
-SHIM
-    sudo chmod +x /usr/local/bin/systemctl
 
     # uwsm and uwsm-app shim
     cat <<'SHIM' | sudo tee /usr/local/bin/uwsm >/dev/null
@@ -260,17 +215,14 @@ SHIM
         sudo ln -sf /usr/bin/elogind-inhibit /usr/local/bin/systemd-inhibit
     fi
 
-    # Install custom repository binaries (void-audio-init, void-backlight, omarchy-system, etc.)
+    # Install custom repository binaries into /usr/local/bin
     if [ -d "${REPO_DIR}/bin" ]; then
         for b in "${REPO_DIR}"/bin/*; do
             if [ -f "$b" ]; then
                 sudo cp -f "$b" /usr/local/bin/
                 sudo chmod +x "/usr/local/bin/$(basename "$b")"
-                sudo ln -sf "/usr/local/bin/$(basename "$b")" "/usr/share/omarchy/bin/$(basename "$b")"
             fi
         done
-        sudo mkdir -p /usr/lib/omarchy
-        sudo ln -sf /usr/local/bin/omarchy-speedtest /usr/lib/omarchy/speedtest
     fi
 
     # Configure greetd with tuigreet
@@ -707,75 +659,12 @@ deploy_dotfiles() {
     log_ok "Dotfiles deployed to ${TARGET_HOME}."
 }
 
-# 7. Limine Multi-Boot Integration
-setup_limine_bootloader() {
-    log_info "Configuring Limine multi-boot integration..."
-    TARGET_PART="/dev/nvme0n1p6"
-    MOUNT_DIR="/run/media/${TARGET_USER}/OMARCHY_EFI"
-    MOUNTED_BY_SCRIPT=0
-
-    if [ -b "$TARGET_PART" ]; then
-        if ! mountpoint -q "$MOUNT_DIR"; then
-            sudo mkdir -p "$MOUNT_DIR"
-            sudo mount "$TARGET_PART" "$MOUNT_DIR" 2>/dev/null && MOUNTED_BY_SCRIPT=1
-        fi
-
-        if [ -f "$MOUNT_DIR/limine.conf" ]; then
-            sudo mkdir -p "$MOUNT_DIR/void"
-            for img in /boot/vmlinuz-*; do
-                [ -f "$img" ] && sudo cp -f "$img" "$MOUNT_DIR/void/"
-            done
-            for initrd in /boot/initramfs-*.img; do
-                [ -f "$initrd" ] && sudo cp -f "$initrd" "$MOUNT_DIR/void/"
-            done
-            sudo chmod 644 "$MOUNT_DIR/void/"* 2>/dev/null || true
-
-            sudo mkdir -p /etc/kernel.d/post-install
-            cat << 'EOF' | sudo tee /etc/kernel.d/post-install/60-limine >/dev/null
-#!/bin/sh
-VERSION="$1"
-TARGET_PART="/dev/nvme0n1p6"
-MOUNT_DIR="/run/media/rajan/OMARCHY_EFI"
-MOUNTED_BY_HOOK=0
-
-if [ -b "$TARGET_PART" ]; then
-    if ! mountpoint -q "$MOUNT_DIR"; then
-        mkdir -p "$MOUNT_DIR"
-        mount "$TARGET_PART" "$MOUNT_DIR" 2>/dev/null && MOUNTED_BY_HOOK=1
-    fi
-
-    if [ -d "$MOUNT_DIR/void" ]; then
-        [ -f "/boot/vmlinuz-${VERSION}" ] && cp -f "/boot/vmlinuz-${VERSION}" "$MOUNT_DIR/void/"
-        [ -f "/boot/initramfs-${VERSION}.img" ] && cp -f "/boot/initramfs-${VERSION}.img" "$MOUNT_DIR/void/"
-        chmod 644 "$MOUNT_DIR/void/"* 2>/dev/null || true
-    fi
-
-    if [ "$MOUNTED_BY_HOOK" -eq 1 ]; then
-        umount "$MOUNT_DIR" 2>/dev/null || true
-    fi
-fi
-EOF
-            sudo chmod 755 /etc/kernel.d/post-install/60-limine
-
-            if command -v efibootmgr >/dev/null 2>&1; then
-                sudo efibootmgr -o 0001,0003,0002 2>/dev/null || true
-            fi
-            log_ok "Limine bootloader updated with Void Linux entries."
-        fi
-
-        if [ "$MOUNTED_BY_SCRIPT" -eq 1 ]; then
-            sudo umount "$MOUNT_DIR" 2>/dev/null || true
-        fi
-    fi
-}
-
 setup_void_repos
 install_packages
-sync_upstream_omarchy
+sync_dotfiles_assets
 install_void_shims
 setup_runit_and_groups
 deploy_dotfiles
-setup_limine_bootloader
 
 echo ""
 echo "======================================================================"

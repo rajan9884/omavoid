@@ -7,7 +7,7 @@ local function normal_theme(interrupted)
   local theme = cursor_theme(current)
   -- Only a lost preference needs recovering; an unset theme still means the default alias.
   if theme or not (interrupted or current == "void-startup") then return theme or "default" end
-  theme = cursor_theme(os.getenv("OMARCHY_STARTUP_CURSOR_THEME"))
+  theme = cursor_theme(os.getenv("VOID_STARTUP_CURSOR_THEME"))
   if theme then return theme end
   local pipe = io.popen("gsettings get org.gnome.desktop.interface cursor-theme 2>/dev/null", "r")
   if pipe then
@@ -31,8 +31,8 @@ function void_startup_cursor_restore(loaded)
   local cursor = void_startup_cursor
   if loaded then
     void_startup_cursor_pending = false
-    hl.env("OMARCHY_STARTUP_CURSOR_SESSION", "")
-    hl.env("OMARCHY_STARTUP_CURSOR_THEME", "")
+    hl.env("VOID_STARTUP_CURSOR_SESSION", "")
+    hl.env("VOID_STARTUP_CURSOR_THEME", "")
     hl.config({ cursor = cursor.config })
     if cursor.config.enable_hyprcursor and cursor.hyprcursor then
       hl.exec_cmd("hyprctl setcursor " .. o.shell_quote(cursor.hyprcursor) .. " " .. cursor.size)
@@ -56,7 +56,7 @@ hl.on("config.reloaded", function()
     -- An ordinary reload must not hide the pointer, but an interrupted reveal survives.
     local cold = #hl.get_monitors() == 0
     local session = os.getenv("HYPRLAND_INSTANCE_SIGNATURE")
-    local interrupted = session and os.getenv("OMARCHY_STARTUP_CURSOR_SESSION") == session
+    local interrupted = session and os.getenv("VOID_STARTUP_CURSOR_SESSION") == session
     recover = not cold and not interrupted and os.getenv("XCURSOR_THEME") == "void-startup"
     void_startup_cursor_pending = cold or interrupted or recover
     if void_startup_cursor_pending then
@@ -74,10 +74,10 @@ hl.on("config.reloaded", function()
       }
       if void_startup_cursor.size <= 0 then void_startup_cursor.size = 24 end
       -- Compositor environment survives Lua reloads; a session id prevents stale inheritance.
-      hl.env("OMARCHY_STARTUP_CURSOR_THEME", void_startup_cursor.xcursor)
-      hl.env("OMARCHY_STARTUP_CURSOR_SESSION", os.getenv("HYPRLAND_INSTANCE_SIGNATURE"))
+      hl.env("VOID_STARTUP_CURSOR_THEME", void_startup_cursor.xcursor)
+      hl.env("VOID_STARTUP_CURSOR_SESSION", os.getenv("HYPRLAND_INSTANCE_SIGNATURE"))
       if cold then
-        local vpath = os.getenv("VOID_PATH") or os.getenv("OMARCHY_PATH") or "/usr/share/void"
+        local vpath = os.getenv("VOID_PATH") or "/usr/share/void"
         hl.env("XCURSOR_PATH", vpath .. "/default/hypr/cursors:" .. void_startup_cursor.path)
         hl.env("XCURSOR_THEME", "void-startup")
       else

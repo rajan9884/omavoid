@@ -5,7 +5,6 @@ local reload_prefixes = {
   "default.hypr",
   "hypr",
   "void.current.theme",
-  "omarchy.current.theme",
 }
 
 local function should_reload_module(module)
@@ -31,7 +30,7 @@ end
 
 -- Load generated state from ~/.local/state, user modules from ~/.config, and
 -- Void defaults from $VOID_PATH.
-local void_path = os.getenv("VOID_PATH") or os.getenv("OMARCHY_PATH") or "/usr/share/void"
+local void_path = os.getenv("VOID_PATH") or "/usr/share/void"
 package.path = home
   .. "/.local/state/?.lua;"
   .. home

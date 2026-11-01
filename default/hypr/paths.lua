@@ -12,7 +12,7 @@ local function env_or(name, fallback)
   return value
 end
 
-local void_path = env_or("VOID_PATH", env_or("OMARCHY_PATH", "/usr/share/void"))
+local void_path = env_or("VOID_PATH", "/usr/share/void")
 
 return {
   home = home,

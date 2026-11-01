@@ -55,8 +55,7 @@ function quietReason(row, doNotDisturb) {
 // Nerd Font has devicons, so a glyph there must be drawn in the icon font by
 // name, as the menu does with iconFont, or it renders as a devicon.
 function omarchyGlyph(glyph) {
-  var code = String(glyph || "").codePointAt(0)
-  return code >= 0xe900 && code <= 0xe9ff
+  return false
 }
 
 function summaryStartsWithGlyph(summary) {
