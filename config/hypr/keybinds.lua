@@ -42,7 +42,7 @@ hl.bind(mainMod .. " + X", send_shortcut_once("CTRL", "X"), { description = "Uni
 -- ── Application Launcher & Clipboard ──
 hl.bind(mainMod .. " + Space", hl.dsp.exec_cmd("void-shell shell toggle omarchy.menu"), { description = "Application Launcher" })
 hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("void-shell shell toggle omarchy.menu"), { description = "Application Launcher" })
-hl.bind(mainMod .. " + CTRL + V", hl.dsp.exec_cmd("void-clipboard-open"), { description = "Clipboard manager" })
+hl.bind(mainMod .. " + CTRL + V", hl.dsp.exec_cmd("void-shell shell toggle omarchy.clipboard"), { description = "Clipboard manager" })
 
 -- ── Core Applications ──
 hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd("foot"), { description = "Terminal" })

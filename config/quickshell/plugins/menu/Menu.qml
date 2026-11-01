@@ -22,7 +22,7 @@ Item {
   readonly property color scrimCol: Commons.Color.menu.scrim
   readonly property color selectedBg: Commons.Color.menu.selectedBackground
   readonly property color selectedFg: Commons.Color.menu.selectedText
-  readonly property color faintFg: Commons.Color.menu.subtext
+  readonly property color faintFg: Qt.rgba(root.fg.r, root.fg.g, root.fg.b, 0.6)
   readonly property int cornerRadius: Commons.Style.cornerRadius
   readonly property string fontFamily: Commons.Style.font.menuFamily
 
