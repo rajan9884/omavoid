@@ -8,13 +8,12 @@ export PATH="$OMARCHY_PATH/bin:/usr/local/bin:/usr/bin:/usr/sbin:$PATH"
 # Exit early if screensaver is already running
 pgrep -f '[o]rg.omarchy.screensaver' && exit 0
 
-if void-cmd-missing ttfx; then
+if ! command -v ttfx >/dev/null 2>&1; then
   void-notification-send -g ✋ "Screensaver requires ttfx"
   exit 1
 fi
 
-# Allow screensaver to be turned off but also force started
-if void-toggle-enabled screensaver-off && [[ $1 != "force" ]]; then
+if [[ -f "${XDG_STATE_HOME:-$HOME/.local/state}/void/toggles/screensaver-off" ]] && [[ $1 != "force" ]]; then
   exit 1
 fi
 
@@ -63,16 +62,16 @@ for m in $(hyprctl monitors -j | jq -r '.[] | .name'); do
 
   case $terminal in
   *Alacritty*)
-    hypr_exec alacritty --class=org.omarchy.screensaver --config-file "$OMARCHY_PATH/default/alacritty/screensaver.toml" -e void-screensaver
+    hypr_exec alacritty --class=org.omarchy.screensaver -o font.size=18 -o window.padding.x=0 -o window.padding.y=0 -o colors.primary.background=\"#000000\" -o colors.primary.foreground=\"#ffffff\" -e void-screensaver
     ;;
   *ghostty*)
-    hypr_exec ghostty --class=org.omarchy.screensaver --config-file="$OMARCHY_PATH/default/ghostty/screensaver" --font-size=18 -e void-screensaver
+    hypr_exec ghostty --class=org.omarchy.screensaver --font-size=18 --background=000000 --foreground=ffffff -e void-screensaver
     ;;
   *foot*)
-    hypr_exec foot --app-id=org.omarchy.screensaver --config="$OMARCHY_PATH/default/foot/screensaver.ini" -e void-screensaver
+    hypr_exec foot --app-id=org.omarchy.screensaver --font="JetBrainsMono Nerd Font:size=18" --override=pad=0x0 --override=colors.background=000000 --override=colors.foreground=ffffff -e void-screensaver
     ;;
   *kitty*)
-    hypr_exec kitty --class=org.omarchy.screensaver --override font_size=18 --override window_padding_width=0 -e void-screensaver
+    hypr_exec kitty --class=org.omarchy.screensaver --override font_size=18 --override window_padding_width=0 --override background=#000000 --override foreground=#ffffff -e void-screensaver
     ;;
   esac
 

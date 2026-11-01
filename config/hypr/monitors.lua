@@ -1,5 +1,6 @@
-local paths = require("default.hypr.paths")
-local hdr_flag = paths.state_home .. "/void/toggles/hdr-on"
+local home = os.getenv("HOME") or "/home/rajan"
+local state_home = os.getenv("XDG_STATE_HOME") or (home .. "/.local/state")
+local hdr_flag = state_home .. "/void/toggles/hdr-on"
 local is_hdr = io.open(hdr_flag, "r") ~= nil
 
 -- Custom user monitor scaling overrides for Void Quattro

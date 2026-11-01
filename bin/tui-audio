@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-if command -v wiremix >/dev/null 2>&1; then
-    exec ~/.local/bin/launch-tui-popup wiremix
-elif command -v pulsemixer >/dev/null 2>&1; then
-    exec ~/.local/bin/launch-tui-popup pulsemixer
-elif command -v alsamixer >/dev/null 2>&1; then
-    exec ~/.local/bin/launch-tui-popup alsamixer
-fi

@@ -1,7 +1,13 @@
--- Extra autostart processes for Void Linux
-o.launch_on_start("void-audio-init")
-o.launch_on_start("void-backlight restore")
-o.launch_on_start("wl-paste --type text --watch cliphist store")
-o.launch_on_start("wl-paste --type image --watch cliphist store")
-o.launch_on_start("hyprsunset")
-o.launch_on_start("void-bluetooth-agent")
+-- Autostart processes for Void Linux on Hyprland
+
+hl.on("hyprland.start", function()
+  hl.exec_cmd("dbus-update-activation-environment --systemd --all")
+  hl.exec_cmd("void-audio-init")
+  hl.exec_cmd("void-backlight restore")
+  hl.exec_cmd("wl-paste --type text --watch cliphist store")
+  hl.exec_cmd("wl-paste --type image --watch cliphist store")
+  hl.exec_cmd("hyprsunset")
+  hl.exec_cmd("void-bluetooth-agent")
+  hl.exec_cmd("udiskie --automount --no-notify --no-tray")
+  hl.exec_cmd("quickshell -n -p /usr/share/void/shell")
+end)

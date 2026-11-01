@@ -37,11 +37,6 @@
             "description": "Warning while someone is connected through gliff"
           },
           {
-            "value": "Reminder",
-            "label": "Reminder",
-            "description": "Queued reminder status"
-          },
-          {
             "value": "NightLight",
             "label": "Night light",
             "description": "Blue-light filter"
