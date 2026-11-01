@@ -58,15 +58,6 @@
     },
     "position": "top"
   },
-  "dock": {
-    "autohide": true,
-    "pinned": [
-      "helium",
-      "foot",
-      "org.gnome.Nautilus"
-    ],
-    "position": "bottom"
-  },
   "idle": {
     "lock": 300,
     "screensaver": 150
