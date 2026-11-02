@@ -473,39 +473,19 @@ var GUARD_READERS = [
 // names the directory the stamp and lock are read from; one that cannot be
 // named is never cached.
 function guardPackageSnapshot() {
-  return '__void_pkg_cache=${XDG_RUNTIME_DIR:+$XDG_RUNTIME_DIR/void-menu-packages}
-'
-    + '__void_pkg_names=()
-'
-    + 'if [[ -s $__void_pkg_cache ]]; then mapfile -t __void_pkg_names <"$__void_pkg_cache"; else
-'
-    + '  mapfile -t __void_pkg_names < <(xbps-query -l 2>/dev/null | awk \'{print $2}\' | sed -E \'s/-[^-]+$//\')
-'
-    + '  [[ -z $__void_pkg_cache ]] || printf "%s\n" "${__void_pkg_names[@]}" >"$__void_pkg_cache" 2>/dev/null || true
-'
-    + 'fi
-'
+  return '__void_pkg_cache=${XDG_RUNTIME_DIR:+$XDG_RUNTIME_DIR/void-menu-packages}\n'
+    + '__void_pkg_names=()\n'
+    + 'if [[ -s $__void_pkg_cache ]]; then mapfile -t __void_pkg_names <"$__void_pkg_cache"; else\n'
+    + '  mapfile -t __void_pkg_names < <(xbps-query -l 2>/dev/null | awk \'{print $2}\' | sed -E \'s/-[^-]+$//\')\n'
+    + '  [[ -z $__void_pkg_cache ]] || printf "%s\\n" "${__void_pkg_names[@]}" >"$__void_pkg_cache" 2>/dev/null || true\n'
+    + 'fi\n'
 }
 
 function guardHelpers() {
-  return 'declare -A __void_pkgs=()
-'
+  return 'declare -A __void_pkgs=()\n'
     + guardPackageSnapshot()
-    + 'for __void_pkg in "${__void_pkg_names[@]}"; do __void_pkgs[$__void_pkg]=1; done
-'
-    + '__void_pkg_has() { [[ -n ${__void_pkgs[$1]-} ]] && return 0; xbps-query "$1" &>/dev/null; }
-'
-    + 'void-pkg-present() { local p; for p in "$@"; do __void_pkg_has "$p" || return 1; done; return 0; }
-'
-    + 'void-pkg-missing() { local p; for p in "$@"; do __void_pkg_has "$p" || return 0; done; return 1; }
-'
-    + 'void-cmd-present() { local c; for c in "$@"; do command -v "$c" &>/dev/null || return 1; done; return 0; }
-'
-    + 'void-cmd-missing() { local c; for c in "$@"; do command -v "$c" &>/dev/null || return 0; done; return 1; }
-'
-}"; do __void_pkgs[$__void_pkg]=1; done\n'
-    + '__void_pkg_has() { [[ -n ${__void_pkgs[$1]-} ]] && return 0; '
-    + '[[ $1 == *[\\<\\>=]* ]] && { pacman -Q "$1" &>/dev/null; return; }; return 1; }\n'
+    + 'for __void_pkg in "${__void_pkg_names[@]}"; do __void_pkgs[$__void_pkg]=1; done\n'
+    + '__void_pkg_has() { [[ -n ${__void_pkgs[$1]-} ]] && return 0; xbps-query "$1" &>/dev/null; }\n'
     + 'void-pkg-present() { local p; for p in "$@"; do __void_pkg_has "$p" || return 1; done; return 0; }\n'
     + 'void-pkg-missing() { local p; for p in "$@"; do __void_pkg_has "$p" || return 0; done; return 1; }\n'
     + 'void-cmd-present() { local c; for c in "$@"; do command -v "$c" &>/dev/null || return 1; done; return 0; }\n'
