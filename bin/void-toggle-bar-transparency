@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Toggle statusbar transparency (transparent / opaque)
+
+if ! void-shell shell toggleBarTransparency >/dev/null 2>&1; then
+  void-bar transparent toggle
+fi

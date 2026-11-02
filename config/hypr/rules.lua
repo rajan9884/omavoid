@@ -95,6 +95,6 @@ hl.window_rule({
 })
 
 -- Layer rules for instant Quickshell UI responses
-hl.layer_rule({ match = { namespace = "omarchy-bar|void-bar" }, no_anim = true, animation = "none" })
-hl.layer_rule({ match = { namespace = "^(omarchy-menu|omarchy-image-selector|omarchy-clipboard|omarchy-osd|omarchy-network-qr)$" }, no_anim = true, animation = "none" })
+hl.layer_rule({ match = { namespace = "^(omarchy-bar|void-bar)$" }, blur = true, ignore_alpha = 0.3, no_anim = true, animation = "none" })
+hl.layer_rule({ match = { namespace = "^(omarchy-menu|void-menu|omarchy-image-selector|omarchy-clipboard|omarchy-osd|omarchy-network-qr)$" }, no_anim = true, animation = "none" })
 hl.layer_rule({ match = { namespace = "^(omarchy-background|owe-background)$" }, no_anim = true, animation = "none" })
