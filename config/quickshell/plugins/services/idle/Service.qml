@@ -187,8 +187,8 @@ Item {
     // the lock timer running once the screensaver exists (or during its short
     // launch grace); Hyprland window events cancel the cycle if it exits before
     // the normal lock deadline.
-    if (root.screensaverStartedThisCycle && screensaverLaunchGraceTimer.running) {
-      logEvent("idle-monitor-active", "screensaver launch grace period")
+    if (root.screensaverStartedThisCycle && (root.screensaverWindowCount > 0 || screensaverLaunchGraceTimer.running)) {
+      logEvent("idle-monitor-active", "screensaver cycle remains armed")
       return
     }
 
@@ -302,7 +302,7 @@ Item {
 
   Timer {
     id: screensaverLaunchGraceTimer
-    interval: 1200
+    interval: 3000
     repeat: false
     onTriggered: {
       if (root.idleEnabled && root.idledThisCycle && root.screensaverStartedThisCycle && root.screensaverWindowCount === 0 && !idleMonitor.isIdle) {
