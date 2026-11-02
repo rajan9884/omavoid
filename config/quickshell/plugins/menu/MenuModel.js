@@ -420,9 +420,9 @@ function displayRow(items, itemOrder, checkedResults, disabledResults, entry, de
 // memo never survives to the expression after it.
 var GUARD_READERS = [
   "void-bar background",
-  "void-bar get omarchy.power showPercentage",
-  "void-bar get omarchy.clock format",
-  "void-bar get omarchy.clock verticalFormat",
+  "void-bar get void.power showPercentage",
+  "void-bar get void.clock format",
+  "void-bar get void.clock verticalFormat",
   "void-bar position",
   "void-channel-current",
   "void-dns",

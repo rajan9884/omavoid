@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# omarchy:summary=Pick one or multiple options from a menu
-# omarchy:group=menu
-# omarchy:name=select
-# omarchy:args=prompt [option...] [-- --multiple --selected <value> --on-change <command-json> --change-key <key> --width <pixels> --maxheight <pixels>]
-# omarchy:examples=omarchy menu select Format jpg png|void-menu-select Resolution 4k 1080p 720p -- --width 400
+# void:summary=Pick one or multiple options from a menu
+# void:group=menu
+# void:name=select
+# void:args=prompt [option...] [-- --multiple --selected <value> --on-change <command-json> --change-key <key> --width <pixels> --maxheight <pixels>]
+# void:examples=void menu select Format jpg png|void-menu-select Resolution 4k 1080p 720p -- --width 400
 
 # An option may lead with an icon, as "<glyph><TAB><label>", and may trail a
 # subtext shown under the label, as "<glyph><TAB><label><TAB><subtext>". The
@@ -128,7 +128,7 @@ payload=$(perl -MEncode=decode -MJSON::PP=encode_json,decode_json -e '
   print encode_json($payload)
 ' "$prompt" "$options_json" "$selection_file" "$done_file" "$menu_width" "$menu_maxheight" "$multiple" "$selected_json" "$on_change" "$change_key")
 
-void-shell shell summon omarchy.menu "$payload" >/dev/null || exit 2
+void-shell shell summon void.menu "$payload" >/dev/null || exit 2
 
 while [[ ! -e $done_file ]]; do
   sleep 0.05

@@ -23,7 +23,7 @@ import "Icons.js" as Icons
 Item {
   id: service
 
-  // Injected by omarchy-shell (the first-party service loader).
+  // Injected by void-shell (the first-party service loader).
   property var shell: null
 
   // ------------------------------------------------------------- displays
@@ -868,7 +868,7 @@ Item {
     return true
   }
 
-  // Whether a click does something of the card's own: Omarchy's --exec
+  // Whether a click does something of the card's own: Void's --exec
   // command, the sender's default action, the sender's own window, or a site
   // to go to. Focusing an app by its name alone does not count.
   function clickable(key) {
@@ -1060,7 +1060,7 @@ Item {
     Hyprland.dispatch('hl.dsp.focus({window = hl.get_window("address:' + win.address + '")})')
   }
 
-  // A click: Omarchy's own --exec command first, then the sender's default
+  // A click: Void's own --exec command first, then the sender's default
   // action, then its window, then its site.
   function activate(key, instant) {
     var at = rowIndexFor(key)
@@ -1503,7 +1503,7 @@ Item {
       visible: !stepAside || hasSomethingToShow
       color: "transparent"
 
-      WlrLayershell.namespace: "omarchy-notifications"
+      WlrLayershell.namespace: "void-notifications"
       WlrLayershell.layer: WlrLayer.Overlay
       readonly property bool takesKeyboard: service.keyboardMode && service.targetDisplayName === String(modelData.name)
       WlrLayershell.keyboardFocus: takesKeyboard ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None

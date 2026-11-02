@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# omarchy:summary=Apply current theme to Yazi file manager
-# omarchy:hidden=true
+# void:summary=Apply current theme to Yazi file manager
+# void:hidden=true
 
 THEME_FILE="$HOME/.local/state/void/current/theme/yazi.theme.toml"
 YAZI_CONFIG_DIR="$HOME/.config/yazi"

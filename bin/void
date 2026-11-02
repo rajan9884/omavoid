@@ -6,8 +6,8 @@
 
 set -euo pipefail
 
-export VOID_PATH="${VOID_PATH:-${OMARCHY_PATH:-/usr/share/void}}"
-export OMARCHY_PATH="$VOID_PATH"
+export VOID_PATH="${VOID_PATH:-${VOID_PATH:-/usr/share/void}}"
+export VOID_PATH="$VOID_PATH"
 
 if [[ $# -eq 0 ]] || [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]] || [[ "$1" == "help" ]]; then
   cat <<'EOF'
@@ -42,6 +42,12 @@ fi
 
 # Fallback aliases
 case "$cmd" in
+  menu)
+    exec void-shell shell toggle void.menu '{"menu":"root"}'
+    ;;
+  bg)
+    exec void-theme-bg-switcher "$@"
+    ;;
   theme)
     if [[ $# -eq 0 ]]; then
       exec void-theme-switcher

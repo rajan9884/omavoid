@@ -11,5 +11,5 @@ void-brightness-keyboard restore >/dev/null 2>&1 || true
 
 # Dismiss screensaver if running
 pkill -x ttfx 2>/dev/null || true
-pkill -f 'org\.(void|omarchy)\.screensaver' 2>/dev/null || true
+pkill -f 'org\.(void|void)\.screensaver' 2>/dev/null || true
 hyprctl eval 'hl.config({ cursor = { invisible = false } })' &>/dev/null || hyprctl keyword cursor:invisible false &>/dev/null || true

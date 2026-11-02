@@ -11,7 +11,7 @@ import qs.Ui
 // stops the traffic, so the download workers never keep saturating the link
 // behind a closed overlay. The payload may carry the connection's display
 // name -- {"connection": "MyWifi"} -- and the panel looks it up itself via
-// omarchy-network-status when the caller doesn't know it.
+// void-network-status when the caller doesn't know it.
 Item {
   id: root
 
@@ -63,7 +63,7 @@ Item {
 
   function dismiss() {
     if (root.shell && typeof root.shell.hide === "function")
-      root.shell.hide((root.manifest && root.manifest.id) || "omarchy.speedtest")
+      root.shell.hide((root.manifest && root.manifest.id) || "void.speedtest")
     else close()
   }
 
@@ -189,11 +189,11 @@ Item {
 
   SpeedTestOverlay {
     fontFamily: Style.font.family
-    layerNamespace: "omarchy-network-speedtest"
+    layerNamespace: "void-network-speedtest"
     title: root.connectionName
     leftLabel: I18n.t("speedtest.download")
     rightLabel: I18n.t("speedtest.upload")
-    runAgainTooltip: I18n.t("speedtest.measureAgainVia").arg("speed.omarchy.org")
+    runAgainTooltip: I18n.t("speedtest.measureAgainVia").arg("speed.cloudflare.com")
     running: root.running
     leftValue: root.downloadValue
     rightValue: root.uploadValue

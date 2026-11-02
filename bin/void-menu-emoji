@@ -1,6 +1,6 @@
 #!/bin/bash
-# omarchy:summary=Launch emojis
-# omarchy:group=menu
-# omarchy:examples=omarchy menu emoji
+# void:summary=Launch emojis
+# void:group=menu
+# void:examples=void menu emoji
 
-void-shell shell toggle omarchy.emojis
+void-shell shell toggle void.emojis

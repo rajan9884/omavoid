@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# omarchy:summary=Toggle animations, blur and shadows, which are slow without a GPU
-# omarchy:args=[toggle|on|off]
-# omarchy:examples=omarchy toggle animations | omarchy toggle animations off | omarchy toggle animations on
+# void:summary=Toggle animations, blur and shadows, which are slow without a GPU
+# void:args=[toggle|on|off]
+# void:examples=void toggle animations | void toggle animations off | void toggle animations on
 
 # The flag records animations being off, so on and off swap on the way through.
 case ${1:-toggle} in

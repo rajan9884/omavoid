@@ -19,7 +19,7 @@ if ! grim -g "$(slurp -d)" "$TMP_PNG" 2>/dev/null; then
     exit 0
 fi
 
-TEXT="$("$TESSERACT" "$TMP_PNG" stdout -l "${OMARCHY_OCR_LANGS:-eng}" --dpi 300 -c preserve_interword_spaces=1 2>/dev/null | sed -e 's/[[:space:]]\+$//' -e '/^$/d' || true)"
+TEXT="$("$TESSERACT" "$TMP_PNG" stdout -l "${VOID_OCR_LANGS:-eng}" --dpi 300 -c preserve_interword_spaces=1 2>/dev/null | sed -e 's/[[:space:]]\+$//' -e '/^$/d' || true)"
 
 if [[ -z "$TEXT" ]]; then
     wl-copy --clear 2>/dev/null || true

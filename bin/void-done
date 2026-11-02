@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# omarchy:summary=Check or mark completed Omarchy setup tasks
-# omarchy:args=<check|mark|ensure> <name>
-# omarchy:hidden=true
+# void:summary=Check or mark completed Void setup tasks
+# void:args=<check|mark|ensure> <name>
+# void:hidden=true
 
 set -e
 

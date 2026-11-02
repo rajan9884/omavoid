@@ -1,8 +1,8 @@
 [Metadata]
-Name=Omarchy
+Name=Void
 Version=1
-Author=Omarchy
-Description=Generated from the current Omarchy theme
+Author=Void
+Description=Generated from the current Void theme
 ScaleWithDPI=True
 
 [InputPanel]

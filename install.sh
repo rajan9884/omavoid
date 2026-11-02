@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# QUATTRO-VOID: LIGHTWEIGHT OMARCHY QUATTRO 4.0 FORK FOR VOID LINUX
+# OMAVOID: LIGHTWEIGHT DESKTOP ENVIRONMENT FOR VOID LINUX
 # Fully reproducible fresh-install automation for Void Linux (x86_64 runit)
 #
 # 1. Configures Fastly Void XBPS repos & Hyprland-Void community repo
 # 2. Installs Wayland, Quickshell, PipeWire, TUI, and CLI packages
-# 3. Synchronizes official Quattro assets (wallpapers, themes, shell)
+# 3. Synchronizes official Omavoid assets (wallpapers, themes, shell)
 # 4. Installs Void compatibility shims (uwsm, systemd-cat, systemctl, pacman, magick, PAM)
 # 5. Configures Runit services, udev sound rules, and user groups
 # 6. Deploys pure Quickshell desktop, Hyprland configs, and TUI shortcuts
@@ -36,7 +36,7 @@ log_ok()    { printf "${GREEN}[OK]${NC}   %s\n" "$1"; }
 log_warn()  { printf "${YELLOW}[WARN]${NC} %s\n" "$1"; }
 
 echo "======================================================================"
-echo "  Quattro-Void (Omarchy Quattro 4.0) Setup for Void Linux"
+echo "  Omavoid Desktop Setup for Void Linux"
 echo "  Target User: ${TARGET_USER} (${TARGET_HOME})"
 echo "======================================================================"
 
@@ -111,7 +111,7 @@ install_packages() {
 
 # 3. Synchronize Void Quattro Assets
 sync_dotfiles_assets() {
-    log_info "Synchronizing Quattro-Void assets and linking system defaults to dotfiles..."
+    log_info "Synchronizing Omavoid assets and linking system defaults to dotfiles..."
     sudo mkdir -p /usr/share/void
 
     # Unify /usr/share/void directly with dotfiles
@@ -280,7 +280,7 @@ command -v alsactl >/dev/null 2>&1 && alsactl store
 RC
     sudo chmod +x /etc/rc.shutdown
 
-    # Mark Omarchy first-run as completed so repetitive notifications do not pop up on every login
+    # Mark Void first-run as completed so repetitive notifications do not pop up on every login
     mkdir -p "${TARGET_HOME}/.local/state/void/done"
     touch "${TARGET_HOME}/.local/state/void/done/first-run-user"
     touch "${TARGET_HOME}/.local/state/void/done/finalize-user"
@@ -324,7 +324,7 @@ SHIM
 ${TARGET_USER} ALL=(root) NOPASSWD: /usr/bin/reboot, /usr/bin/poweroff, /usr/bin/shutdown, /usr/bin/halt, /usr/bin/zzz, /usr/bin/ZZZ, /usr/local/bin/void-enable-greetd
 SUDO
     sudo chmod 0440 /etc/sudoers.d/zz-void-power
-    sudo rm -f /etc/sudoers.d/zz-omarchy-power /etc/sudoers.d/zz-omarchy-theme-browser /etc/sudoers.d/zz-void-theme-browser /etc/pam.d/omarchy-lock-password 2>/dev/null || true
+    sudo rm -f /etc/sudoers.d/zz-void-power /etc/sudoers.d/zz-void-theme-browser /etc/sudoers.d/zz-void-theme-browser /etc/pam.d/void-lock-password 2>/dev/null || true
 
     # pacman shim for xbps queries and package operations
     cat <<'SHIM' | sudo tee /usr/local/bin/pacman >/dev/null
@@ -488,7 +488,7 @@ CONF
 
 # 6. Deploy Dotfiles to Target User Home (via Symlinks)
 deploy_dotfiles() {
-    log_info "Deploying Quattro-Void dotfiles via symlinks to ${TARGET_HOME}..."
+    log_info "Deploying Omavoid dotfiles via symlinks to ${TARGET_HOME}..."
     BACKUP_DIR="${TARGET_HOME}/.config-backup-$(date +%Y%m%d-%H%M%S)"
     mkdir -p "${TARGET_HOME}/.config" "${TARGET_HOME}/.local/bin" "${TARGET_HOME}/.local/state/void/current/theme" "${TARGET_HOME}/Pictures/Screenshots"
 
@@ -605,5 +605,5 @@ deploy_dotfiles
 
 echo ""
 echo "======================================================================"
-log_ok "Quattro-Void setup complete! Log in on VT 1 as '${TARGET_USER}'."
+log_ok "Omavoid setup complete! Log in on VT 1 as '${TARGET_USER}'."
 echo "======================================================================"

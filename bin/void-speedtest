@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-void-speedtest: High-performance network speed measurement client for Omarchy on Void Linux.
-Measures download and upload bandwidth against speed.omarchy.org (or custom server).
+void-speedtest: High-performance network speed measurement client for Void on Void Linux.
+Measures download and upload bandwidth against speed.cloudflare.com (or custom server).
 Implements parent-death termination, periodic live throughput reporting, and JSON output mode.
 """
 
@@ -27,7 +27,7 @@ try:
 except Exception:
     pass
 
-expected_ppid = os.environ.get("OMARCHY_SPEEDTEST_PARENT_PID")
+expected_ppid = os.environ.get("VOID_SPEEDTEST_PARENT_PID")
 if expected_ppid and str(os.getppid()) != expected_ppid:
     if os.getppid() == 1:
         sys.exit(1)
@@ -42,13 +42,13 @@ if len(args) != 1 or args[0] not in ("down", "up"):
 mode = args[0]
 is_json = "--json" in flags
 
-base_url = os.environ.get("OMARCHY_SPEEDTEST_URL", "https://speed.omarchy.org").rstrip("/")
+base_url = os.environ.get("VOID_SPEEDTEST_URL", "https://speed.cloudflare.com/__").rstrip("/")
 if not (base_url.startswith("https://") or base_url.startswith("http://")):
     sys.stderr.write("Invalid speed test URL\n")
     sys.exit(1)
 
 try:
-    concurrency = int(os.environ.get("OMARCHY_SPEEDTEST_CONNECTIONS", "4"))
+    concurrency = int(os.environ.get("VOID_SPEEDTEST_CONNECTIONS", "4"))
 except ValueError:
     sys.stderr.write("Invalid connection count\n")
     sys.exit(1)
@@ -77,7 +77,7 @@ def download_worker():
     url = f"{base_url}/down?bytes=67108864"
     cmd = [
         "curl", "-s", "-N",
-        "-H", "User-Agent: Omarchy-Speedtest/1.0 (+https://omarchy.org)",
+        "-H", "User-Agent: Void-Speedtest/1.0",
         "-H", "Content-Type: application/octet-stream",
         "-H", "X-Speedtest-Phase: measure",
         url
@@ -108,7 +108,7 @@ def upload_worker():
     payload = b"\x00" * chunk_size
     cmd = [
         "curl", "-s",
-        "-H", "User-Agent: Omarchy-Speedtest/1.0 (+https://omarchy.org)",
+        "-H", "User-Agent: Void-Speedtest/1.0",
         "-H", "Content-Type: application/octet-stream",
         "-H", "X-Speedtest-Phase: measure",
         "--data-binary", "@-",

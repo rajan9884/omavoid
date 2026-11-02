@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# omarchy:summary=Open a config file in the user's editor and surface a toast
-# omarchy:args=<path>
-# omarchy:examples=omarchy launch config-editor ~/.config/hypr/hyprland.lua
+# void:summary=Open a config file in the user's editor and surface a toast
+# void:args=<path>
+# void:examples=void launch config-editor ~/.config/hypr/hyprland.lua
 
 path="${1-}"
 

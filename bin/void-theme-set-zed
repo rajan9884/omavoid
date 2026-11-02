@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Void Generator - Convert Omarchy colors.toml (or Alacritty TOML) to Zed theme JSON
+# Void Generator - Convert Void colors.toml (or Alacritty TOML) to Zed theme JSON
 
 set -euo pipefail
 

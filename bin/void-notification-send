@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# omarchy:summary=Send an Omarchy desktop notification
-# omarchy:args=[--app-name <app-name>] [-g <glyph>] [-u <low|normal|critical>] [-i <icon>] [-t <ms>] [-r <id>] [-p] [--image <path-or-uri>] <headline> [description] [--exec <program> [args...] | --action <label> <program> [words...]... [--with <args...>]]
-# omarchy:examples=omarchy notification send "Reminder" "5 minutes are up" -g 󰢌
+# void:summary=Send an Void desktop notification
+# void:args=[--app-name <app-name>] [-g <glyph>] [-u <low|normal|critical>] [-i <icon>] [-t <ms>] [-r <id>] [-p] [--image <path-or-uri>] <headline> [description] [--exec <program> [args...] | --action <label> <program> [words...]... [--with <args...>]]
+# void:examples=void notification send "Reminder" "5 minutes are up" -g 󰢌
 
 set -euo pipefail
 
@@ -30,7 +30,7 @@ usage() {
 # Recognize a known option, in both `--flag value` and `--flag=value` forms.
 # Returns 1 for anything unrecognized so the caller can decide (headline, or a
 # hard error in option position).
-parse_omarchy_option() {
+parse_void_option() {
   local opt val nargs
   if [[ $1 == --?*=* ]]; then
     opt=${1%%=*}
@@ -86,7 +86,7 @@ parse_omarchy_option() {
 }
 
 while (($# > 0)); do
-  if parse_omarchy_option "$@"; then
+  if parse_void_option "$@"; then
     shift "$parsed_option_args"
   else
     break
@@ -158,7 +158,7 @@ while (($# > 0)); do
     shift
     with_args=("$@")
     break
-  elif parse_omarchy_option "$@"; then
+  elif parse_void_option "$@"; then
     shift "$parsed_option_args"
   else
     echo "Unknown option: $1" >&2

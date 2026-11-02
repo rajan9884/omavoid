@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# omarchy:summary=Show or adjust brightness on the focused display.
-# omarchy:args=[--no-osd] [--monitor name] [+N%|N%-|N%|off|on]
-# omarchy:examples=omarchy brightness display | omarchy brightness display +5% | omarchy brightness display --monitor DP-1 50% | omarchy brightness display off | omarchy brightness display on
+# void:summary=Show or adjust brightness on the focused display.
+# void:args=[--no-osd] [--monitor name] [+N%|N%-|N%|off|on]
+# void:examples=void brightness display | void brightness display +5% | void brightness display --monitor DP-1 50% | void brightness display off | void brightness display on
 
 no_osd=0
 monitor=""

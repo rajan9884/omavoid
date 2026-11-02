@@ -14,9 +14,9 @@ Singleton {
 
   signal changed()
 
-  // Tests point this at a fixture root, the way OMARCHY_PROC_ROOT and
-  // OMARCHY_SYS_ROOT stand in for /proc and /sys.
-  readonly property string fixtureRoot: Quickshell.env("OMARCHY_INPUT_ROOT") || ""
+  // Tests point this at a fixture root, the way VOID_PROC_ROOT and
+  // VOID_SYS_ROOT stand in for /proc and /sys.
+  readonly property string fixtureRoot: Quickshell.env("VOID_INPUT_ROOT") || ""
   readonly property string devDir: fixtureRoot + "/dev"
   readonly property string inputDir: devDir + "/input"
   readonly property string udevDir: fixtureRoot + "/run/udev/data"

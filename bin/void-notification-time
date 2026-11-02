@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# omarchy:summary=Show the current time and date notification
+# void:summary=Show the current time and date notification
 
-# Day and month names follow the Omarchy language right away, rather than
+# Day and month names follow the Void language right away, rather than
 # LC_TIME, which only catches up with it at the next login. One timestamp feeds
 # every part, so a notification sent at midnight can't mix two days.
 locale=${LC_TIME:-${LANG:-en_US.UTF-8}}

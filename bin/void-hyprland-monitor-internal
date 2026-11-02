@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# omarchy:summary=Enable, disable, toggle, or recover the internal laptop display
-# omarchy:args=<on|off|toggle|recover>
+# void:summary=Enable, disable, toggle, or recover the internal laptop display
+# void:args=<on|off|toggle|recover>
 
 TOGGLE="internal-monitor-disable"
 TOGGLE_FLAG="$HOME/.local/state/void/toggles/hypr/$TOGGLE.lua"

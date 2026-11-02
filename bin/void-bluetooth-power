@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# omarchy:summary=Turn Bluetooth on or off, remembered across reboots
-# omarchy:group=bluetooth
-# omarchy:args=<on|off|toggle|is-on>
+# void:summary=Turn Bluetooth on or off, remembered across reboots
+# void:group=bluetooth
+# void:args=<on|off|toggle|is-on>
 
 # BlueZ never persists an adapter's Powered property, so turning Bluetooth off
 # through bluetoothctl lasts only until the next boot. The rfkill soft block does
@@ -13,10 +13,10 @@
 #
 # So the block is the state, and BlueZ follows it: unblocking leaves AutoEnable
 # at its stock default and bluetoothd powers the adapter up by itself. Every
-# Omarchy path that turns Bluetooth on or off goes through here, because a plain
+# Void path that turns Bluetooth on or off goes through here, because a plain
 # `bluetoothctl power on` fails outright while the block is set.
 
-POWER_WAIT_SECONDS=${OMARCHY_BLUETOOTH_POWER_WAIT_SECONDS:-2}
+POWER_WAIT_SECONDS=${VOID_BLUETOOTH_POWER_WAIT_SECONDS:-2}
 
 controllers() {
   timeout 2s bluetoothctl list 2>/dev/null | awk '{print $2}'

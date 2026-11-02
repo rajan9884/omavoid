@@ -11,14 +11,14 @@ import "Model.js" as Model
 // heavy scrim. Esc or the scrim dismiss it.
 //
 // Standalone panel plugin: each summon regenerates the code via
-// omarchy-network-qr, which emits the interface, security, and SSID it
+// void-network-qr, which emits the interface, security, and SSID it
 // shared ahead of the module matrix — so a bare summon self-detects the
 // connection. The payload may pin the interface and pre-title the card:
 // {"iface": "wlan0", "ssid": "MyWifi"}.
 Item {
   id: root
 
-  property string omarchyPath: Quickshell.env("OMARCHY_PATH")
+  property string voidPath: Quickshell.env("VOID_PATH")
   property var shell: null
   property var manifest: null
 
@@ -89,7 +89,7 @@ Item {
 
   function dismiss() {
     if (root.shell && typeof root.shell.hide === "function")
-      root.shell.hide((root.manifest && root.manifest.id) || "omarchy.wifiqr")
+      root.shell.hide((root.manifest && root.manifest.id) || "void.wifiqr")
     else close()
   }
 
@@ -212,7 +212,7 @@ Item {
 
   OverlayWindow {
     shown: root.opened
-    WlrLayershell.namespace: "omarchy-network-qr"
+    WlrLayershell.namespace: "void-network-qr"
 
     // Deep scrim: the floating code needs the backdrop to carry the contrast
     // on any wallpaper.

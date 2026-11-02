@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# omarchy:summary=Set the current background image or video
-# omarchy:args=<path-to-media>
-# omarchy:examples=omarchy theme bg set ~/Pictures/background.png
+# void:summary=Set the current background image or video
+# void:args=<path-to-media>
+# void:examples=void theme bg set ~/Pictures/background.png
 
 if [[ -z $1 ]]; then
   echo "Usage: void-theme-bg-set <path-to-media>" >&2

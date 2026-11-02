@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# omarchy:summary=Choose a legible transparent bar text color
-# omarchy:hidden=true
+# void:summary=Choose a legible transparent bar text color
+# void:hidden=true
 
 set -e
 
@@ -124,7 +124,7 @@ esac
 # second full-size resize buffer. Box scaling still averages every source pixel;
 # point sampling would alias on fine stripes and pick the wrong text color. Do
 # not let an oversized image spill its pixel cache into a memory map or /tmp (a
-# tmpfs on Omarchy); fall back to the configured text color when the bounded
+# tmpfs on Void); fall back to the configured text color when the bounded
 # sample cannot finish cheaply.
 pixel=$(MAGICK_MEMORY_LIMIT=512MiB \
   MAGICK_MAP_LIMIT=0 \

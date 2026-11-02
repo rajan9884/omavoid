@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# omarchy:summary=Open a captive portal's sign-in window, pausing any Tailscale exit node until online
-# omarchy:group=network
-# omarchy:args=<url>
+# void:summary=Open a captive portal's sign-in window, pausing any Tailscale exit node until online
+# void:group=network
+# void:args=<url>
 
 set -euo pipefail
 

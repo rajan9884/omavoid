@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # QUATTRO QUICKSHELL IPC CONTROLLER (qshell-ctl)
-# Controls Omarchy Quattro Quickshell Menus, Panels, Lockscreen & OSD
+# Controls Omavoid Quickshell Menus, Panels, Lockscreen & OSD
 # ==============================================================================
 set -euo pipefail
 
-export OMARCHY_PATH="${OMARCHY_PATH:-/usr/share/void}"
+export VOID_PATH="${VOID_PATH:-/usr/share/void}"
 runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$UID}"
 if [[ -z ${WAYLAND_DISPLAY:-} ]]; then
     socket=$(ls -t "$runtime_dir"/wayland-[0-9]* 2>/dev/null | grep -v '\.lock$' | head -n1)
@@ -21,10 +21,10 @@ send_ipc() {
 
     case "$action" in
         toggle)
-            if [ "$p1" = "omarchy.apps" ]; then
-                void-shell -q shell toggle omarchy.menu '{"menu":"root"}' || true
-            elif [ "$p1" = "omarchy.keybinds" ]; then
-                void-menu-keybindings >/dev/null 2>&1 || void-shell -q shell toggle omarchy.menu '{"menu":"keybindings"}' || true
+            if [ "$p1" = "void.apps" ]; then
+                void-shell -q shell toggle void.menu '{"menu":"root"}' || true
+            elif [ "$p1" = "void.keybinds" ]; then
+                void-menu-keybindings >/dev/null 2>&1 || void-shell -q shell toggle void.menu '{"menu":"keybindings"}' || true
             else
                 void-shell -q shell toggle "$p1" "{}" >/dev/null 2>&1 || true
             fi

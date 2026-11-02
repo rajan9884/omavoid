@@ -3,8 +3,8 @@
 # void:summary=Open the wallpaper background switcher
 # void:group=theme
 
-: "${OMARCHY_PATH:=/usr/share/void}"
-export PATH="$OMARCHY_PATH/bin:/usr/local/bin:/usr/bin:/usr/sbin:$PATH"
+: "${VOID_PATH:=/usr/share/void}"
+export PATH="$VOID_PATH/bin:/usr/local/bin:/usr/bin:/usr/sbin:$PATH"
 
 theme_name=$(cat "$HOME/.local/state/void/current/theme.name" 2>/dev/null)
 current_background=$(readlink -f "$HOME/.local/state/void/current/background" 2>/dev/null)

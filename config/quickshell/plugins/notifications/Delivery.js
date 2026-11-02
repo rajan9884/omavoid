@@ -5,17 +5,17 @@
 
 var CRITICAL = 2
 
-// Omarchy's own action toasts and bare notify-send critical alerts get through
+// Void's own action toasts and bare notify-send critical alerts get through
 // Do Not Disturb. Critical alone is not enough: chat apps send
 // critical to force visibility, under their own app name.
 function bypassesQuiet(row) {
   var app = String((row && row.app) || "")
-  if (app === "omarchy-action" || app === "void-action") return true
+  if (app === "void-action" || app === "void-action") return true
   return app === "notify-send" && Number(row.urgency) === CRITICAL
 }
 
 // The buttons a card offers, in the order it draws them and the number keys
-// count them: copying each code it found, then an Omarchy sender's --action
+// count them: copying each code it found, then an Void sender's --action
 // buttons, then the sender's own actions. A code's label is left to the card,
 // which translates it.
 function deeds(row, senderActions) {
@@ -37,7 +37,7 @@ function deeds(row, senderActions) {
 function isEphemeral(row) {
   if (row && row.transient === true) return true
   var app = String((row && row.app) || "")
-  return app === "notify-send" || app === "omarchy-action" || app === "void-action"
+  return app === "notify-send" || app === "void-action" || app === "void-action"
 }
 
 // "silenced", or "" when the row shows. A verification code always passes: it
@@ -51,10 +51,10 @@ function quietReason(row, doNotDisturb) {
 
 // A summary that opens with its own glyph ("󰂚  Silenced": one code point, two
 // spaces) already carries its mark, so the card drops the icon slot.
-// Omarchy's own marks (default/fonts/omarchy) sit at U+E900 and up, where the
+// Void's own marks (default/fonts/void) sit at U+E900 and up, where the
 // Nerd Font has devicons, so a glyph there must be drawn in the icon font by
 // name, as the menu does with iconFont, or it renders as a devicon.
-function omarchyGlyph(glyph) {
+function voidGlyph(glyph) {
   return false
 }
 

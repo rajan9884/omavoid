@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# omarchy:summary=Toggle crash capture notifications
+# void:summary=Toggle crash capture notifications
 
 # nf-md-robot_dead, escaped so this file reads without a Nerd Font.
 readonly CRASH_GLYPH=$'\U000f16a1'

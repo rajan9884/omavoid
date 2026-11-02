@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# omarchy:summary=Resize the active webcam recording overlay
-# omarchy:group=capture
-# omarchy:args=<smaller|larger|reset|small|medium|large>
-# omarchy:examples=omarchy capture webcam resize smaller | void-capture-webcam-resize reset
+# void:summary=Resize the active webcam recording overlay
+# void:group=capture
+# void:args=<smaller|larger|reset|small|medium|large>
+# void:examples=void capture webcam resize smaller | void-capture-webcam-resize reset
 
 set -euo pipefail
 

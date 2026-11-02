@@ -13,7 +13,7 @@ Item {
 
   property var host: null
   property bool cover: true
-  readonly property bool sessionConsumed: String(sessionMarker.text() || "").trim() === (Quickshell.env("OMARCHY_SESSION_ID") || Quickshell.env("HYPRLAND_INSTANCE_SIGNATURE"))
+  readonly property bool sessionConsumed: String(sessionMarker.text() || "").trim() === (Quickshell.env("VOID_SESSION_ID") || Quickshell.env("HYPRLAND_INSTANCE_SIGNATURE"))
   property bool startupSettled: sessionConsumed
   property bool startupPending: !sessionConsumed
   property bool startupMediaReady: false
@@ -22,7 +22,7 @@ Item {
   property bool checked: false
   property string themeToken: ""
   property string transitionToken: ""
-  readonly property string startupBackgroundPath: Quickshell.env("OMARCHY_STARTUP_BACKGROUND")
+  readonly property string startupBackgroundPath: Quickshell.env("VOID_STARTUP_BACKGROUND")
   property string themeBackground: sessionConsumed && !Util.isVideoPath(startupBackgroundPath) ? startupBackgroundPath : ""
   property var themeNativeSize: null
   property string themeColors: ""
@@ -35,18 +35,18 @@ Item {
   // same slanted cut as an ordinary background transition, not the intro fade.
   property bool themeCut: false
   property real themeCutProgress: 0
-  readonly property var backgroundService: host && host.services ? host.firstPartyServiceFor("omarchy.background") : null
+  readonly property var backgroundService: host && host.services ? host.firstPartyServiceFor("void.background") : null
   readonly property bool backgroundActive: !!backgroundService && !backgroundService.suspended
   readonly property bool backgroundReady: backgroundActive && backgroundService.ready !== false
 
   function restoreStartupCursor() {
-    Quickshell.execDetached(["hyprctl", "eval", "if omarchy_startup_cursor_restore then omarchy_startup_cursor_restore() end"])
+    Quickshell.execDetached(["hyprctl", "eval", "if void_startup_cursor_restore then void_startup_cursor_restore() end"])
   }
 
   function finishStartup() {
     if (!cover || !startupSettled) return
     var registry = host ? host.pluginRegistry : null
-    var backgroundId = registry ? registry.resolveEnabledId("omarchy.background") : ""
+    var backgroundId = registry ? registry.resolveEnabledId("void.background") : ""
     var disabled = registry && registry.installedPlugins[backgroundId] && !registry.isEnabled(backgroundId)
     if (!backgroundReady && !disabled) return
     cover = false
@@ -295,7 +295,7 @@ Item {
       exclusionMode: ExclusionMode.Ignore
       WlrLayershell.layer: WlrLayer.Overlay
       WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-      WlrLayershell.namespace: "omarchy-background"
+      WlrLayershell.namespace: "void-background"
 
       Rectangle {
         anchors.fill: parent
@@ -333,7 +333,7 @@ Item {
       exclusionMode: ExclusionMode.Ignore
       WlrLayershell.layer: WlrLayer.Bottom
       WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-      WlrLayershell.namespace: "omarchy-background"
+      WlrLayershell.namespace: "void-background"
 
       Rectangle {
         anchors.fill: parent

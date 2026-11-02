@@ -1,17 +1,17 @@
 #!/bin/bash
 
-# omarchy:group=transcode
-# omarchy:name=
-# omarchy:summary=Transcode pictures and videos for sharing
-# omarchy:args=[--path path] [input] [format] [resolution]
-# omarchy:examples=omarchy transcode|omarchy transcode --path ~/Downloads|omarchy transcode ~/Videos/demo.mov mp4 1080p|omarchy transcode ~/Pictures/background.heic jpg medium
+# void:group=transcode
+# void:name=
+# void:summary=Transcode pictures and videos for sharing
+# void:args=[--path path] [input] [format] [resolution]
+# void:examples=void transcode|void transcode --path ~/Downloads|void transcode ~/Videos/demo.mov mp4 1080p|void transcode ~/Pictures/background.heic jpg medium
 
 set -euo pipefail
 
 usage() {
   cat <<'EOF'
 Usage:
-  omarchy transcode [--path path] [input] [format] [resolution]
+  void transcode [--path path] [input] [format] [resolution]
 
 With no input, pick a picture or video from ~/Pictures and ~/Videos,
 or only from --path when provided. Then pick the output format and resolution.
@@ -182,7 +182,7 @@ main() {
     fi
   fi
 
-  # Picture qualities are words, so the menu shows them in the Omarchy language
+  # Picture qualities are words, so the menu shows them in the Void language
   # and maps the pick back to the value the transcoder takes.
   local high medium low choice
   high=$(void-i18n transcode.qualityHigh)

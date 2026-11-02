@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# void:summary=Print OSC sequences for an Omarchy / Void color theme
+# void:summary=Print OSC sequences for an Void / Void color theme
 # void:hidden=true
 
 theme="${1:-$HOME/.local/state/void/current/theme/colors.toml}"

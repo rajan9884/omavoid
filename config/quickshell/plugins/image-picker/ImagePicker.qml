@@ -12,15 +12,15 @@ import "ImagePickerModel.js" as ImagePickerModel
 Item {
   id: root
 
-  // Injected by omarchy-shell; defaults to the session OMARCHY_PATH or VOID_PATH.
-  property string omarchyPath: Quickshell.env("VOID_PATH") || Quickshell.env("OMARCHY_PATH") || "/usr/share/void"
+  // Injected by void-shell; defaults to the session VOID_PATH or VOID_PATH.
+  property string voidPath: Quickshell.env("VOID_PATH") || Quickshell.env("VOID_PATH") || "/usr/share/void"
   property string stateHome: Quickshell.env("HOME") + "/.local/state"
   property string userThemesPath: Quickshell.env("HOME") + "/.config/void/themes"
-  property string imageDirs: Quickshell.env("OMARCHY_IMAGE_SELECTOR_DIRS") || Quickshell.env("OMARCHY_IMAGE_SELECTOR_DIR") || Quickshell.env("OMARCHY_STOCK_BACKGROUNDS_DIR") || (stateHome + "/void/current/theme/backgrounds")
+  property string imageDirs: Quickshell.env("VOID_IMAGE_SELECTOR_DIRS") || Quickshell.env("VOID_IMAGE_SELECTOR_DIR") || Quickshell.env("VOID_STOCK_BACKGROUNDS_DIR") || (stateHome + "/void/current/theme/backgrounds")
   property string imageRows: ""
   property string loadedImageRows: ""
-  property string selectionFile: Quickshell.env("OMARCHY_IMAGE_SELECTOR_SELECTION_FILE") || Quickshell.env("OMARCHY_BACKGROUND_SELECTION_FILE")
-  property string selectedImage: Quickshell.env("OMARCHY_IMAGE_SELECTOR_SELECTED")
+  property string selectionFile: Quickshell.env("VOID_IMAGE_SELECTOR_SELECTION_FILE") || Quickshell.env("VOID_BACKGROUND_SELECTION_FILE")
+  property string selectedImage: Quickshell.env("VOID_IMAGE_SELECTOR_SELECTED")
   property int selectedIndex: 0
   property bool imagesLoaded: false
   property bool opened: false
@@ -36,7 +36,7 @@ Item {
   property string filterText: ""
   property var doneFilesToRelease: []
   // Themes open from rows the shell already holds, so the picker shows without
-  // waiting on omarchy-theme-switcher; each open refreshes them behind it.
+  // waiting on void-theme-switcher; each open refreshes them behind it.
   property string themeRows: ""
   property bool themeMode: false
   property bool themeOpenPending: false
@@ -76,7 +76,7 @@ Item {
   }
 
   function scriptPath(name) {
-    return omarchyPath + "/shell/plugins/image-picker/" + name
+    return voidPath + "/shell/plugins/image-picker/" + name
   }
 
   function focusPicker() {
@@ -421,7 +421,7 @@ Item {
     pendingDeleteTheme = ""
   }
 
-  // Removal itself is omarchy-theme-remove's job (including its guards and
+  // Removal itself is void-theme-remove's job (including its guards and
   // notification); the picker only refreshes its rows once it finishes.
   function confirmDeleteTheme() {
     var name = pendingDeleteTheme
@@ -463,7 +463,7 @@ Item {
   Process {
     id: themeRowsProc
     property bool queued: false
-    command: [root.omarchyPath + "/bin/void-theme-switcher", "--print-rows"]
+    command: [root.voidPath + "/bin/void-theme-switcher", "--print-rows"]
     stdout: StdioCollector {
       onStreamFinished: root.updateThemeRows(String(text || "").trim())
     }
@@ -475,7 +475,7 @@ Item {
     }
   }
 
-  // The same listing omarchy-theme-remove offers interactively: real
+  // The same listing void-theme-remove offers interactively: real
   // directories under the user themes path, never symlinked working copies.
   Process {
     id: extraThemesProc
@@ -494,7 +494,7 @@ Item {
 
   Process {
     id: stockThemesProc
-    command: ["find", root.omarchyPath + "/themes", "-mindepth", "1", "-maxdepth", "1", "-type", "d", "-printf", "%f\n"]
+    command: ["find", root.voidPath + "/themes", "-mindepth", "1", "-maxdepth", "1", "-type", "d", "-printf", "%f\n"]
     stdout: StdioCollector {
       onStreamFinished: root.stockThemeNames = ImagePickerModel.parseThemeNames(String(text || ""))
     }
@@ -564,7 +564,7 @@ Item {
     }
   }
 
-  // Lifecycle hooks invoked by omarchy-shell summon/hide. shell.summon(id,
+  // Lifecycle hooks invoked by void-shell summon/hide. shell.summon(id,
   // payloadJson) hands the JSON to open() here; shell.hide(id) calls close().
   // The shell host owns the stable `image-selector` IPC target and forwards
   // those lower-level positional calls here.
@@ -632,7 +632,7 @@ Item {
     id: panel
     shown: root.opened
     shownKeyboardFocus: root.imagesLoaded ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-    WlrLayershell.namespace: "omarchy-image-selector"
+    WlrLayershell.namespace: "void-image-selector"
 
     MouseArea {
       anchors.fill: parent

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# omarchy:summary=Set the default audio input and move active streams
-# omarchy:args=<node-id> <source-name>
-# omarchy:examples=omarchy audio input set default 43 alsa_input.pci-0000_00_1f.3.analog-stereo
+# void:summary=Set the default audio input and move active streams
+# void:args=<node-id> <source-name>
+# void:examples=void audio input set default 43 alsa_input.pci-0000_00_1f.3.analog-stereo
 
 node_id=${1:-}
 source_name=${2:-}

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# omarchy:summary=Print the layout of a workspace: dwindle, scrolling, or floating
-# omarchy:args=[workspace-id]
+# void:summary=Print the layout of a workspace: dwindle, scrolling, or floating
+# void:args=[workspace-id]
 
 if [[ -n $1 ]]; then
   WORKSPACE_ID=$1

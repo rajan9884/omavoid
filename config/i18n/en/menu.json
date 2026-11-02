@@ -56,8 +56,8 @@
   "learn.keybindings": {
     "label": "Keybindings"
   },
-  "learn.omarchy": {
-    "label": "Omarchy"
+  "learn.void": {
+    "label": "Void"
   },
   "learn.hyprland": {
     "label": "Hyprland"
@@ -1199,8 +1199,8 @@
   "remove.development.elixir.phoenix": {
     "label": "Phoenix"
   },
-  "update.omarchy": {
-    "label": "Omarchy"
+  "update.void": {
+    "label": "Void"
   },
   "update.channel": {
     "label": "Channel"

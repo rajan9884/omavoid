@@ -17,7 +17,7 @@ Item {
 
   // The shell host, for summoning the OSD.
   property var host: null
-  // The backlight omarchy-hw-display picks. Devices do not come and go at
+  // The backlight void-hw-display picks. Devices do not come and go at
   // runtime, but each press refreshes it for the next.
   property string device: ""
   readonly property string devicePath: device ? "/sys/class/backlight/" + device : ""
@@ -52,12 +52,12 @@ Item {
     return Number(String(file.text() || "").trim())
   }
 
-  // The payload omarchy-osd builds, from the level read back after the write.
+  // The payload void-osd builds, from the level read back after the write.
   function showOsd() {
     var max = readNumber(maxFile)
     if (!host || !(max > 0)) return
     var percent = Math.round(100 * readNumber(brightnessFile) / max)
-    host.summon("omarchy.osd", JSON.stringify({
+    host.summon("void.osd", JSON.stringify({
       icon: "brightness",
       message: "",
       value: String(percent),

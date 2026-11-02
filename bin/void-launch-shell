@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# omarchy:summary=Launch the Omarchy shell with its log kept in the journal
-# omarchy:hidden=true
+# void:summary=Launch the Void shell with its log kept in the journal
+# void:hidden=true
 
 # Quickshell only logs to its instance runtime dir (tmpfs), so when the shell
 # dies the idle/lock event trail is gone after a reboot. The journal keeps it
@@ -10,16 +10,16 @@
 # Backgrounded because bash defers a trap until a foreground command returns but
 # interrupts wait. systemd-cat execs, so the job is Quickshell itself.
 #
-# Quickshell's own reloading is off; Omarchy restarts the shell deliberately.
-# A package upgrade rewriting $OMARCHY_PATH/shell would otherwise reload it
+# Quickshell's own reloading is off; Void restarts the shell deliberately.
+# A package upgrade rewriting $VOID_PATH/shell would otherwise reload it
 # against a half-written tree, and that failed reload leaves a second engine
 # generation behind that turns the next restart's IPC kill into a crash.
 run_shell() {
   command -v void-audio-init >/dev/null 2>&1 && void-audio-init
   local startup_background
   startup_background=$(readlink -f "$HOME/.local/state/void/current/background" 2>/dev/null)
-  OMARCHY_STARTUP_BACKGROUND="$startup_background" QS_DISABLE_FILE_WATCHER=1 QS_NO_RELOAD_POPUP=1 \
-    systemd-cat -t void-shell -- quickshell -n -p "$OMARCHY_PATH/shell" &
+  VOID_STARTUP_BACKGROUND="$startup_background" QS_DISABLE_FILE_WATCHER=1 QS_NO_RELOAD_POPUP=1 \
+    systemd-cat -t void-shell -- quickshell -n -p "$VOID_PATH/shell" &
   shell_pid=$!
 
   local status
@@ -85,10 +85,10 @@ while true; do
   fi
 
   if (( ++attempts > 5 )); then
-    logger -t void-shell "Giving up on the Omarchy shell after $attempts relaunches in under a minute."
+    logger -t void-shell "Giving up on the Void shell after $attempts relaunches in under a minute."
     exit 1
   fi
 
-  logger -t void-shell "Omarchy shell exited with status $status; relaunching."
+  logger -t void-shell "Void shell exited with status $status; relaunching."
   sleep 1
 done

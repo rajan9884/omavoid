@@ -246,7 +246,7 @@ Item {
 
   function showOsd(actionLabel, iconName, player) {
     if (!shell) return
-    shell.summon("omarchy.osd", JSON.stringify({
+    shell.summon("void.osd", JSON.stringify({
       icon: iconName || "media",
       message: osdMessage(player || activePlayer, actionLabel)
     }))
@@ -490,9 +490,9 @@ Item {
       audio.volume = step.percent / 100
     }
 
-    // The payload omarchy-osd builds, from the values just set: the node may
+    // The payload void-osd builds, from the values just set: the node may
     // not report them back before the OSD draws.
-    shell.summon("omarchy.osd", JSON.stringify({
+    shell.summon("void.osd", JSON.stringify({
       icon: MediaModel.volumeOsdIcon(step.percent, step.muted),
       message: "",
       value: String(step.percent),

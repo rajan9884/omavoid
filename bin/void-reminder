@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# omarchy:summary=Set and show lightweight desktop notification reminders
-# omarchy:args=[-i|--interactive] | <minutes> [message] | show [-j|--json] | clear
-# omarchy:examples=omarchy reminder -i | omarchy reminder 5 | omarchy reminder 30 "Check the oven" | omarchy reminder show | omarchy reminder show --json | omarchy reminder clear
+# void:summary=Set and show lightweight desktop notification reminders
+# void:args=[-i|--interactive] | <minutes> [message] | show [-j|--json] | clear
+# void:examples=void reminder -i | void reminder 5 | void reminder 30 "Check the oven" | void reminder show | void reminder show --json | void reminder clear
 
 set -euo pipefail
 
@@ -36,11 +36,11 @@ active_reminder_timers() {
 }
 
 refresh_indicator() {
-  void-shell -q omarchy.indicators refresh >/dev/null 2>&1 || true
+  void-shell -q void.indicators refresh >/dev/null 2>&1 || true
 }
 
 open_interactive() {
-  void-shell shell summon omarchy.reminders "{}"
+  void-shell shell summon void.reminders "{}"
 }
 
 show_reminders() {
@@ -192,7 +192,7 @@ if [[ -n $custom_message ]]; then
 fi
 
 systemd-run --user --quiet --collect --on-active="${minutes}m" --unit="$unit" \
-  bash -c 'void-notification-send -g 󰢌 "$(void-i18n reminder.title)" "$1"; rm -f "$2"; void-shell -q omarchy.indicators refresh >/dev/null 2>&1 || true' bash "$message" "$message_file"
+  bash -c 'void-notification-send -g 󰢌 "$(void-i18n reminder.title)" "$1"; rm -f "$2"; void-shell -q void.indicators refresh >/dev/null 2>&1 || true' bash "$message" "$message_file"
 
 refresh_indicator
 void-notification-send -g 󰢌 "$confirmation_title" "$confirmation"

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# omarchy:summary=Decode a QR code from a screenshot region
-# omarchy:group=capture
-# omarchy:examples=omarchy capture qr
+# void:summary=Decode a QR code from a screenshot region
+# void:group=capture
+# void:examples=void capture qr
 
 # Keep hyprpicker alive until after grim captures so the screenshot sees the
 # frozen overlay rather than live content shifting during teardown.

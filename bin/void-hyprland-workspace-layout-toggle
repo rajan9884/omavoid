@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# omarchy:summary=Cycle the current active workspace through the dwindle, scrolling, and floating layouts
-# omarchy:args=[back]
+# void:summary=Cycle the current active workspace through the dwindle, scrolling, and floating layouts
+# void:args=[back]
 
 # Layout changes replace one notification instead of stacking a new one for
 # each press, so cycling through the layouts leaves a single, current one.
@@ -86,8 +86,8 @@ fi
 
 # The bar shows the focused workspace's layout, and the dock shows on floating ones.
 if (( APPLIED )); then
-  void-shell -q omarchy.workspaces refresh
-  void-shell -q omarchy.dock refresh
+  void-shell -q void.workspaces refresh
+  void-shell -q void.dock refresh
 fi
 
 # A workspace starting to float sets up its titlebars as the mode applies. The

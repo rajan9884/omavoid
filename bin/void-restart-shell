@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# omarchy:summary=Restart the Omarchy shell
-# omarchy:examples=omarchy restart shell
+# void:summary=Restart the Void shell
+# void:examples=void restart shell
 
 # A caller opened after dev link/unlink may disagree with the still-running
 # desktop. The user manager receives Hyprland's environment at session start.
-session_omarchy_path=$(systemctl --user show-environment 2>/dev/null | sed -n 's/^OMARCHY_PATH=//p' | tail -n 1)
-: "${session_omarchy_path:=${OMARCHY_PATH:-${VOID_PATH:-/usr/share/void}}}"
+session_void_path=$(systemctl --user show-environment 2>/dev/null | sed -n 's/^VOID_PATH=//p' | tail -n 1)
+: "${session_void_path:=${VOID_PATH:-${VOID_PATH:-/usr/share/void}}}"
 
-CONFIG_DIR="$session_omarchy_path/shell"
-[[ -f $CONFIG_DIR/shell.qml ]] || { echo "Omarchy shell config not found: $CONFIG_DIR" >&2; exit 1; }
+CONFIG_DIR="$session_void_path/shell"
+[[ -f $CONFIG_DIR/shell.qml ]] || { echo "Void shell config not found: $CONFIG_DIR" >&2; exit 1; }
 
 # Allow running from outside the session (e.g. over ssh) by deriving the
 # Hyprland instance signature from the newest instance runtime dir.
@@ -27,10 +27,10 @@ fi
 # that reports the lock secure or in progress is worth preserving.
 relock=0
 if void-hyprland-session-locked; then
-  locking=$(OMARCHY_PATH="$session_omarchy_path" OMARCHY_SHELL_IPC_TIMEOUT=0.5s void-shell lock status 2>/dev/null |
+  locking=$(VOID_PATH="$session_void_path" VOID_SHELL_IPC_TIMEOUT=0.5s void-shell lock status 2>/dev/null |
     jq -r '.secure or .requested' 2>/dev/null)
   if [[ $locking == "true" ]]; then
-    echo "Refusing to restart Omarchy shell while the session is locked." >&2
+    echo "Refusing to restart Void shell while the session is locked." >&2
     exit 1
   fi
   relock=1
@@ -46,13 +46,13 @@ relock_session() {
   local state deadline=$((SECONDS + 30))
 
   while (( SECONDS < deadline )); do
-    state=$(OMARCHY_PATH="$session_omarchy_path" OMARCHY_SHELL_IPC_TIMEOUT=0.5s void-shell lock status 2>/dev/null |
+    state=$(VOID_PATH="$session_void_path" VOID_SHELL_IPC_TIMEOUT=0.5s void-shell lock status 2>/dev/null |
       jq -r 'if .secure == true then "secure" elif .requested == true then "locking" else "idle" end' 2>/dev/null)
 
     case $state in
       secure) return 0 ;;
       locking) ;;
-      *) OMARCHY_PATH="$session_omarchy_path" OMARCHY_SHELL_IPC_TIMEOUT=0.5s void-shell lock lock >/dev/null 2>&1 ;;
+      *) VOID_PATH="$session_void_path" VOID_SHELL_IPC_TIMEOUT=0.5s void-shell lock lock >/dev/null 2>&1 ;;
     esac
 
     sleep 0.1
@@ -103,14 +103,14 @@ shell_ready=0
 # of attempts.
 deadline=$((SECONDS + 60))
 while (( SECONDS < deadline )); do
-  if OMARCHY_PATH="$session_omarchy_path" OMARCHY_SHELL_IPC_TIMEOUT=0.5s void-shell shell ping >/dev/null 2>&1; then
+  if VOID_PATH="$session_void_path" VOID_SHELL_IPC_TIMEOUT=0.5s void-shell shell ping >/dev/null 2>&1; then
     shell_ready=1
     break
   fi
   sleep 0.1
 done
 if (( shell_ready == 0 )); then
-  echo "Omarchy shell did not become ready after restart." >&2
+  echo "Void shell did not become ready after restart." >&2
   exit 1
 fi
 
@@ -119,7 +119,7 @@ fi
 # first and depends on nothing else: a user stranded behind the failsafe must
 # not wait on the notification plugin, which may be slow or absent.
 if (( relock )) && ! relock_session; then
-  echo "Omarchy shell restarted, but the session lock was not re-secured." >&2
+  echo "Void shell restarted, but the session lock was not re-secured." >&2
   exit 1
 fi
 
@@ -135,16 +135,16 @@ if (( notifications_were_running )); then
     sleep 0.1
   done
   if (( notifications_restored == 0 )); then
-    echo "Omarchy shell restarted, but its notification service did not become ready." >&2
+    echo "Void shell restarted, but its notification service did not become ready." >&2
     exit 1
   fi
 fi
 
 # Invitation toasts (like Voxtype/fingerprint setup) die with the old
 # shell, and their notify-send waiters hang forever: the dying server
-# never emits NotificationClosed. A still-running omarchy-*-invitation
+# never emits NotificationClosed. A still-running void-*-invitation
 # unit is therefore an unanswered invitation — re-run it so its toast
 # reappears on the new shell. Answered invitations have already exited
 # and been collected, so the glob no longer matches them.
-systemctl --user try-restart 'omarchy-*-invitation.service' 2>/dev/null || true
+systemctl --user try-restart 'void-*-invitation.service' 2>/dev/null || true
 exit 0

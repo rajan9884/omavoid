@@ -9,7 +9,7 @@ import qs.Commons
 Item {
   id: root
 
-  // Injected by omarchy-shell (the first-party service loader).
+  // Injected by void-shell (the first-party service loader).
   property var shell: null
 
   readonly property string home: Quickshell.env("HOME")
@@ -172,7 +172,7 @@ Item {
     if (name === "openwindow") {
       var open = eventParts(event, 4)
       var cls = String(open[2] || "")
-      if (cls === root.screensaverClass || cls === "org.omarchy.screensaver") root.handleScreensaverWindowOpened(open[0])
+      if (cls === root.screensaverClass || cls === "org.void.screensaver") root.handleScreensaverWindowOpened(open[0])
     } else if (name === "closewindow") {
       var close = eventParts(event, 1)
       var address = String(close[0] || "")

@@ -1,4 +1,4 @@
-# .bashrc - Authentic Omarchy Quattro Shell for Void Linux
+# .bashrc - Authentic Omavoid Shell for Void Linux
 
 # If not running interactively, return early
 [[ $- != *i* ]] && return
@@ -8,8 +8,8 @@ export USER="${USER:-$(id -un)}"
 export HOME="${HOME:-$(getent passwd "$USER" 2>/dev/null | cut -d: -f6)}"
 [ -z "$HOME" ] && export HOME="/home/$USER"
 export VOID_PATH="/usr/share/void"
-export OMARCHY_PATH="$VOID_PATH"
-export PATH="$HOME/.local/bin:$OMARCHY_PATH/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin"
+export VOID_PATH="$VOID_PATH"
+export PATH="$HOME/.local/bin:$VOID_PATH/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin"
 export EDITOR="nvim"
 export SUDO_EDITOR="nvim"
 export VISUAL="nvim"

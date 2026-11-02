@@ -8,8 +8,8 @@ import "Model.js" as Model
 
 Panel {
   id: root
-  moduleName: "omarchy.weather"
-  ipcTarget: "omarchy.weather"
+  moduleName: "void.weather"
+  ipcTarget: "void.weather"
   manageIpc: false
 
   property var anchorItem: null
@@ -75,11 +75,11 @@ Panel {
   property var dailyForecastReport: null
 
   // Configured location, read from the weather.json state file (owned by
-  // omarchy-weather-location). The watch makes hand edits take effect live.
+  // void-weather-location). The watch makes hand edits take effect live.
   property var configuredLocationState: ({ name: "", latitude: null, longitude: null })
   readonly property string configuredLocation: configuredLocationState.name
 
-  // With nothing configured, where geo.omarchy.org places this network, in the
+  // With nothing configured, where ip-api.com places this network, in the
   // same shape. Kept when a later lookup fails.
   property var detectedLocationState: ({ name: "", latitude: null, longitude: null })
   property bool detectingLocation: false
@@ -88,7 +88,7 @@ Panel {
 
   // The query is the wttr.in path segment (coordinates when known, else the
   // encoded name); empty means wttr.in's own IP auto-detect, used only when
-  // geo.omarchy.org could not answer.
+  // ip-api.com could not answer.
   readonly property var locationState: Model.effectiveLocation(configuredLocationState, detectedLocationState)
   readonly property string locationQuery: Model.wttrLocationQuery(locationState.name, locationState.latitude, locationState.longitude)
 
@@ -172,7 +172,7 @@ Panel {
     // starve retries for the rest of the session.
     forecastRetries = 0
     dailyForecastRetries = 0
-    // Until geo.omarchy.org answers there is nothing to ask for: wait for it
+    // Until ip-api.com answers there is nothing to ask for: wait for it
     // rather than have wttr.in look this machine up. Its answer, or its
     // failure, refreshes again.
     if (detectingLocation && locationQuery === "") return
@@ -361,7 +361,7 @@ Panel {
     return Model.iconForOpenMeteoCode(code)
   }
 
-  // Mirrors omarchy-weather-icon's wttr.in code → nerd-font glyph mapping.
+  // Mirrors void-weather-icon's wttr.in code → nerd-font glyph mapping.
   function iconForCode(code, night) {
     return Model.iconForCode(code, night)
   }
@@ -490,11 +490,11 @@ Panel {
     }
   }
 
-  // Omarchy's own lookup: city and coordinates from Cloudflare's view of
+  // Void's own lookup: city and coordinates from Cloudflare's view of
   // this network, in weather.json's shape.
   Process {
     id: locationProc
-    command: ["curl", "-fsS", "--max-time", "4", "https://geo.omarchy.org/"]
+    command: ["curl", "-fsS", "--max-time", "4", "http://ip-api.com/json/"]
     stdout: StdioCollector {
       waitForEnd: true
       onStreamFinished: {

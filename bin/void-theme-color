@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# omarchy:summary=Resolve semantic colors from an Omarchy theme colors.toml
-# omarchy:args=[--file <colors.toml>] (--all | --raw | <key> [fallback])
-# omarchy:hidden=true
+# void:summary=Resolve semantic colors from an Void theme colors.toml
+# void:args=[--file <colors.toml>] (--all | --raw | <key> [fallback])
+# void:hidden=true
 
 # Shared colors.toml parser/resolver. The alias/fallback cascade mirrors what
-# omarchy-theme-set-templates bakes into the generated configs at theme-set
+# void-theme-set-templates bakes into the generated configs at theme-set
 # time, so every consumer (templates, OSC sequences, tmux, GNOME, previews)
 # resolves the exact same palette.
 #

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# omarchy:summary=Show or set window corners: theme, sharp, or rounded
-# omarchy:args=[theme|sharp|rounded]
-# omarchy:examples=omarchy hyprland corners | omarchy hyprland corners rounded
+# void:summary=Show or set window corners: theme, sharp, or rounded
+# void:args=[theme|sharp|rounded]
+# void:examples=void hyprland corners | void hyprland corners rounded
 
 TOGGLES_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/void/toggles/hypr"
 
@@ -31,7 +31,7 @@ esac
 
 # Save the new choice before dropping the old one, so a failed save keeps it.
 if [[ $1 != "theme" ]]; then
-  mkdir -p "$TOGGLES_DIR" && cp "$OMARCHY_PATH/default/hypr/toggles/corners-$1.lua" "$TOGGLES_DIR/corners-$1.lua" || exit 1
+  mkdir -p "$TOGGLES_DIR" && cp "$VOID_PATH/default/hypr/toggles/corners-$1.lua" "$TOGGLES_DIR/corners-$1.lua" || exit 1
 fi
 for mode in sharp rounded; do
   [[ $mode == "$1" ]] || rm -f "$TOGGLES_DIR/corners-$mode.lua" || exit 1
