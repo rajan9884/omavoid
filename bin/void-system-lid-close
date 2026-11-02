@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+# void-system-lid-close: Lock screen and handle clamshell/suspend on laptop lid close
+# omarchy:summary=Lock and reconcile displays when the laptop lid closes
+# omarchy:group=system
+# omarchy:hidden=true
+
+# Check if an external monitor is connected and active
+has_external_monitors() {
+  if ! command -v hyprctl >/dev/null 2>&1 || ! command -v jq >/dev/null 2>&1; then
+    return 1
+  fi
+  hyprctl monitors -j 2>/dev/null | jq -e '[.[] | select(.name | test("^(eDP|LVDS|DSI)") | not)] | length > 0' >/dev/null 2>&1
+}
+
+if has_external_monitors; then
+  # Clamshell mode: laptop lid is closed while connected to external monitor
+  # Turn off internal display, keep external display active
+  internal=$(hyprctl monitors -j 2>/dev/null | jq -r '.[] | select(.name | test("^(eDP|LVDS|DSI)")) | .name' | head -n 1)
+  if [[ -n $internal ]]; then
+    hyprctl dispatch "hl.dsp.dpms({ action = 'off', monitor = '$internal' })" >/dev/null 2>&1 || true
+  fi
+else
+  # Normal lid close: lock the session immediately, then suspend
+  void-system-lock >/dev/null 2>&1 || true
+  loginctl suspend 2>/dev/null || zzz 2>/dev/null || true
+fi

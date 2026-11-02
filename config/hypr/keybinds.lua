@@ -151,6 +151,10 @@ hl.bind(mainMod .. " + SHIFT + ALT + comma", hl.dsp.exec_cmd("void-shell notific
 hl.bind(mainMod .. " + CTRL + L", hl.dsp.exec_cmd("void-system-lock"), { description = "Lock system" })
 hl.bind(mainMod .. " + Escape", hl.dsp.exec_cmd("void-shell shell toggle omarchy.menu '{\"menu\":\"system\"}'"), { description = "System menu" })
 
+-- ── Laptop Lid Switch ──
+hl.bind("switch:on:Lid Switch", hl.dsp.exec_cmd("void-system-lid-close"), { locked = true, description = "Laptop lid close" })
+hl.bind("switch:off:Lid Switch", hl.dsp.exec_cmd("void-system-lid-open"), { locked = true, description = "Laptop lid open" })
+
 -- ── Volume / Brightness / Media Keys ──
 hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("void-audio-output-volume up"), { repeating = true, locked = true, description = "Volume up" })
 hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("void-audio-output-volume down"), { repeating = true, locked = true, description = "Volume down" })
