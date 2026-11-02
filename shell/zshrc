@@ -15,10 +15,17 @@ export BAT_THEME="ansi"
 # If not running interactively, return early
 [[ $- != *i* ]] && return
 
-# Custom Void packages
-alias vsv='sudo vsv'
-alias vp-sync='XBPS_DISTDIR="$HOME/.local/share/pkg/void-packages" "$HOME/.local/share/pkg/void-packages/vp-sync"'
-export XBPS_DISTDIR="$HOME/.local/share/pkg/void-packages"
+# Common Aliases (shared with bashrc / bash_aliases)
+if [ -f "$HOME/.bash_aliases" ]; then
+  source "$HOME/.bash_aliases"
+elif [ -f "$HOME/quattro-void-dotfiles/shell/aliases" ]; then
+  source "$HOME/quattro-void-dotfiles/shell/aliases"
+fi
+
+# Also source ~/.bashrc if present (for any custom aliases defined in bashrc)
+if [ -f "$HOME/.bashrc" ]; then
+  source "$HOME/.bashrc"
+fi
 
 # Starship Prompt
 if command -v starship >/dev/null 2>&1; then
@@ -28,7 +35,7 @@ fi
 # Hyprland launches GUI apps with cwd=/ — never start an interactive shell at /
 [[ "$PWD" == "/" ]] && cd "$HOME" >/dev/null 2>&1 || true
 
-# Aliases
+# Aliases & Functions (Interactive Zsh)
 unalias ff ffd 2>/dev/null
 ff() {
   local files=(${(f)"$(fzf -m --preview='bat --color=always {}')"})
@@ -39,13 +46,6 @@ ffd() {
   local files=(${(f)"$(fzf -m --preview='bat --color=always {}')"})
   (( $#files )) && { echo "Delete: $files"; read -q "?Confirm? "; echo; rm -rf $files }
 }
-
-alias zed='zed-editor'
-alias v='nvim'
-alias qs='qshell-ctl'
-alias ll='eza -lah --icons=auto --git'
-alias la='eza -a --icons=auto'
-alias ls='eza --icons=auto'
 
 # Monochrome eza
 export EZA_COLORS="uu=bright-black:gu=bright-black:da=bright-black:ur=white:uw=bright-black:ux=white:ue=bright-black:gr=bright-black:gw=bright-black:gx=white:tr=bright-black:fi=white:di=bright-white:ln=bright-black:pi=bright-black:so=bright-black:bd=bright-black:cd=bright-black:or=bright-black:mi=bright-black:ex=white"

@@ -536,21 +536,27 @@ deploy_dotfiles() {
         log_ok "Symlinked ~/.local/bin scripts to repo."
     fi
 
-    # Symlink ZSH dotfiles
-    for zf in .zshrc .zprofile; do
-        repo_zf="${REPO_DIR}/zsh/${zf}"
-        target_zf="${TARGET_HOME}/${zf}"
-        if [ -f "$repo_zf" ]; then
-            if [ -L "$target_zf" ] && [ "$(readlink -f "$target_zf" 2>/dev/null)" = "$(readlink -f "$repo_zf")" ]; then
+    # Symlink shell dotfiles (bashrc, zshrc, zprofile, aliases)
+    declare -A SHELL_FILES=(
+        [".bashrc"]="shell/bashrc"
+        [".zshrc"]="shell/zshrc"
+        [".zprofile"]="shell/zprofile"
+        [".bash_aliases"]="shell/aliases"
+    )
+    for sf in "${!SHELL_FILES[@]}"; do
+        repo_sf="${REPO_DIR}/${SHELL_FILES[$sf]}"
+        target_sf="${TARGET_HOME}/${sf}"
+        if [ -f "$repo_sf" ]; then
+            if [ -L "$target_sf" ] && [ "$(readlink -f "$target_sf" 2>/dev/null)" = "$(readlink -f "$repo_sf")" ]; then
                 continue
             fi
-            if [ -e "$target_zf" ] || [ -L "$target_zf" ]; then
+            if [ -e "$target_sf" ] || [ -L "$target_sf" ]; then
                 mkdir -p "$BACKUP_DIR"
-                cp -f "$target_zf" "$BACKUP_DIR/" 2>/dev/null || true
+                cp -f "$target_sf" "$BACKUP_DIR/" 2>/dev/null || true
             fi
-            ln -sf "$repo_zf" "${target_zf}.tmp.$$"
-            mv -f "${target_zf}.tmp.$$" "$target_zf"
-            log_ok "Symlinked ~/${zf} -> ${repo_zf}"
+            ln -sf "$repo_sf" "${target_sf}.tmp.$$"
+            mv -f "${target_sf}.tmp.$$" "$target_sf"
+            log_ok "Symlinked ~/${sf} -> ${repo_sf}"
         fi
     done
 
@@ -585,7 +591,7 @@ deploy_dotfiles() {
     fi
 
     # Ensure proper non-root ownership on deployed user symlinks and files
-    sudo chown -h "${TARGET_USER}:${TARGET_USER}" "${TARGET_HOME}/.config/"* "${TARGET_HOME}/.zshrc" "${TARGET_HOME}/.zprofile" 2>/dev/null || true
+    sudo chown -h "${TARGET_USER}:${TARGET_USER}" "${TARGET_HOME}/.config/"* "${TARGET_HOME}/.zshrc" "${TARGET_HOME}/.zprofile" "${TARGET_HOME}/.bashrc" "${TARGET_HOME}/.bash_aliases" 2>/dev/null || true
     sudo chown -R "${TARGET_USER}:${TARGET_USER}" "${REPO_DIR}" "${TARGET_HOME}/.local" "${TARGET_HOME}/Pictures" 2>/dev/null || true
     log_ok "Dotfiles deployed to ${TARGET_HOME}."
 }
