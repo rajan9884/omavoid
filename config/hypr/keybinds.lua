@@ -46,12 +46,11 @@ hl.bind(mainMod .. " + CTRL + V", hl.dsp.exec_cmd("void-shell shell toggle void.
 
 -- ── Core Applications ──
 hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd("foot"), { description = "Terminal" })
-hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("helium-browser"), { description = "Browser" })
+hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("foot -e btop"), { description = "System Monitor" })
 hl.bind(mainMod .. " + SHIFT + B", hl.dsp.exec_cmd("helium-browser"), { description = "Browser" })
 hl.bind(mainMod .. " + SHIFT + ALT + B", hl.dsp.exec_cmd("helium-browser --incognito"), { description = "Private Browser" })
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd("thunar"), { description = "File Manager" })
 hl.bind(mainMod .. " + SHIFT + F", hl.dsp.exec_cmd("foot -e yazi"), { description = "Yazi File Manager" })
-hl.bind(mainMod .. " + SHIFT + T", hl.dsp.exec_cmd("foot -e btop"), { description = "System Monitor" })
 hl.bind(mainMod .. " + SHIFT + M", hl.dsp.exec_cmd("foot -e cliamp"), { description = "Music Player" })
 
 -- ── Package & App Management ──
@@ -66,7 +65,6 @@ hl.bind(mainMod .. " + slash", hl.dsp.exec_cmd("void-menu-keybindings"), { descr
 
 -- ── Window Management ──
 hl.bind(mainMod .. " + W", hl.dsp.window.close(), { description = "Close window" })
-hl.bind(mainMod .. " + Q", hl.dsp.window.close(), { description = "Close window" })
 hl.bind(mainMod .. " + T", hl.dsp.exec_cmd("void-toggle-floating-centered"), { description = "Toggle float" })
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen({ mode = "fullscreen" }), { description = "Toggle fullscreen" })
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"), { description = "Toggle split" })
@@ -177,5 +175,3 @@ hl.bind("Print", hl.dsp.exec_cmd("void-capture-screenshot fullscreen"), { descri
 hl.bind(mainMod .. " + Print", hl.dsp.exec_cmd("void-capture-screenshot region"), { description = "Screenshot region" })
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("void-capture-screenshot region"), { description = "Screenshot region" })
 hl.bind(mainMod .. " + CTRL + Print", hl.dsp.exec_cmd("ocr-extract"), { description = "OCR region to clipboard" })
-hl.bind(mainMod .. " + ALT + Print", hl.dsp.exec_cmd("ocr-extract"), { description = "OCR region to clipboard" })
-hl.bind(mainMod .. " + SHIFT + O", hl.dsp.exec_cmd("ocr-extract"), { description = "OCR region to clipboard" })

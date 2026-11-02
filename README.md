@@ -103,7 +103,7 @@ sudo reboot
 
 | Shortcut | Description |
 | :--- | :--- |
-| `SUPER + Q` / `SUPER + W` | Close focused window |
+| `SUPER + W` | Close focused window |
 | `SUPER + F` | Toggle fullscreen mode |
 | `SUPER + T` | Toggle floating mode for focused window |
 | `SUPER + H / J / K / L` | Move window focus (Left, Down, Up, Right) |
@@ -112,13 +112,14 @@ sudo reboot
 | `SUPER + Shift + 1 .. 9` | Move focused window to Workspace 1–9 |
 | `SUPER + S` | Toggle special scratchpad workspace |
 
-### Terminals & TUI Applications
+### Terminals & Applications
 
 | Shortcut | Description |
 | :--- | :--- |
 | `SUPER + Enter` | Open Terminal (`foot`) |
-| `SUPER + Shift + F` | File Manager (`yazi` floating card) |
+| `SUPER + Shift + B` | Web Browser (`helium-browser`) |
 | `SUPER + B` | System Monitor (`btop` floating card) |
+| `SUPER + Shift + F` | File Manager (`yazi` floating card) |
 | `SUPER + G` | Git Interface (`lazygit` floating card) |
 | `SUPER + Shift + M` | Music Player (`cliamp`) |
 | `SUPER + Alt + A` | Audio Mixer (`wiremix` / `pulsemixer`) |
@@ -134,6 +135,7 @@ sudo reboot
 | `SUPER + C` / `SUPER + V` | Universal Copy / Paste (smart detection for terminals vs GUI apps) |
 | `SUPER + X` / `SUPER + A` | Universal Cut / Select All |
 | `Print` | Interactive Region Screenshot (saved to `~/Pictures/Screenshots` & copied) |
+| `SUPER + Ctrl + Print` | OCR screen region directly to clipboard (`ocr-extract`) |
 | `SUPER + Ctrl + Alt + C` | Alternate Region Screenshot shortcut |
 | `SUPER + ,` | Dismiss top notification toast |
 | `SUPER + Shift + ,` | Dismiss all notification toasts |
