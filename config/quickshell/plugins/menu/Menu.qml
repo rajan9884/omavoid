@@ -53,7 +53,7 @@ Item {
   // JSONC menu definitions. The shell parses both at startup and merges
   // the user file on top of the defaults, so the keybind → IPC → visible
   // path doesn't have to shell out to bash + jq on every open.
-  property string defaultMenuPath: Quickshell.env("HOME") + "/.config/void/void-menu.jsonc"
+  property string defaultMenuPath: root.voidPath + "/config/void/void-menu.jsonc"
   property string userMenuPath: Quickshell.env("HOME") + "/.config/void/extensions/void-menu.jsonc"
   // Display language for the shipped rows. The code lives in
   // ~/.config/void/language; a missing file
@@ -1172,7 +1172,7 @@ Item {
 
   FileView {
     id: menuCatalogFile
-    path: root.voidPath + "/default/i18n/" + root.language + "/menu.json"
+    path: root.voidPath + "/config/i18n/" + root.language + "/menu.json"
     watchChanges: true
     printErrors: false
     onLoaded: { root.menuCatalog = root.parseCatalog(text()); root.rebuildItemsFromSources(true) }
@@ -1263,7 +1263,7 @@ Item {
   }
   OverlayWindow {
     id: panel
-    shown: root.opened && root.rowsLoaded
+    shown: root.opened && (root.rowsLoaded || root.dmenuActive)
     WlrLayershell.namespace: "void-menu"
 
     // The card opens centered exactly as always. The first search keystroke
