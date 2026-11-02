@@ -3,13 +3,14 @@
 # void:summary=Run the screensaver using random effects from TTE.
 
 screensaver_in_focus() {
-  hyprctl activewindow -j | jq -e '.class == "org.void.screensaver" or .class == "org.void.screensaver"' >/dev/null 2>&1
+  hyprctl activewindow -j 2>/dev/null | jq -e '.class == "org.void.screensaver"' >/dev/null 2>&1
 }
 
 exit_screensaver() {
+  printf '\033[?1003l\033[?1006l' 2>/dev/null || true
   hyprctl eval 'hl.config({ cursor = { invisible = false } })' &>/dev/null || hyprctl keyword cursor:invisible false &>/dev/null || true
   pkill -x ttfx 2>/dev/null
-  pkill -f 'org\.(void|void)\.screensaver' 2>/dev/null
+  pkill -f 'org\.void\.screensaver' 2>/dev/null
   exit 0
 }
 
@@ -39,6 +40,9 @@ wait_for_focus() {
 }
 
 wait_for_focus
+
+# Enable any-event mouse tracking so mouse movement/clicks dismiss the screensaver
+printf '\033[?1003h\033[?1006h'
 
 screensaver_file="${XDG_CONFIG_HOME:-$HOME/.config}/void/branding/screensaver.txt"
 [[ -f "$screensaver_file" ]] || screensaver_file="${XDG_CONFIG_HOME:-$HOME/.config}/void/branding/screensaver.txt"

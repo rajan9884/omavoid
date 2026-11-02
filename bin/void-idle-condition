@@ -14,14 +14,23 @@ if pactl list sinks 2>/dev/null | grep -q "State: RUNNING"; then
   exit 1
 fi
 
+# 2b. MPRIS media player is actively playing
+if command -v playerctl >/dev/null 2>&1; then
+  if playerctl status 2>/dev/null | grep -qi "Playing"; then
+    exit 1
+  fi
+fi
+
 # 3. Audio input stream is active (e.g. microphone in use for call or recording)
 if [[ -n $(pactl list source-outputs short 2>/dev/null) ]]; then
   exit 1
 fi
 
-# 4. Active window is fullscreen
+# 4. Active window is fullscreen (excluding screensaver so lock can engage after screensaver)
 if command -v hyprctl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
-  if hyprctl activewindow -j 2>/dev/null | jq -e '.fullscreen == 1 or .fullscreen == 2' >/dev/null 2>&1; then
+  active_class=$(hyprctl activewindow -j 2>/dev/null | jq -r '.class // empty')
+  active_fullscreen=$(hyprctl activewindow -j 2>/dev/null | jq -r '.fullscreen // 0')
+  if [[ "$active_fullscreen" != "0" && "$active_class" != "org.void.screensaver" ]]; then
     exit 1
   fi
 fi
