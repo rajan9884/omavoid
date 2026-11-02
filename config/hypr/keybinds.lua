@@ -149,6 +149,7 @@ hl.bind(mainMod .. " + SHIFT + ALT + comma", hl.dsp.exec_cmd("void-shell notific
 
 -- ── System Lock & Exit ──
 hl.bind(mainMod .. " + CTRL + L", hl.dsp.exec_cmd("void-system-lock"), { description = "Lock system" })
+hl.bind(mainMod .. " + CTRL + I", hl.dsp.exec_cmd("void-toggle-idle"), { description = "Toggle stay awake / idle lock" })
 hl.bind(mainMod .. " + Escape", hl.dsp.exec_cmd("void-shell shell toggle omarchy.menu '{\"menu\":\"system\"}'"), { description = "System menu" })
 
 -- ── Laptop Lid Switch ──

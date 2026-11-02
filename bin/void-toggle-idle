@@ -33,9 +33,11 @@ apply_state() {
     stay-awake)
       mkdir -p "$STATE_DIR"
       touch "$STATE_FILE"
+      void-osd -i "cup" -m "Stay Awake enabled (idle lock off)" -d 2000 2>/dev/null || true
       ;;
     allow-idle)
       rm -f "$STATE_FILE"
+      void-osd -i "alarm" -m "Idle lock restored" -d 2000 2>/dev/null || true
       ;;
   esac
 }
