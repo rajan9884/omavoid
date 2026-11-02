@@ -5,7 +5,7 @@
 #
 # 1. Configures Fastly Void XBPS repos & Hyprland-Void community repo
 # 2. Installs Wayland, Quickshell, PipeWire, TUI, and CLI packages
-# 3. Synchronizes official Quattro assets (omarchy.ttf, wallpapers, themes, shell)
+# 3. Synchronizes official Quattro assets (wallpapers, themes, shell)
 # 4. Installs Void compatibility shims (uwsm, systemd-cat, systemctl, pacman, magick, PAM)
 # 5. Configures Runit services, udev sound rules, and user groups
 # 6. Deploys pure Quickshell desktop, Hyprland configs, and TUI shortcuts
@@ -124,8 +124,6 @@ sync_dotfiles_assets() {
 
     sudo ln -sfn "${REPO_DIR}/bin" /usr/share/void/bin
     sudo ln -sfn "${REPO_DIR}/config" /usr/share/void/config
-    sudo ln -sfn "${REPO_DIR}/default" /usr/share/void/default
-    sudo ln -sfn "${REPO_DIR}/install" /usr/share/void/install
     sudo ln -sfn "${REPO_DIR}/config/quickshell" /usr/share/void/shell
     sudo ln -sfn "${REPO_DIR}/themes" /usr/share/void/themes
 
@@ -215,15 +213,7 @@ SHIM
         sudo ln -sf /usr/bin/elogind-inhibit /usr/local/bin/systemd-inhibit
     fi
 
-    # Install custom repository binaries into /usr/local/bin
-    if [ -d "${REPO_DIR}/bin" ]; then
-        for b in "${REPO_DIR}"/bin/*; do
-            if [ -f "$b" ]; then
-                sudo cp -f "$b" /usr/local/bin/
-                sudo chmod +x "/usr/local/bin/$(basename "$b")"
-            fi
-        done
-    fi
+
 
     # Configure greetd with tuigreet
     if command -v tuigreet >/dev/null 2>&1; then
@@ -317,80 +307,24 @@ SHIM
         sudo chmod +x /usr/local/bin/xdg-terminal-exec
     fi
 
-    # omasnap screenshot shim (grim + slurp)
+    # omasnap screenshot compatibility shim
     cat <<'SHIM' | sudo tee /usr/local/bin/omasnap >/dev/null
-#!/bin/bash
+#!/usr/bin/env bash
 for arg in "$@"; do
     if [[ -f "$arg" && "$arg" =~ \.(png|jpg|jpeg|webp)$ ]]; then
         exec imv "$arg"
     fi
 done
-SCREENSHOT_DIR="${OMASNAP_SCREENSHOT_DIR:-${OMARCHY_SCREENSHOT_DIR:-$HOME/Pictures/Screenshots}}"
-mkdir -p "$SCREENSHOT_DIR"
-filename="$SCREENSHOT_DIR/screenshot-$(date +%Y-%m-%d_%H-%M-%S).png"
-is_fullscreen=0
-for arg in "$@"; do
-    [[ "$arg" == "fullscreen" ]] && { is_fullscreen=1; break; }
-done
-if (( is_fullscreen )); then
-    grim "$filename" || exit 1
-else
-    geometry=$(slurp 2>/dev/null)
-    [ -z "$geometry" ] && exit 0
-    grim -g "$geometry" "$filename" || exit 1
-fi
-if [ -f "$filename" ]; then
-    wl-copy < "$filename"
-    omarchy-notification-send -i "$filename" "Screenshot captured" "Saved to Pictures/Screenshots and copied to clipboard"
-fi
+exec void-capture-screenshot "$@"
 SHIM
     sudo chmod +x /usr/local/bin/omasnap
 
-    # Universal clipboard shortcut helper
-    cat <<'SHIM' | sudo tee /usr/local/bin/omarchy-universal-shortcut >/dev/null
-#!/bin/bash
-action="$1"
-active=$(hyprctl activewindow -j 2>/dev/null)
-address=$(jq -r '.address // empty' <<< "$active")
-class=$(jq -r '.class // empty' <<< "$active")
-is_terminal=0
-case "${class,,}" in
-    foot*|alacritty*|kitty*|ghostty*|wezterm*|xterm*) is_terminal=1 ;;
-esac
-case "$action" in
-    copy)
-        if [[ -z "$address" ]]; then wtype -M ctrl -k c -m ctrl
-        elif (( is_terminal )); then hyprctl dispatch sendshortcut "CTRL SHIFT,c,address:$address" >/dev/null
-        else hyprctl dispatch sendshortcut "CTRL,c,address:$address" >/dev/null; fi ;;
-    paste)
-        if [[ -z "$address" ]]; then wtype -M ctrl -k v -m ctrl
-        elif (( is_terminal )); then hyprctl dispatch sendshortcut "CTRL SHIFT,v,address:$address" >/dev/null
-        else hyprctl dispatch sendshortcut "CTRL,v,address:$address" >/dev/null; fi ;;
-    cut)
-        if [[ -z "$address" ]]; then wtype -M ctrl -k x -m ctrl
-        elif (( is_terminal )); then hyprctl dispatch sendshortcut "CTRL SHIFT,x,address:$address" >/dev/null
-        else hyprctl dispatch sendshortcut "CTRL,x,address:$address" >/dev/null; fi ;;
-    selectall)
-        if [[ -z "$address" ]]; then wtype -M ctrl -k a -m ctrl
-        else hyprctl dispatch sendshortcut "CTRL,a,address:$address" >/dev/null; fi ;;
-esac
-SHIM
-    sudo chmod +x /usr/local/bin/omarchy-universal-shortcut
-
-    # Sudoers rules for passwordless power management & theme browser tinting
-    cat <<SUDO | sudo tee /etc/sudoers.d/zz-omarchy-power >/dev/null
-${TARGET_USER} ALL=(root) NOPASSWD: /usr/bin/reboot, /usr/bin/poweroff, /usr/bin/shutdown, /usr/bin/halt, /usr/bin/zzz, /usr/bin/ZZZ, /usr/local/bin/omarchy-enable-greetd
+    # Sudoers rules for passwordless power management & greetd enablement
+    cat <<SUDO | sudo tee /etc/sudoers.d/zz-void-power >/dev/null
+${TARGET_USER} ALL=(root) NOPASSWD: /usr/bin/reboot, /usr/bin/poweroff, /usr/bin/shutdown, /usr/bin/halt, /usr/bin/zzz, /usr/bin/ZZZ, /usr/local/bin/void-enable-greetd
 SUDO
-    sudo chmod 0440 /etc/sudoers.d/zz-omarchy-power
-
-    cat <<'SUDO' | sudo tee /etc/sudoers.d/zz-omarchy-theme-browser >/dev/null
-%wheel ALL=(root) NOPASSWD: /usr/bin/omarchy-theme-set-browser-policy [0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]
-SUDO
-    sudo chmod 0440 /etc/sudoers.d/zz-omarchy-theme-browser
-
-    if [ -f /usr/share/omarchy/bin/omarchy-theme-set-browser-policy ]; then
-        sudo ln -snf /usr/share/omarchy/bin/omarchy-theme-set-browser-policy /usr/bin/omarchy-theme-set-browser-policy
-    fi
+    sudo chmod 0440 /etc/sudoers.d/zz-void-power
+    sudo rm -f /etc/sudoers.d/zz-omarchy-power /etc/sudoers.d/zz-omarchy-theme-browser /etc/sudoers.d/zz-void-theme-browser /etc/pam.d/omarchy-lock-password 2>/dev/null || true
 
     # pacman shim for xbps queries and package operations
     cat <<'SHIM' | sudo tee /usr/local/bin/pacman >/dev/null
@@ -627,10 +561,7 @@ deploy_dotfiles() {
     fi
 
     # Stage initial Tokyo Night / Quattro theme state
-    THEME_SRC="/usr/share/omarchy/themes/tokyo-night"
-    if [ ! -d "$THEME_SRC" ] && [ -d "${REPO_DIR}/themes/tokyo-night" ]; then
-        THEME_SRC="${REPO_DIR}/themes/tokyo-night"
-    fi
+    THEME_SRC="${REPO_DIR}/themes/tokyo-night"
 
     if [ -d "$THEME_SRC" ]; then
         cp "$THEME_SRC/colors.toml" "${TARGET_HOME}/.local/state/void/current/theme/colors.toml" 2>/dev/null || true
