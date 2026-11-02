@@ -28,7 +28,7 @@ Item {
   readonly property int screensaverDelaySeconds: IdleModel.delayAfterFirstIdle(screensaverTimeoutSeconds, firstIdleTimeoutSeconds)
   readonly property int lockDelaySeconds: IdleModel.delayAfterFirstIdle(lockTimeoutSeconds, firstIdleTimeoutSeconds)
   readonly property bool idleEnabled: stayAwakeStateLoaded && !stayAwake
-  readonly property string screensaverClass: "org.omarchy.screensaver"
+  readonly property string screensaverClass: "org.void.screensaver"
 
   property bool stayAwake: false
   property bool stayAwakeStateLoaded: false
@@ -53,7 +53,7 @@ Item {
     var suffix = details === undefined || details === null || details === "" ? "" : ": " + String(details)
     root.lastEventAt = nowIso()
     root.lastEvent = event + suffix
-    console.log("omarchy idle " + root.lastEventAt + " " + root.lastEvent)
+    console.log("void idle " + root.lastEventAt + " " + root.lastEvent)
   }
 
   function runProcess(process, label, command) {
@@ -89,6 +89,14 @@ Item {
       logEvent("idle-cycle-already-running")
       return
     }
+
+    if (!idleConditionChecker.running) {
+      idleConditionChecker.running = true
+    }
+  }
+
+  function proceedIdleCycle() {
+    if (root.idledThisCycle) return
 
     logEvent("idle-cycle-start", "screensaver=" + root.screensaverTimeoutSeconds + " lock=" + root.lockTimeoutSeconds)
     root.idledThisCycle = true
@@ -163,7 +171,8 @@ Item {
     var name = String(event && event.name ? event.name : "")
     if (name === "openwindow") {
       var open = eventParts(event, 4)
-      if (String(open[2] || "") === root.screensaverClass) root.handleScreensaverWindowOpened(open[0])
+      var cls = String(open[2] || "")
+      if (cls === root.screensaverClass || cls === "org.omarchy.screensaver") root.handleScreensaverWindowOpened(open[0])
     } else if (name === "closewindow") {
       var close = eventParts(event, 1)
       var address = String(close[0] || "")
@@ -178,8 +187,8 @@ Item {
     // the lock timer running once the screensaver exists (or during its short
     // launch grace); Hyprland window events cancel the cycle if it exits before
     // the normal lock deadline.
-    if (root.screensaverStartedThisCycle && (root.screensaverWindowCount > 0 || screensaverLaunchGraceTimer.running)) {
-      logEvent("idle-monitor-active", "screensaver cycle remains armed")
+    if (root.screensaverStartedThisCycle && screensaverLaunchGraceTimer.running) {
+      logEvent("idle-monitor-active", "screensaver launch grace period")
       return
     }
 
@@ -284,16 +293,33 @@ Item {
   Timer {
     id: lockTimer
     repeat: false
-    onTriggered: if (root.idleEnabled && root.idledThisCycle && root.lockEnabled) root.lockSystem("lock-timeout")
+    onTriggered: {
+      if (root.idleEnabled && root.idledThisCycle && root.lockEnabled) {
+        runProcess(lockProcess, "lock", "void-idle-condition && void-system-lock || true")
+      }
+    }
   }
 
   Timer {
     id: screensaverLaunchGraceTimer
-    interval: 3000
+    interval: 1200
     repeat: false
     onTriggered: {
       if (root.idleEnabled && root.idledThisCycle && root.screensaverStartedThisCycle && root.screensaverWindowCount === 0 && !idleMonitor.isIdle) {
         root.cancelIdleCycle("screensaver-not-running")
+      }
+    }
+  }
+
+  Process {
+    id: idleConditionChecker
+    command: ["void-idle-condition"]
+    onExited: function(exitCode) {
+      if (exitCode === 0) {
+        root.proceedIdleCycle()
+      } else {
+        root.logEvent("idle-inhibited", "condition check blocked idle (code=" + exitCode + ")")
+        root.idledThisCycle = false
       }
     }
   }

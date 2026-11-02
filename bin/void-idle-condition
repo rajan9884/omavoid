@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+# void-idle-condition: Check if system idle actions (dim, screensaver, lock, suspend) are permitted.
+# Exit 0 if idle is permitted.
+# Exit 1 (or >0) if idle is inhibited (stay-awake active, audio playing, mic recording, or fullscreen app).
+
+# 1. Stay-awake manual indicator toggle
+if [[ -f "$HOME/.local/state/void/indicators/stay-awake" ]]; then
+  exit 1
+fi
+
+# 2. Audio is playing (e.g. video in browser, mpv, Spotify, media player)
+if pactl list sinks 2>/dev/null | grep -q "State: RUNNING"; then
+  exit 1
+fi
+
+# 3. Audio input stream is active (e.g. microphone in use for call or recording)
+if [[ -n $(pactl list source-outputs short 2>/dev/null) ]]; then
+  exit 1
+fi
+
+# 4. Active window is fullscreen
+if command -v hyprctl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+  if hyprctl activewindow -j 2>/dev/null | jq -e '.fullscreen == 1 or .fullscreen == 2' >/dev/null 2>&1; then
+    exit 1
+  fi
+fi
+
+# System is idle and not inhibited
+exit 0

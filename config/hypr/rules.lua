@@ -62,11 +62,11 @@ hl.window_rule({
 
 hl.window_rule({
   name = "media-float",
-  name = "media-float",
   match = { class = "^(imv|mpv)$" },
   float = true,
   center = true,
   size = { 875, 600 },
+  idle_inhibit = "focus",
 })
 
 hl.window_rule({

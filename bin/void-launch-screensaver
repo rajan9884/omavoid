@@ -6,7 +6,7 @@
 export PATH="$OMARCHY_PATH/bin:/usr/local/bin:/usr/bin:/usr/sbin:$PATH"
 
 # Exit early if screensaver is already running
-pgrep -f '[o]rg.omarchy.screensaver' && exit 0
+pgrep -f 'org\.(omarchy|void)\.screensaver' && exit 0
 
 if ! command -v ttfx >/dev/null 2>&1; then
   void-notification-send -g ✋ "Screensaver requires ttfx"
