@@ -39,10 +39,8 @@ hl.config({
 })
 
 -- Load modular configurations directly
-require("monitors")
-require("input")
-require("look")
-require("rules")
-require("workspace-modes")
-require("keybinds")
-require("autostart")
+local modules = { "monitors", "input", "look", "rules", "workspace-modes", "keybinds", "autostart" }
+for _, mod in ipairs(modules) do
+  package.loaded[mod] = nil
+  require(mod)
+end
