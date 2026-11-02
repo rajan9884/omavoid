@@ -43,8 +43,8 @@ Placement:
 The center section is the box in the middle of the bar: its widgets are
 centered as one group. centerBegin and centerEnd hang off the box's two edges.
 
-Enable and disable widgets with 'omarchy plugin enable' and
-'omarchy plugin disable'.
+Enable and disable widgets with 'void-shell plugin enable' and
+'void-shell plugin disable'.
 
 'put' places a widget the way 'plugin enable' does, but leaves one that is
 already on the bar where it is, and falls back to the widget's usual spot when
@@ -158,7 +158,7 @@ cmd_use() {
   if [[ $plugin == "default" || $plugin == "built-in" ]]; then
     plugin="omarchy.bar"
   fi
-  bar_option_exists "$plugin" || fail "$plugin is not a known bar option; run 'omarchy plugin list'"
+  bar_option_exists "$plugin" || fail "$plugin is not a known bar option; run 'void-shell plugin list'"
 
   if [[ $plugin == "omarchy.bar" ]]; then
     commit "$NORMALIZE | del(.bar.id)"
@@ -371,7 +371,7 @@ cmd_put() {
     ask_to_put "$id" "$(placement_json)" || return 0
   fi
 
-  [[ $PUT_RESULT != "unknown" ]] || fail "$id is not a known widget; run 'omarchy plugin list'"
+  [[ $PUT_RESULT != "unknown" ]] || fail "$id is not a known widget; run 'void-shell plugin list'"
   [[ $PUT_RESULT == "ok" ]] || fail "$PUT_RESULT"
   # Says nothing about whether it had to be placed: a widget already on the bar
   # is left where it is, and both outcomes are the same answer to the caller.

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# omarchy:summary=Hand off a URL to a running browser instance
+# Return 1 to allow direct launch by caller
+
+exit 1

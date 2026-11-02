@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# omarchy:summary=Toggle animations, blur and shadows, which are slow without a GPU
+# omarchy:args=[toggle|on|off]
+# omarchy:examples=omarchy toggle animations | omarchy toggle animations off | omarchy toggle animations on
+
+# The flag records animations being off, so on and off swap on the way through.
+case ${1:-toggle} in
+toggle) void-hyprland-toggle no-animations toggle ;;
+on) void-hyprland-toggle no-animations off ;;
+off) void-hyprland-toggle no-animations on ;;
+*)
+  echo "Usage: void-toggle-animations [toggle|on|off]" >&2
+  exit 1
+  ;;
+esac
+
+if void-hyprland-toggle-enabled no-animations; then
+  void-notification-send -g 󰗘 "$(void-i18n animations.disabled)"
+else
+  void-notification-send -g 󰗘 "$(void-i18n animations.enabled)"
+fi

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# omarchy:summary=Toggle single-window square aspect ratio.
+
+case $(void-hyprland-toggle single-window-aspect-ratio) in
+  on) void-notification-send -g  "$(void-i18n window.squareOn)" ;;
+  off) void-notification-send -g  "$(void-i18n window.squareOff)" ;;
+esac
