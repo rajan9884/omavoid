@@ -40,9 +40,9 @@ hl.bind(mainMod .. " + V", universal_clipboard_shortcut("CTRL", "V", "CTRL SHIFT
 hl.bind(mainMod .. " + X", send_shortcut_once("CTRL", "X"), { description = "Universal cut" })
 
 -- ── Application Launcher & Clipboard ──
-hl.bind(mainMod .. " + Space", hl.dsp.exec_cmd("void-shell shell toggle omarchy.menu"), { description = "Application Launcher" })
-hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("void-shell shell toggle omarchy.menu"), { description = "Application Launcher" })
-hl.bind(mainMod .. " + CTRL + V", hl.dsp.exec_cmd("void-shell shell toggle omarchy.clipboard"), { description = "Clipboard manager" })
+hl.bind(mainMod .. " + Space", hl.dsp.exec_cmd("void-shell shell toggle void.menu"), { description = "Application Launcher" })
+hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("void-shell shell toggle void.menu"), { description = "Application Launcher" })
+hl.bind(mainMod .. " + CTRL + V", hl.dsp.exec_cmd("void-shell shell toggle void.clipboard"), { description = "Clipboard manager" })
 
 -- ── Core Applications ──
 hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd("foot"), { description = "Terminal" })
@@ -124,12 +124,12 @@ hl.bind(mainMod .. " + S", hl.dsp.workspace.toggle_special("scratchpad"), { desc
 hl.bind(mainMod .. " + ALT + S", hl.dsp.window.move({ workspace = "special:scratchpad", follow = false }), { description = "Move window to scratchpad" })
 
 -- ── Quickshell Statusbar Panels ──
-hl.bind(mainMod .. " + CTRL + A", hl.dsp.exec_cmd("void-shell shell toggle omarchy.audio"), { description = "Audio panel" })
-hl.bind(mainMod .. " + CTRL + B", hl.dsp.exec_cmd("void-shell shell toggle omarchy.bluetooth"), { description = "Bluetooth panel" })
-hl.bind(mainMod .. " + CTRL + D", hl.dsp.exec_cmd("void-shell shell toggle omarchy.monitor"), { description = "Display panel" })
-hl.bind(mainMod .. " + CTRL + N", hl.dsp.exec_cmd("void-shell shell toggle omarchy.network"), { description = "Network panel" })
-hl.bind(mainMod .. " + CTRL + P", hl.dsp.exec_cmd("void-shell shell toggle omarchy.power"), { description = "Power panel" })
-hl.bind(mainMod .. " + CTRL + ALT + D", hl.dsp.exec_cmd("void-shell shell toggle omarchy.clock"), { description = "Clock panel" })
+hl.bind(mainMod .. " + CTRL + A", hl.dsp.exec_cmd("void-shell shell toggle void.audio"), { description = "Audio panel" })
+hl.bind(mainMod .. " + CTRL + B", hl.dsp.exec_cmd("void-shell shell toggle void.bluetooth"), { description = "Bluetooth panel" })
+hl.bind(mainMod .. " + CTRL + D", hl.dsp.exec_cmd("void-shell shell toggle void.monitor"), { description = "Display panel" })
+hl.bind(mainMod .. " + CTRL + N", hl.dsp.exec_cmd("void-shell shell toggle void.network"), { description = "Network panel" })
+hl.bind(mainMod .. " + CTRL + P", hl.dsp.exec_cmd("void-shell shell toggle void.power"), { description = "Power panel" })
+hl.bind(mainMod .. " + CTRL + ALT + D", hl.dsp.exec_cmd("void-shell shell toggle void.clock"), { description = "Clock panel" })
 
 -- ── Themes & Wallpapers ──
 hl.bind(mainMod .. " + CTRL + Space", hl.dsp.exec_cmd("void-theme-bg-switcher"), { description = "Wallpaper switcher" })
@@ -150,7 +150,7 @@ hl.bind(mainMod .. " + SHIFT + ALT + comma", hl.dsp.exec_cmd("void-shell notific
 -- ── System Lock & Exit ──
 hl.bind(mainMod .. " + CTRL + L", hl.dsp.exec_cmd("void-system-lock"), { description = "Lock system" })
 hl.bind(mainMod .. " + CTRL + I", hl.dsp.exec_cmd("void-toggle-idle"), { description = "Toggle stay awake / idle lock" })
-hl.bind(mainMod .. " + Escape", hl.dsp.exec_cmd("void-shell shell toggle omarchy.menu '{\"menu\":\"system\"}'"), { description = "System menu" })
+hl.bind(mainMod .. " + Escape", hl.dsp.exec_cmd("void-shell shell toggle void.menu '{\"menu\":\"system\"}'"), { description = "System menu" })
 
 -- ── Laptop Lid Switch ──
 hl.bind("switch:on:Lid Switch", hl.dsp.exec_cmd("void-system-lid-close"), { locked = true, description = "Laptop lid close" })

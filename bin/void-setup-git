@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# omarchy:summary=Set the name and email for your git commits, and sign in to GitHub
-# omarchy:args=[--name <name>] [--email <email>]
-# omarchy:examples=omarchy setup git | omarchy setup git --name "Jane Doe" --email jane@example.com
+# void:summary=Set the name and email for your git commits, and sign in to GitHub
+# void:args=[--name <name>] [--email <email>]
+# void:examples=void setup git | void setup git --name "Jane Doe" --email jane@example.com
 
 set -e
 

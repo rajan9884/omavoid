@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# omarchy:summary=Log out, reboot, or shut down after closing applications
-# omarchy:args=<logout|reboot|shutdown|suspend|hibernate>
-# omarchy:examples=omarchy system logout | omarchy system reboot | omarchy system shutdown
-# omarchy:aliases=omarchy logout | omarchy reboot | omarchy shutdown
+# void:summary=Log out, reboot, or shut down after closing applications
+# void:args=<logout|reboot|shutdown|suspend|hibernate>
+# void:examples=void system logout | void system reboot | void system shutdown
+# void:aliases=void logout | void reboot | void shutdown
 
 usage="Usage: void-system <logout|reboot|shutdown|suspend|hibernate>"
 for arg in "$@"; do
@@ -93,11 +93,11 @@ elif [[ ${2:-} == "--execute" ]]; then
   if [[ $action == "shutdown" ]]; then
     if command -v elogind-inhibit >/dev/null 2>&1; then
       elogind-inhibit --what=sleep:idle:handle-lid-switch \
-        --who=Omarchy --why="Shutdown in progress" --mode=block \
+        --who=Void --why="Shutdown in progress" --mode=block \
         "$0" "$action" --inhibited
     elif command -v systemd-inhibit >/dev/null 2>&1; then
       systemd-inhibit --what=sleep:idle:handle-lid-switch \
-        --who=Omarchy --why="Shutdown in progress" --mode=block \
+        --who=Void --why="Shutdown in progress" --mode=block \
         "$0" "$action" --inhibited
     else
       exit_session

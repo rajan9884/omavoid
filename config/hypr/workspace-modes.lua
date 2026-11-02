@@ -6,12 +6,12 @@ o = o or {}
 local home = os.getenv("HOME") or "/home/rajan"
 local state_home = os.getenv("XDG_STATE_HOME") or (home .. "/.local/state")
 
-local FLOATED_TAG = "omarchy-mode-floated"
-local WORKSPACE_TAG = "omarchy-floating-workspace"
-local OPENED_TAG = "omarchy-mode-opened"
-local OPEN_RULE = "omarchy-floating-open-"
+local FLOATED_TAG = "void-mode-floated"
+local WORKSPACE_TAG = "void-floating-workspace"
+local OPENED_TAG = "void-mode-opened"
+local OPEN_RULE = "void-floating-open-"
 local LAST_WORKSPACE = 2147483647
-local TITLEBARS = "/usr/lib/omarchy-hyprland-titlebars/titlebars.so"
+local TITLEBARS = "/usr/lib/void-hyprland-titlebars/titlebars.so"
 
 local M = {}
 local modes = {}

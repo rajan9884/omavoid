@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# omarchy:summary=Lock the computer and turn off the display
-# omarchy:group=system
-# omarchy:name=lock
-# omarchy:examples=omarchy system lock
+# void:summary=Lock the computer and turn off the display
+# void:group=system
+# void:name=lock
+# void:examples=void system lock
 
 void-shell lock lock >/dev/null
 
@@ -23,4 +23,4 @@ fi
 pkill -x ttfx 2>/dev/null || true
 # ttfx handles SIGTERM asynchronously, so keep its terminal alive until it exits.
 timeout 1s pidwait -x ttfx 2>/dev/null || true
-pkill -f '[o]rg\.(omarchy|void)\.screensaver' 2>/dev/null || true
+pkill -f '[o]rg\.(void|void)\.screensaver' 2>/dev/null || true

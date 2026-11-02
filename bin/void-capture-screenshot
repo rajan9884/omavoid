@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-# omarchy:summary=Take a screenshot (fullscreen or region)
-# omarchy:group=capture
-# omarchy:args=[smart|region|windows|fullscreen|full] [copy|save]
-# omarchy:examples=void-capture-screenshot | void-capture-screenshot fullscreen
+# void:summary=Take a screenshot (fullscreen or region)
+# void:group=capture
+# void:args=[smart|region|windows|fullscreen|full] [copy|save]
+# void:examples=void-capture-screenshot | void-capture-screenshot fullscreen
 
 set -euo pipefail
 
@@ -14,7 +14,7 @@ for arg in "$@"; do
   fi
 done
 
-SCREENSHOT_DIR="${OMARCHY_SCREENSHOT_DIR:-${OMASNAP_SCREENSHOT_DIR:-$HOME/Pictures/Screenshots}}"
+SCREENSHOT_DIR="${VOID_SCREENSHOT_DIR:-${VOID_SCREENSHOT_DIR:-$HOME/Pictures/Screenshots}}"
 mkdir -p "$SCREENSHOT_DIR"
 filename="$SCREENSHOT_DIR/screenshot-$(date +%Y-%m-%d_%H-%M-%S).png"
 

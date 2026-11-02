@@ -58,7 +58,7 @@ desktop_file=$(path_for_web_app "$APP_NAME")
 rm -f "${desktop_file:-$DESKTOP_DIR/$APP_NAME.desktop}"
 rm -f "$ICON_DIR/$icon_name.png" "$ICON_DIR/$APP_NAME.png" "$OLD_ICON_DIR/$APP_NAME.png"
 
-if [[ ${OMARCHY_REMOVE_NOTIFY:-true} != "false" ]]; then
+if [[ ${VOID_REMOVE_NOTIFY:-true} != "false" ]]; then
   void-notification-send -g  "$(void-i18n webapp.removed 2>/dev/null || echo "Removed")" "$APP_NAME"
 fi
 update-desktop-database "$DESKTOP_DIR" &>/dev/null

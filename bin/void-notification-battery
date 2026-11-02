@@ -1,5 +1,5 @@
 #!/bin/bash
 
-# omarchy:summary=Show the current battery status notification
+# void:summary=Show the current battery status notification
 
 void-notification-send -g 󰁹 -u low "$(void-battery-status)"

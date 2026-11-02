@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# omarchy:summary=Generate a Wi-Fi QR matrix for the shell
-# omarchy:group=network
-# omarchy:args=[--meta] [interface]
+# void:summary=Generate a Wi-Fi QR matrix for the shell
+# void:group=network
+# void:args=[--meta] [interface]
 
 set -euo pipefail
 

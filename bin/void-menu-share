@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# omarchy:summary=Share clipboard, files, or folders with LocalSend
-# omarchy:group=share
-# omarchy:name=
-# omarchy:args=<clipboard|file|folder> [path...]
-# omarchy:examples=omarchy share clipboard | omarchy share file ~/Downloads/example.txt
+# void:summary=Share clipboard, files, or folders with LocalSend
+# void:group=share
+# void:name=
+# void:args=<clipboard|file|folder> [path...]
+# void:examples=void share clipboard | void share file ~/Downloads/example.txt
 
 if (($# == 0)); then
   echo "Usage: void-menu-share [clipboard|file|folder]"

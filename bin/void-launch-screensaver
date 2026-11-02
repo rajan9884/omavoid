@@ -2,11 +2,11 @@
 
 # void:summary=Launch the screensaver in the default terminal on the system with the correct font configuration.
 
-: "${OMARCHY_PATH:=/usr/share/void}"
-export PATH="$OMARCHY_PATH/bin:/usr/local/bin:/usr/bin:/usr/sbin:$PATH"
+: "${VOID_PATH:=/usr/share/void}"
+export PATH="$VOID_PATH/bin:/usr/local/bin:/usr/bin:/usr/sbin:$PATH"
 
 # Exit early if screensaver is already running
-pgrep -f 'org\.(omarchy|void)\.screensaver' && exit 0
+pgrep -f 'org\.(void|void)\.screensaver' && exit 0
 
 if ! command -v ttfx >/dev/null 2>&1; then
   void-notification-send -g ✋ "Screensaver requires ttfx"
@@ -53,7 +53,7 @@ exec {events}< <(socat -U - "UNIX-CONNECT:$SOCKET")
 wait_for_screensaver_window() {
   local line deadline=$((SECONDS + 5))
   while ((SECONDS < deadline)) && IFS= read -r -t $((deadline - SECONDS)) -u "$events" line; do
-    [[ $line == openwindow\>\>*,org.void.screensaver,* || $line == openwindow\>\>*,org.omarchy.screensaver,* ]] && return 0
+    [[ $line == openwindow\>\>*,org.void.screensaver,* || $line == openwindow\>\>*,org.void.screensaver,* ]] && return 0
   done
 }
 
@@ -81,7 +81,7 @@ done
 hypr_focus_monitor "$focused"
 
 (
-  while hyprctl clients -j | SCREENSAVER=org.void.screensaver jq -e 'any(.[]; .mapped and (.class == env.SCREENSAVER or .class == "org.omarchy.screensaver"))' >/dev/null; do
+  while hyprctl clients -j | SCREENSAVER=org.void.screensaver jq -e 'any(.[]; .mapped and (.class == env.SCREENSAVER or .class == "org.void.screensaver"))' >/dev/null; do
     IFS= read -r -u "$events" line || exit
   done
   hypr_focus_monitor "$focused"

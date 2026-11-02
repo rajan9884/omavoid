@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# omarchy:summary=Edit, set, or reset screensaver branding
-# omarchy:group=branding
-# omarchy:name=screensaver
-# omarchy:args=<image|text|reset>
-# omarchy:examples=omarchy branding screensaver image | omarchy branding screensaver text | omarchy branding screensaver reset
+# void:summary=Edit, set, or reset screensaver branding
+# void:group=branding
+# void:name=screensaver
+# void:args=<image|text|reset>
+# void:examples=void branding screensaver image | void branding screensaver text | void branding screensaver reset
 
 set -euo pipefail
 
@@ -19,7 +19,7 @@ text)
   void-launch-editor ~/.config/void/branding/screensaver.txt >/dev/null 2>&1 && void-launch-screensaver force >/dev/null 2>&1
   ;;
 reset)
-  cp "$OMARCHY_PATH/logo.txt" ~/.config/void/branding/screensaver.txt && void-launch-screensaver force >/dev/null 2>&1
+  cp "$VOID_PATH/logo.txt" ~/.config/void/branding/screensaver.txt && void-launch-screensaver force >/dev/null 2>&1
   ;;
 *)
   echo "Usage: void-branding-screensaver <image|text|reset>" >&2

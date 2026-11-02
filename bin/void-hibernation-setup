@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# omarchy:summary=Set up hibernation with swap and boot resume configuration
-# omarchy:requires-sudo=true
-# omarchy:args=[--force] [--no-rebuild]
+# void:summary=Set up hibernation with swap and boot resume configuration
+# void:requires-sudo=true
+# void:args=[--force] [--no-rebuild]
 
 FORCE=false
 NO_REBUILD=false
@@ -37,10 +37,10 @@ if ! $NO_REBUILD && void-cmd-missing limine-mkinitcpio; then
   exit 0
 fi
 
-MKINITCPIO_CONF="/etc/mkinitcpio.conf.d/omarchy_resume.conf"
+MKINITCPIO_CONF="/etc/mkinitcpio.conf.d/void_resume.conf"
 SWAP_FILE="/swap/swapfile"
 RESUME_DROP_IN="/etc/limine-entry-tool.d/resume.conf"
-RESUME_REBUILD_PENDING="/var/lib/omarchy/hibernation-resume-rebuild"
+RESUME_REBUILD_PENDING="/var/lib/void/hibernation-resume-rebuild"
 
 install_root_file() {
   local source="$1"
@@ -48,7 +48,7 @@ install_root_file() {
   local mode="$3"
   local stage
 
-  stage=$(sudo /usr/bin/mktemp -- "${destination%/*}/.${destination##*/}.omarchy.XXXXXX") || return 1
+  stage=$(sudo /usr/bin/mktemp -- "${destination%/*}/.${destination##*/}.void.XXXXXX") || return 1
   safe_stage_path "$stage" "$destination" || return 1
 
   if sudo /usr/bin/install -m "$mode" -o root -g root -T "$source" "$stage" &&
@@ -65,7 +65,7 @@ safe_stage_path() {
   local destination="$2"
   local prefix suffix
 
-  prefix="${destination%/*}/.${destination##*/}.omarchy."
+  prefix="${destination%/*}/.${destination##*/}.void."
   [[ $stage == "$prefix"* ]] || return 1
   suffix=${stage#"$prefix"}
   [[ $suffix =~ ^[[:alnum:]]{6}$ ]]
@@ -197,7 +197,7 @@ fi
 # Ensure keyboard backlight doesn't prevent sleep
 # Install this before writing the resume marker so a failed install remains
 # retryable through the normal setup command.
-if ! install_root_file "$OMARCHY_PATH/default/systemd/system-sleep/keyboard-backlight" \
+if ! install_root_file "$VOID_PATH/default/systemd/system-sleep/keyboard-backlight" \
   /usr/lib/systemd/system-sleep/keyboard-backlight 0755; then
   echo "Could not install the keyboard-backlight system-sleep hook" >&2
   exit 1

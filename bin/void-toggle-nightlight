@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# omarchy:summary=Toggle nightlight screen temperature
-# omarchy:args=[--status]
-# omarchy:examples=omarchy toggle nightlight
+# void:summary=Toggle nightlight screen temperature
+# void:args=[--status]
+# void:examples=void toggle nightlight
 
 ON_TEMP=4000
 OFF_TEMP=6500

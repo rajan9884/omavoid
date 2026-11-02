@@ -6,52 +6,52 @@
         {
           "format": "dddd HH:mm",
           "formatAlt": "d MMMM 'W'ww yyyy",
-          "id": "omarchy.clock",
+          "id": "void.clock",
           "verticalFormat": "HH\n—\nmm"
         }
       ],
       "centerBegin": [
         {
-          "id": "omarchy.indicators"
+          "id": "void.indicators"
         }
       ],
       "centerEnd": [
         {
-          "id": "omarchy.weather"
+          "id": "void.weather"
         },
         {
-          "id": "omarchy.system-update"
+          "id": "void.system-update"
         }
       ],
       "left": [
         {
-          "id": "omarchy.menu"
+          "id": "void.menu"
         },
         {
-          "id": "omarchy.workspaces"
+          "id": "void.workspaces"
         }
       ],
       "right": [
         {
-          "id": "omarchy.tray"
+          "id": "void.tray"
         },
         {
-          "id": "omarchy.keyboard-layout"
+          "id": "void.keyboard-layout"
         },
         {
-          "id": "omarchy.bluetooth"
+          "id": "void.bluetooth"
         },
         {
-          "id": "omarchy.network"
+          "id": "void.network"
         },
         {
-          "id": "omarchy.audio"
+          "id": "void.audio"
         },
         {
-          "id": "omarchy.monitor"
+          "id": "void.monitor"
         },
         {
-          "id": "omarchy.power",
+          "id": "void.power",
           "showPercentage": true
         }
       ]

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# omarchy:summary=Print active network status for the shell
-# omarchy:group=network
-# omarchy:args=[--verbose]
+# void:summary=Print active network status for the shell
+# void:group=network
+# void:args=[--verbose]
 
 verbose=false
 internet_probe=1.1.1.1

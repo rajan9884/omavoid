@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Authentic Omarchy audio stack initialization for Void Linux under Wayland / Hyprland
-# Ensures PipeWire, WirePlumber, PipeWire-Pulse, Omarchy speaker tuning, and Jack detection start cleanly.
+# Authentic Void audio stack initialization for Void Linux under Wayland / Hyprland
+# Ensures PipeWire, WirePlumber, PipeWire-Pulse, Void speaker tuning, and Jack detection start cleanly.
 
 if [ -z "${XDG_RUNTIME_DIR:-}" ]; then
     export XDG_RUNTIME_DIR="/run/user/$(id -u)"
@@ -84,7 +84,7 @@ if command -v pactl >/dev/null 2>&1; then
     fi
 fi
 
-# If Omarchy speaker tuning is installed, ensure its filter-chain host client is running
+# If Void speaker tuning is installed, ensure its filter-chain host client is running
 tuning_conf="${XDG_CONFIG_HOME:-$HOME/.config}/pipewire/void-speaker-tuning.conf"
 if [ -f "$tuning_conf" ]; then
     if ! pgrep -u "$USER" -f "pipewire -c .*void-speaker-tuning.conf" >/dev/null 2>&1; then
@@ -95,11 +95,11 @@ fi
 
 # Ensure virtual tuning sink is unity volume and default sink is properly assigned
 if command -v pactl >/dev/null 2>&1; then
-    if timeout 2s pactl list sinks short 2>/dev/null | grep -q "omarchy_speaker_tuning"; then
-        timeout 2s pactl set-sink-volume omarchy_speaker_tuning 100% >/dev/null 2>&1 || true
+    if timeout 2s pactl list sinks short 2>/dev/null | grep -q "void_speaker_tuning"; then
+        timeout 2s pactl set-sink-volume void_speaker_tuning 100% >/dev/null 2>&1 || true
         current_sink="$(timeout 2s pactl get-default-sink 2>/dev/null || true)"
-        if [ "$current_sink" != "omarchy_speaker_tuning" ] && [[ "$current_sink" == *"Speaker"* || "$current_sink" == "auto_null" || -z "$current_sink" ]]; then
-            timeout 2s pactl set-default-sink omarchy_speaker_tuning >/dev/null 2>&1 || true
+        if [ "$current_sink" != "void_speaker_tuning" ] && [[ "$current_sink" == *"Speaker"* || "$current_sink" == "auto_null" || -z "$current_sink" ]]; then
+            timeout 2s pactl set-default-sink void_speaker_tuning >/dev/null 2>&1 || true
         fi
     fi
 fi

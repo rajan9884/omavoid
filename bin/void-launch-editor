@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# omarchy:summary=Launch the default editor selected via Omarchy defaults.
-# omarchy:args=[--inline] <path>
+# void:summary=Launch the default editor selected via Void defaults.
+# void:args=[--inline] <path>
 
 default_editor="$HOME/.local/state/void/defaults/editor"
 

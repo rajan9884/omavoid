@@ -23,31 +23,31 @@ QtObject {
   property var _refresh: null
 
   function setIdleEnabled(value) {
-    if (serviceId === "omarchy.idle" && _setIdleEnabled) _setIdleEnabled(!!value)
+    if (serviceId === "void.idle" && _setIdleEnabled) _setIdleEnabled(!!value)
   }
 
   function setNightlight(value) {
-    if (serviceId === "omarchy.nightlight" && _setNightlight) _setNightlight(!!value)
+    if (serviceId === "void.nightlight" && _setNightlight) _setNightlight(!!value)
   }
 
   function setDoNotDisturb(value) {
-    if (serviceId === "omarchy.notifications" && _setDoNotDisturb) _setDoNotDisturb(!!value)
+    if (serviceId === "void.notifications" && _setDoNotDisturb) _setDoNotDisturb(!!value)
   }
 
   function runAction(action, showFeedback, playerId) {
-    if (serviceId === "omarchy.media" && _runAction)
+    if (serviceId === "void.media" && _runAction)
       _runAction(String(action || ""), !!showFeedback, String(playerId || ""))
   }
 
   function playerKey(player) {
-    return serviceId === "omarchy.media" && _playerKey ? _playerKey(player) : ""
+    return serviceId === "void.media" && _playerKey ? _playerKey(player) : ""
   }
 
   function selectPlayer(playerId) {
-    if (serviceId === "omarchy.media" && _selectPlayer) _selectPlayer(String(playerId || ""))
+    if (serviceId === "void.media" && _selectPlayer) _selectPlayer(String(playerId || ""))
   }
 
   function refresh() {
-    if (serviceId === "omarchy.remote-session" && _refresh) _refresh()
+    if (serviceId === "void.remote-session" && _refresh) _refresh()
   }
 }

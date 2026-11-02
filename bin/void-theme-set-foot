@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# omarchy:summary=Apply current Omarchy theme colors and background alpha to running Foot terminals
-# omarchy:hidden=true
+# void:summary=Apply current Void theme colors and background alpha to running Foot terminals
+# void:hidden=true
 
 colors_toml=$HOME/.local/state/void/current/theme/colors.toml
 foot_ini=$HOME/.local/state/void/current/theme/foot.ini

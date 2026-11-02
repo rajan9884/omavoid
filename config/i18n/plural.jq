@@ -1,5 +1,5 @@
-# CLDR cardinal plural categories for whole counts, per Omarchy language
-# code, for omarchy-i18n. shell/Commons/Plural.js holds the same rules for
+# CLDR cardinal plural categories for whole counts, per Void language
+# code, for void-i18n. shell/Commons/Plural.js holds the same rules for
 # the shell, and i18n-test.sh keeps the two in agreement.
 
 def plural_category($code; $count):

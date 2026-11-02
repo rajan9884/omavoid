@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# omarchy:summary=Toggles transparency for the currently focused window.
+# void:summary=Toggles transparency for the currently focused window.
 
 set -euo pipefail
 

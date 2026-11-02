@@ -11,14 +11,14 @@ import "Model.js" as Model
 
 Panel {
   id: root
-  moduleName: "omarchy.audio"
-  ipcTarget: "omarchy.audio"
+  moduleName: "void.audio"
+  ipcTarget: "void.audio"
 
   readonly property var sink: Pipewire.defaultAudioSink
   readonly property var source: Pipewire.defaultAudioSource
   readonly property var nodes: Pipewire.nodes ? Pipewire.nodes.values : []
   readonly property var mprisPlayers: Mpris.players ? Mpris.players.values : []
-  readonly property var mediaService: bar?.shell?.firstPartyServiceFor("omarchy.media")
+  readonly property var mediaService: bar?.shell?.firstPartyServiceFor("void.media")
   readonly property var activeMediaPlayer: mediaService ? mediaService.activePlayer : null
 
   // Nodes of a platform's audio processing, which are neither devices nor apps,
@@ -64,7 +64,7 @@ Panel {
       if (!n || !n.isStream || !isPlaybackStream(n)) continue
       // A tuning's output is a playback stream too, but it is the processing
       // itself rather than an application, so it does not belong in the list.
-      if (String(n.name || "").indexOf("omarchy_speaker_tuning") === 0) continue
+      if (String(n.name || "").indexOf("void_speaker_tuning") === 0) continue
       if (platformHides(n)) continue
       list.push(n)
     }
@@ -133,7 +133,7 @@ Panel {
   // *into* the processing, so the slider would move while the speakers did not,
   // and on a chain with a limiter it would change the tone as well.
   //
-  // omarchy-audio-output-sink resolves the *current* default output through any
+  // void-audio-output-sink resolves the *current* default output through any
   // such sink to the physical one, which is the same definition the volume keys
   // and the output switcher use. Resolving the default (rather than "whatever a
   // tuning fronts") is what keeps this correct when headphones or HDMI are
@@ -173,7 +173,7 @@ Panel {
 
   function resolveVolumeSink() {
     volumeSinkGeneration++
-    // A hardware output is its own volume sink, as omarchy-audio-output-sink
+    // A hardware output is its own volume sink, as void-audio-output-sink
     // reports without looking further, so only a DSP sink needs the script.
     if (sink && String(sink.name).indexOf("alsa_output.") === 0) {
       volumeSinkName = String(sink.name)
@@ -420,10 +420,10 @@ Panel {
     for (var i = 0; i < sinks.length; i++) {
       var sname = String(sinks[i].name || "")
       if (sname.indexOf("Headphones") !== -1) hasHp = true
-      if (sname.indexOf("Speaker") !== -1 || sname === "omarchy_speaker_tuning") hasSpk = true
+      if (sname.indexOf("Speaker") !== -1 || sname === "void_speaker_tuning") hasSpk = true
     }
     var hpSinkName = "alsa_output.pci-0000_00_1f.3-platform-skl_hda_dsp_generic.HiFi__Headphones__sink"
-    var spkSinkName = "omarchy_speaker_tuning"
+    var spkSinkName = "void_speaker_tuning"
     if (!hasHp) {
       sinks.push({ id: -101, name: hpSinkName, isVirtualSink: true })
     }
@@ -534,7 +534,7 @@ Panel {
 
   function showVolumeOsd(volume) {
     if (!bar || !bar.shell) return
-    bar.shell.summon("omarchy.osd", JSON.stringify({
+    bar.shell.summon("void.osd", JSON.stringify({
       icon: outputIcon(volume),
       value: Math.round(volume * 100)
     }))
@@ -601,9 +601,9 @@ Panel {
     if (!node || !node.name) return false
     var name = String(node.name)
     if (name.indexOf("HiFi__Speaker__sink") !== -1) {
-      return !Pipewire.nodes ? true : !Pipewire.nodes.values.some(function(n) { return n && n.name === "omarchy_speaker_tuning" })
+      return !Pipewire.nodes ? true : !Pipewire.nodes.values.some(function(n) { return n && n.name === "void_speaker_tuning" })
     }
-    if (name.indexOf("HiFi__Headphones__sink") !== -1 || name === "omarchy_speaker_tuning") return true
+    if (name.indexOf("HiFi__Headphones__sink") !== -1 || name === "void_speaker_tuning") return true
     if (!sinkAvailabilityLoaded) return true
     return sinkAvailability[name] !== false
   }
@@ -1177,8 +1177,8 @@ Panel {
       var nname = String(node.name || "")
       if (sname === nname) return true
       if (nname.indexOf("Headphones") !== -1 && sname.indexOf("Headphones") !== -1) return true
-      if ((nname.indexOf("Speaker") !== -1 || nname === "omarchy_speaker_tuning") &&
-          (sname.indexOf("Speaker") !== -1 || sname === "omarchy_speaker_tuning")) return true
+      if ((nname.indexOf("Speaker") !== -1 || nname === "void_speaker_tuning") &&
+          (sname.indexOf("Speaker") !== -1 || sname === "void_speaker_tuning")) return true
       return false
     }
     hasCursor: root.cursorActive && root.focusSection === "output" && root.selectedIndex === rowIndex

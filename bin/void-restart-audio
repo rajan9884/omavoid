@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# omarchy:summary=Restart audio services and recover stuck USB audio devices.
-# omarchy:examples=omarchy restart audio | void-restart-audio
+# void:summary=Restart audio services and recover stuck USB audio devices.
+# void:examples=void restart audio | void-restart-audio
 
 services=(wireplumber.service pipewire.service pipewire-pulse.service)
 

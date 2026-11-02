@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# omarchy:summary=Toggle idle behavior so the system either idles normally or stays awake
-# omarchy:group=toggle
-# omarchy:args=[toggle|stay-awake|allow-idle|status]
-# omarchy:examples=omarchy toggle idle | omarchy toggle idle stay-awake | void-toggle-idle --status
+# void:summary=Toggle idle behavior so the system either idles normally or stays awake
+# void:group=toggle
+# void:args=[toggle|stay-awake|allow-idle|status]
+# void:examples=void toggle idle | void toggle idle stay-awake | void-toggle-idle --status
 
 STATE_DIR="$HOME/.local/state/void/indicators"
 STATE_FILE="$STATE_DIR/stay-awake"

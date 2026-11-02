@@ -17,7 +17,7 @@ import "Numbers.js" as Numbers
 QtObject {
   id: root
 
-  readonly property string omarchyPath: Quickshell.env("VOID_PATH") || Quickshell.env("OMARCHY_PATH") || "/usr/share/void"
+  readonly property string voidPath: Quickshell.env("VOID_PATH") || Quickshell.env("VOID_PATH") || "/usr/share/void"
   readonly property string configHome: Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")
 
   readonly property string language: languageCode(languageFile.text())
@@ -83,9 +83,9 @@ QtObject {
   // The catalogs are small local files, read synchronously so the first
   // binding to call t() already gets the string rather than the raw key.
   property FileView languageFile: FileView {
-    // OMARCHY_LANGUAGE_FILE overrides the location, as it does for
-    // omarchy-i18n, so tests can pin a language whatever the machine uses.
-    path: Quickshell.env("VOID_LANGUAGE_FILE") || Quickshell.env("OMARCHY_LANGUAGE_FILE") || (root.configHome + "/void/language")
+    // VOID_LANGUAGE_FILE overrides the location, as it does for
+    // void-i18n, so tests can pin a language whatever the machine uses.
+    path: Quickshell.env("VOID_LANGUAGE_FILE") || Quickshell.env("VOID_LANGUAGE_FILE") || (root.configHome + "/void/language")
     watchChanges: true
     printErrors: false
     blockLoading: true
@@ -93,7 +93,7 @@ QtObject {
   }
 
   property FileView englishCatalogFile: FileView {
-    path: root.omarchyPath + "/config/i18n/en/shell.json"
+    path: root.voidPath + "/config/i18n/en/shell.json"
     watchChanges: true
     printErrors: false
     blockLoading: true
@@ -101,7 +101,7 @@ QtObject {
   }
 
   property FileView languageCatalogFile: FileView {
-    path: root.omarchyPath + "/config/i18n/" + root.language + "/shell.json"
+    path: root.voidPath + "/config/i18n/" + root.language + "/shell.json"
     watchChanges: true
     printErrors: false
     blockLoading: true
@@ -109,7 +109,7 @@ QtObject {
   }
 
   property FileView registryFile: FileView {
-    path: root.omarchyPath + "/config/i18n/locales.json"
+    path: root.voidPath + "/config/i18n/locales.json"
     watchChanges: true
     printErrors: false
     blockLoading: true

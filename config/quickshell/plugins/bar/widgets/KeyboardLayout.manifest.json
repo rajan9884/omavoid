@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": "omarchy.keyboard-layout",
+  "id": "void.keyboard-layout",
   "name": "Keyboard layout",
   "version": "1.0.0",
-  "author": "Omarchy",
+  "author": "Void",
   "description": "Current keyboard layout and input language, click cycles",
   "kinds": [
     "bar-widget"
@@ -18,7 +18,7 @@
     "defaultSection": "right",
     "allowMultiple": false
   },
-  "omarchy": {
+  "void": {
     "clonePaths": [
       {
         "source": "KeyboardLayoutModel.js",

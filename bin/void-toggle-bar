@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# omarchy:summary=Toggle bar visibility without killing the Omarchy shell (on hides the bar, off shows it)
-# omarchy:args=[toggle|on|off]
-# omarchy:examples=omarchy toggle bar | omarchy toggle bar off | omarchy toggle bar on
+# void:summary=Toggle bar visibility without killing the Void shell (on hides the bar, off shows it)
+# void:args=[toggle|on|off]
+# void:examples=void toggle bar | void toggle bar off | void toggle bar on
 
 void-toggle bar-off "${1:-toggle}"
 
@@ -10,4 +10,4 @@ void-toggle bar-off "${1:-toggle}"
 # quick succession, stranding the bar off screen until the shell restarts.
 # Nudge the bar to re-read the flag; quiet best-effort so the toggle still
 # works when the shell is not up.
-void-shell -q omarchy.bar syncHidden
+void-shell -q void.bar syncHidden

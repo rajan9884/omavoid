@@ -8,7 +8,7 @@ import qs.Ui
 
 BarWidget {
   id: root
-  moduleName: "omarchy.workspaces"
+  moduleName: "void.workspaces"
 
   // Every monitor has workspaces 1-10 of its own, which Hyprland numbers in a
   // block of ten per monitor: 1-10, 11-20, and so on (see
@@ -234,7 +234,7 @@ BarWidget {
   // Super + L and the default layout change the mode without a focus change,
   // so they ask every bar to read it again.
   ShellIpc {
-    target: "omarchy.workspaces"
+    target: "void.workspaces"
 
     function refresh(): void { root.broadcast("refresh") }
   }

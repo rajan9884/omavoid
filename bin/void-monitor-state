@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# omarchy:summary=Print monitor panel state for the shell
-# omarchy:group=monitor
+# void:summary=Print monitor panel state for the shell
+# void:group=monitor
 
 monitors_json=$(hyprctl monitors all -j)
 focused_monitor=$(printf '%s\n' "$monitors_json" | jq -r '[.[] | select(.focused == true)][0].name // ""')

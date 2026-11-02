@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# omarchy:summary=Open a generic image selector menu
-# omarchy:args=[--selected <image>] [--print-name] [--show-labels] [--filterable] [--lazy-thumbnails] [--preload] [--cache-only] [--print-rows] <image-dir>...
+# void:summary=Open a generic image selector menu
+# void:args=[--selected <image>] [--print-name] [--show-labels] [--filterable] [--lazy-thumbnails] [--preload] [--cache-only] [--print-rows] <image-dir>...
 
 selected_image=""
 print_name=false
@@ -108,7 +108,7 @@ if [[ -n $current_image ]]; then
   done
 fi
 
-cache_dir=${XDG_CACHE_HOME:-$HOME/.cache}/omarchy/image-selector
+cache_dir=${XDG_CACHE_HOME:-$HOME/.cache}/void/image-selector
 index_file="$cache_dir/index.tsv"
 rows=""
 mkdir -p "$cache_dir"

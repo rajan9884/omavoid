@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# omarchy:summary=Show or set the layout of workspaces without one of their own: dwindle, scrolling, or floating
-# omarchy:args=[dwindle|scrolling|floating]
-# omarchy:examples=omarchy hyprland workspace layout default | omarchy hyprland workspace layout default scrolling
+# void:summary=Show or set the layout of workspaces without one of their own: dwindle, scrolling, or floating
+# void:args=[dwindle|scrolling|floating]
+# void:examples=void hyprland workspace layout default | void hyprland workspace layout default scrolling
 
 # Layout changes replace one notification instead of stacking a new one for
 # each press, so cycling through the layouts leaves a single, current one.
@@ -92,6 +92,6 @@ done
 printf 'o.workspace_mode({ default = "%s" })\n' "$1" >"$DEFAULT_FILE"
 
 hyprctl reload >/dev/null
-void-shell -q omarchy.workspaces refresh
-void-shell -q omarchy.dock refresh
+void-shell -q void.workspaces refresh
+void-shell -q void.dock refresh
 notify_layout "$MESSAGE"

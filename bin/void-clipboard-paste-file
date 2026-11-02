@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# omarchy:summary=Copy a file to the clipboard and paste it
-# omarchy:group=clipboard
-# omarchy:args=[--copy-only] <mime-type> <path>
-# omarchy:examples=omarchy clipboard paste file image/png /tmp/screenshot.png
-# omarchy:hidden=true
+# void:summary=Copy a file to the clipboard and paste it
+# void:group=clipboard
+# void:args=[--copy-only] <mime-type> <path>
+# void:examples=void clipboard paste file image/png /tmp/screenshot.png
+# void:hidden=true
 
 copy_only=false
 

@@ -11,7 +11,7 @@ package.path = config_dir .. "/?.lua;" .. config_dir .. "/?/init.lua;" .. home .
 
 hl.env("PATH", full_path)
 hl.env("VOID_PATH", void_path)
-hl.env("OMARCHY_PATH", void_path)
+hl.env("VOID_PATH", void_path)
 
 -- Wayland & environment setup
 hl.env("GDK_BACKEND", "wayland,x11,*")

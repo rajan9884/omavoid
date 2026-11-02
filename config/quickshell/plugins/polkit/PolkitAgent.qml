@@ -176,7 +176,7 @@ Item {
 
   PolkitAgent {
     id: polkitAgent
-    path: "/org/omarchy/PolkitAgent"
+    path: "/org/void/PolkitAgent"
 
     onAuthenticationRequestStarted: root.beginFlow()
     onIsActiveChanged: {
@@ -184,8 +184,8 @@ Item {
       else if (!root.closing) root.resetSnapshot()
     }
     onIsRegisteredChanged: {
-      if (isRegistered) console.log("omarchy polkit agent registered")
-      else console.warn("omarchy polkit agent is not registered; another agent may be running")
+      if (isRegistered) console.log("void polkit agent registered")
+      else console.warn("void polkit agent is not registered; another agent may be running")
     }
   }
 
@@ -228,7 +228,7 @@ Item {
     visible: root.dialogVisible
     anchors { top: true; bottom: true; left: true; right: true }
     color: "transparent"
-    WlrLayershell.namespace: "omarchy-polkit"
+    WlrLayershell.namespace: "void-polkit"
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
     exclusionMode: ExclusionMode.Ignore

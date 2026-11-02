@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# omarchy:summary=Control a Bluetooth device
-# omarchy:group=bluetooth
-# omarchy:args=[pair|connect|disconnect|forget] <address>
-# omarchy:examples=omarchy bluetooth device connect 00:11:22:33:44:55
+# void:summary=Control a Bluetooth device
+# void:group=bluetooth
+# void:args=[pair|connect|disconnect|forget] <address>
+# void:examples=void bluetooth device connect 00:11:22:33:44:55
 
 set -e
 

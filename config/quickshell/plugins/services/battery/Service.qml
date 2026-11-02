@@ -9,14 +9,14 @@ Item {
   id: root
 
   property var shell: null
-  property string omarchyPath: Quickshell.env("OMARCHY_PATH")
+  property string voidPath: Quickshell.env("VOID_PATH")
 
   readonly property int batteryThreshold: 10
   property string pendingPowerSource: ""
   // Follows power-profiles-daemon's change signals, so nothing polls it.
   // Quickshell never attaches that listener if the daemon failed when the
   // shell started, so a one-off read on startup, on a power source change and
-  // after omarchy-powerprofiles-set (which asks for it over IPC) recovers.
+  // after void-powerprofiles-set (which asks for it over IPC) recovers.
   property string activePowerProfile: ""
   property bool powerProfileReadPending: false
   property int powerProfileSignals: 0
@@ -24,7 +24,7 @@ Item {
 
   PersistentProperties {
     id: persisted
-    reloadableId: "omarchy-battery"
+    reloadableId: "void-battery"
     property bool notifiedLowBattery: false
   }
 

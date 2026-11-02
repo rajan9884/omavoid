@@ -14,8 +14,8 @@ import "BarModel.js" as BarModel
 Item {
   id: root
 
-  // The omarchy-shell host injects omarchyPath from OMARCHY_PATH.
-  property string omarchyPath: Quickshell.env("OMARCHY_PATH")
+  // The void-shell host injects voidPath from VOID_PATH.
+  property string voidPath: Quickshell.env("VOID_PATH")
   // Injected by the host shell so bar slots can resolve enabled widgets.
   property var barWidgetRegistry: fallbackBarWidgetRegistry
   // Read-only registry view for third-party full bars; the built-in bar does
@@ -44,7 +44,7 @@ Item {
   property bool barHidden: false
   property string home: Quickshell.env("HOME")
   property string stateHome: home + "/.local/state"
-  property string omarchyConfigDir: home + "/.config/void"
+  property string voidConfigDir: home + "/.config/void"
   property var fallbackBarConfig: ({
     position: "top",
     background: "opaque",
@@ -74,7 +74,7 @@ Item {
   property int barConfigSerial: 0
   property string position: "top"
   // Resolves through fontconfig at paint time (Style.font.family defaults
-  // to "monospace"), so changing the system font (via `omarchy-font-set`)
+  // to "monospace"), so changing the system font (via `void-font-set`)
   // updates the bar without a reload.
   property string fontFamily: Style.font.family
   // Bound to the central Color singleton so the bar tracks shell.toml's
@@ -930,7 +930,7 @@ Item {
     return monitor ? String(monitor.name || "") : ""
   }
 
-  // Resolve the live bar-widget instance for a plugin id (e.g. "omarchy.bluetooth").
+  // Resolve the live bar-widget instance for a plugin id (e.g. "void.bluetooth").
   // Only widgets that expose popup open/close methods count; plain indicators
   // (clock, workspaces, tray) return null. Used by shell.summon/toggle so
   // panel hotkeys route through the bar instead of a per-target IPC handler
@@ -1001,7 +1001,7 @@ Item {
   }
 
   function customModuleSource(entry) {
-    var source = BarModel.customModulePath(entry, home, omarchyConfigDir)
+    var source = BarModel.customModulePath(entry, home, voidConfigDir)
     return source ? Util.fileUrl(source) : ""
   }
 
@@ -1645,7 +1645,7 @@ Item {
 
   // Presence of the `bar-off` flag = bar hidden. Watching the parent toggles
   // directory because FileView can't observe a file that doesn't exist yet,
-  // and the flag is created/removed by `omarchy-toggle-bar`.
+  // and the flag is created/removed by `void-toggle-bar`.
   Process {
     id: barHiddenProbe
     running: true
@@ -1661,10 +1661,10 @@ Item {
 
   // The directory watch can permanently stop delivering events after flag
   // changes land in quick succession, stranding the bar off screen until the
-  // shell restarts. `omarchy-toggle-bar` nudges this after flipping the flag
+  // shell restarts. `void-toggle-bar` nudges this after flipping the flag
   // so the probe re-reads it even when the watch has gone quiet.
   ShellIpc {
-    target: "omarchy.bar"
+    target: "void.bar"
 
     // Start rather than restart: a probe already in flight was launched by the
     // directory watch after the flag flipped, so its answer is current, and
@@ -1800,7 +1800,7 @@ Item {
     implicitHeight: root.vertical ? 0 : (screen ? screen.height : thickness)
     color: "transparent"
     surfaceFormat.opaque: false
-    WlrLayershell.namespace: "omarchy-bar"
+    WlrLayershell.namespace: "void-bar"
     WlrLayershell.layer: WlrLayer.Top
 
     // Idle, only the strip takes input, so the clear expanse passes clicks
@@ -2003,7 +2003,7 @@ Item {
     visible: (active && sourceItem !== null) || poofShown
     color: "transparent"
     exclusionMode: ExclusionMode.Ignore
-    WlrLayershell.namespace: "omarchy-bar-drag-ghost"
+    WlrLayershell.namespace: "void-bar-drag-ghost"
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
@@ -2197,7 +2197,7 @@ Item {
     visible: root.barMoveActive && root.sameScreen(root.barMoveScreen, ghostScreen)
     color: "transparent"
     exclusionMode: ExclusionMode.Ignore
-    WlrLayershell.namespace: "omarchy-bar-move-ghost"
+    WlrLayershell.namespace: "void-bar-move-ghost"
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# omarchy:summary=Apply an Omarchy theme
-# omarchy:args=<theme-name>
-# omarchy:examples=omarchy theme list | omarchy theme set "Tokyo Night"
+# void:summary=Apply an Void theme
+# void:args=<theme-name>
+# void:examples=void theme list | void theme set "Tokyo Night"
 
 if [[ -z $1 ]]; then
   echo "Usage: void-theme-set <theme-name>"
@@ -27,7 +27,7 @@ if [[ -z ${VOID_PATH:-} || ! -d "$VOID_PATH" ]]; then
 fi
 VOID_THEMES_PATH="$VOID_PATH/themes"
 export VOID_PATH="$VOID_PATH"
-export OMARCHY_PATH="$VOID_PATH"
+export VOID_PATH="$VOID_PATH"
 
 # What a theme installed from a git repo may not ship, because these run code.
 # Hyprland requires a theme's hyprland.lua and gum_env.lua at login and Neovim
@@ -44,7 +44,7 @@ IGNORED_THEME_FILES=()
 
 FAILED_THEME_COMMANDS=()
 
-# Each command is an Omarchy command on the PATH this one already has, so it
+# Each command is an Void command on the PATH this one already has, so it
 # runs directly rather than through a login shell that rereads the profile.
 # A background command would otherwise get /dev/null as stdin, and the browser
 # policy asks for a sudo password on stdin when it is a terminal.
@@ -366,7 +366,7 @@ stage_installed_dir() {
   done
 }
 
-# `omarchy theme install` clones into ~/.config/void/themes, so a .git
+# `void theme install` clones into ~/.config/void/themes, so a .git
 # directory there means the contents came from a stranger and are held to the
 # list above. A directory the user wrote themselves, and a symlink to their own
 # working copy, are theirs to fill however they like -- the same distinction
@@ -411,7 +411,7 @@ report_ignored_theme_files() {
 
 THEME_NAME=$(echo "$1" | sed -E 's/<[^>]+>//g' | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
 THEME_HEADLESS=0
-if [[ ${OMARCHY_THEME_HEADLESS:-} == "1" || ${OMARCHY_THEME_OFFLINE:-} == "1" ]]; then
+if [[ ${VOID_THEME_HEADLESS:-} == "1" || ${VOID_THEME_OFFLINE:-} == "1" ]]; then
   THEME_HEADLESS=1
 fi
 
@@ -433,7 +433,7 @@ flock 9
 
 # A current video frame only represents the screen after its opening fade.
 # Finish that short reveal before capturing the next outgoing cover.
-if [[ $THEME_HEADLESS != "1" && $OMARCHY_THEME_SKIP_BACKGROUND != "1" ]]; then
+if [[ $THEME_HEADLESS != "1" && $VOID_THEME_SKIP_BACKGROUND != "1" ]]; then
   wait_for_theme_intro themeIntroStatus "$(stat -Lc '%d:%i' "$CURRENT_THEME_PATH" 2>/dev/null)" "pending"
   # A background change in the same theme names its intro with its own token.
   if [[ -s $BACKGROUND_INTRO_TOKEN_PATH ]]; then
@@ -473,7 +473,7 @@ THEME_BACKGROUND_INTRO=""
 THEME_BACKGROUND_COVER=false
 INTRO_PREPARE_PID=""
 THEME_INTRO_TOKEN=""
-if [[ $THEME_HEADLESS != "1" && $OMARCHY_THEME_SKIP_BACKGROUND != "1" ]]; then
+if [[ $THEME_HEADLESS != "1" && $VOID_THEME_SKIP_BACKGROUND != "1" ]]; then
   # Resolve the staged choice while the old theme still exists. Video changes
   # switch directly to the durable path in QML, so neither side needs a copy.
   if choose_staged_theme_background; then
@@ -545,8 +545,8 @@ if [[ $THEME_HEADLESS == "1" ]]; then
   # No shell/session bus exists during ISO chroot finalization, but the first
   # real login still needs a current background symlink for void-shell to
   # render.
-  [[ $OMARCHY_THEME_SKIP_BACKGROUND == "1" ]] || set_theme_background_link || true
-elif [[ $OMARCHY_THEME_SKIP_BACKGROUND == "1" ]]; then
+  [[ $VOID_THEME_SKIP_BACKGROUND == "1" ]] || set_theme_background_link || true
+elif [[ $VOID_THEME_SKIP_BACKGROUND == "1" ]]; then
   shell_ipc shell applyTheme "$colors_payload" "$shell_payload" || true
 else
   set_theme_background
@@ -643,8 +643,8 @@ if [[ $THEME_HEADLESS != "1" ]]; then
   # on screen has changed and leaves the rest running behind it, with its
   # output in the log. One typed in a terminal waits for everything, so the
   # browser policy can ask for a sudo password there, and so does a caller
-  # that sets OMARCHY_THEME_WAIT=1 because it reads those app configs next.
-  if [[ -t 0 || ${OMARCHY_THEME_WAIT:-} == "1" ]]; then
+  # that sets VOID_THEME_WAIT=1 because it reads those app configs next.
+  if [[ -t 0 || ${VOID_THEME_WAIT:-} == "1" ]]; then
     apply_other_theme_commands
   else
     mkdir -p "${THEME_SET_LOG%/*}"

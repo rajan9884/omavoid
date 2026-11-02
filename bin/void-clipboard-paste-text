@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# omarchy:summary=Copy text to the clipboard and type or paste it
-# omarchy:group=clipboard
-# omarchy:args=[--shift-insert] [--copy-only] [--history-index <index>|<text>]
-# omarchy:examples=omarchy clipboard paste text "hello" | omarchy clipboard paste text --shift-insert "hello"
-# omarchy:hidden=true
+# void:summary=Copy text to the clipboard and type or paste it
+# void:group=clipboard
+# void:args=[--shift-insert] [--copy-only] [--history-index <index>|<text>]
+# void:examples=void clipboard paste text "hello" | void clipboard paste text --shift-insert "hello"
+# void:hidden=true
 
 use_shift_insert=false
 copy_only=false

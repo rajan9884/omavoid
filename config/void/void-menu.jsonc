@@ -88,7 +88,7 @@
       "theme",
       "themes"
     ],
-    "action": "void-shell shell summon omarchy.image-picker '{\"source\":\"themes\"}'"
+    "action": "void-shell shell summon void.image-picker '{\"source\":\"themes\"}'"
   },
   "appearance.background": {
     "icon": "",
@@ -153,14 +153,14 @@
   "appearance.top-bar.indicators.battery-percentage-on": {
     "icon": "󰁹",
     "label": "Show Battery %",
-    "when": "void-hw-laptop && [[ $(void-bar get omarchy.power showPercentage) != true ]]",
-    "action": "void-shell omarchy.power togglePercentage"
+    "when": "void-hw-laptop && [[ $(void-bar get void.power showPercentage) != true ]]",
+    "action": "void-shell void.power togglePercentage"
   },
   "appearance.top-bar.indicators.battery-percentage-off": {
     "icon": "󰁹",
     "label": "Hide Battery %",
-    "when": "void-hw-laptop && [[ $(void-bar get omarchy.power showPercentage) == true ]]",
-    "action": "void-shell omarchy.power togglePercentage"
+    "when": "void-hw-laptop && [[ $(void-bar get void.power showPercentage) == true ]]",
+    "action": "void-shell void.power togglePercentage"
   },
   "appearance.top-bar.indicators.clock": {
     "icon": "󰥔",
@@ -170,99 +170,99 @@
     "icon": "󰥔",
     "label": "Sunday 14:30",
     "when": "[[ $(void-bar position) != \"left\" && $(void-bar position) != \"right\" ]]",
-    "checked": "[[ $(void-bar get omarchy.clock format) == \"dddd HH:mm\" ]]",
-    "action": "void-bar set omarchy.clock format \"dddd HH:mm\""
+    "checked": "[[ $(void-bar get void.clock format) == \"dddd HH:mm\" ]]",
+    "action": "void-bar set void.clock format \"dddd HH:mm\""
   },
   "appearance.top-bar.indicators.clock.sunday-12h": {
     "icon": "󰥔",
     "label": "Sunday 2:30 PM",
     "when": "[[ $(void-bar position) != \"left\" && $(void-bar position) != \"right\" ]]",
-    "checked": "[[ $(void-bar get omarchy.clock format) == \"dddd h:mm AP\" ]]",
-    "action": "void-bar set omarchy.clock format \"dddd h:mm AP\""
+    "checked": "[[ $(void-bar get void.clock format) == \"dddd h:mm AP\" ]]",
+    "action": "void-bar set void.clock format \"dddd h:mm AP\""
   },
   "appearance.top-bar.indicators.clock.sunday-seconds-24h": {
     "icon": "󰥔",
     "label": "Sunday 14:30:05",
     "when": "[[ $(void-bar position) != \"left\" && $(void-bar position) != \"right\" ]]",
-    "checked": "[[ $(void-bar get omarchy.clock format) == \"dddd HH:mm:ss\" ]]",
-    "action": "void-bar set omarchy.clock format \"dddd HH:mm:ss\""
+    "checked": "[[ $(void-bar get void.clock format) == \"dddd HH:mm:ss\" ]]",
+    "action": "void-bar set void.clock format \"dddd HH:mm:ss\""
   },
   "appearance.top-bar.indicators.clock.sunday-seconds-12h": {
     "icon": "󰥔",
     "label": "Sunday 2:30:05 PM",
     "when": "[[ $(void-bar position) != \"left\" && $(void-bar position) != \"right\" ]]",
-    "checked": "[[ $(void-bar get omarchy.clock format) == \"dddd h:mm:ss AP\" ]]",
-    "action": "void-bar set omarchy.clock format \"dddd h:mm:ss AP\""
+    "checked": "[[ $(void-bar get void.clock format) == \"dddd h:mm:ss AP\" ]]",
+    "action": "void-bar set void.clock format \"dddd h:mm:ss AP\""
   },
   "appearance.top-bar.indicators.clock.time-24h": {
     "icon": "󰥔",
     "label": "14:30",
     "when": "[[ $(void-bar position) != \"left\" && $(void-bar position) != \"right\" ]]",
-    "checked": "[[ $(void-bar get omarchy.clock format) == \"HH:mm\" ]]",
-    "action": "void-bar set omarchy.clock format \"HH:mm\""
+    "checked": "[[ $(void-bar get void.clock format) == \"HH:mm\" ]]",
+    "action": "void-bar set void.clock format \"HH:mm\""
   },
   "appearance.top-bar.indicators.clock.time-12h": {
     "icon": "󰥔",
     "label": "2:30 PM",
     "when": "[[ $(void-bar position) != \"left\" && $(void-bar position) != \"right\" ]]",
-    "checked": "[[ $(void-bar get omarchy.clock format) == \"h:mm AP\" ]]",
-    "action": "void-bar set omarchy.clock format \"h:mm AP\""
+    "checked": "[[ $(void-bar get void.clock format) == \"h:mm AP\" ]]",
+    "action": "void-bar set void.clock format \"h:mm AP\""
   },
   "appearance.top-bar.indicators.clock.date-24h": {
     "icon": "󰥔",
     "label": "Sun 3 May 14:30",
     "when": "[[ $(void-bar position) != \"left\" && $(void-bar position) != \"right\" ]]",
-    "checked": "[[ $(void-bar get omarchy.clock format) == \"ddd d MMM HH:mm\" ]]",
-    "action": "void-bar set omarchy.clock format \"ddd d MMM HH:mm\""
+    "checked": "[[ $(void-bar get void.clock format) == \"ddd d MMM HH:mm\" ]]",
+    "action": "void-bar set void.clock format \"ddd d MMM HH:mm\""
   },
   "appearance.top-bar.indicators.clock.date-12h": {
     "icon": "󰥔",
     "label": "Sun 3 May 2:30 PM",
     "when": "[[ $(void-bar position) != \"left\" && $(void-bar position) != \"right\" ]]",
-    "checked": "[[ $(void-bar get omarchy.clock format) == \"ddd d MMM h:mm AP\" ]]",
-    "action": "void-bar set omarchy.clock format \"ddd d MMM h:mm AP\""
+    "checked": "[[ $(void-bar get void.clock format) == \"ddd d MMM h:mm AP\" ]]",
+    "action": "void-bar set void.clock format \"ddd d MMM h:mm AP\""
   },
   "appearance.top-bar.indicators.clock.week": {
     "icon": "󰥔",
     "label": "3 May W18 2026",
     "when": "[[ $(void-bar position) != \"left\" && $(void-bar position) != \"right\" ]]",
-    "checked": "[[ $(void-bar get omarchy.clock format) == \"d MMMM 'W'ww yyyy\" ]]",
-    "action": "void-bar set omarchy.clock format \"d MMMM 'W'ww yyyy\""
+    "checked": "[[ $(void-bar get void.clock format) == \"d MMMM 'W'ww yyyy\" ]]",
+    "action": "void-bar set void.clock format \"d MMMM 'W'ww yyyy\""
   },
   "appearance.top-bar.indicators.clock.iso": {
     "icon": "󰥔",
     "label": "2026-05-03 14:30",
     "when": "[[ $(void-bar position) != \"left\" && $(void-bar position) != \"right\" ]]",
-    "checked": "[[ $(void-bar get omarchy.clock format) == \"yyyy-MM-dd HH:mm\" ]]",
-    "action": "void-bar set omarchy.clock format \"yyyy-MM-dd HH:mm\""
+    "checked": "[[ $(void-bar get void.clock format) == \"yyyy-MM-dd HH:mm\" ]]",
+    "action": "void-bar set void.clock format \"yyyy-MM-dd HH:mm\""
   },
   "appearance.top-bar.indicators.clock.stacked-24h": {
     "icon": "󰥔",
     "label": "14 — 30",
     "when": "[[ $(void-bar position) == \"left\" || $(void-bar position) == \"right\" ]]",
-    "checked": "[[ $(void-bar get omarchy.clock verticalFormat) == $'HH\\n—\\nmm' ]]",
-    "action": "void-bar set omarchy.clock verticalFormat $'HH\\n—\\nmm'"
+    "checked": "[[ $(void-bar get void.clock verticalFormat) == $'HH\\n—\\nmm' ]]",
+    "action": "void-bar set void.clock verticalFormat $'HH\\n—\\nmm'"
   },
   "appearance.top-bar.indicators.clock.stacked-12h": {
     "icon": "󰥔",
     "label": "2 — 30 PM",
     "when": "[[ $(void-bar position) == \"left\" || $(void-bar position) == \"right\" ]]",
-    "checked": "[[ $(void-bar get omarchy.clock verticalFormat) == $'h\\n—\\nmm\\nAP' ]]",
-    "action": "void-bar set omarchy.clock verticalFormat $'h\\n—\\nmm\\nAP'"
+    "checked": "[[ $(void-bar get void.clock verticalFormat) == $'h\\n—\\nmm\\nAP' ]]",
+    "action": "void-bar set void.clock verticalFormat $'h\\n—\\nmm\\nAP'"
   },
   "appearance.top-bar.indicators.clock.stacked-date": {
     "icon": "󰥔",
     "label": "03 May W18 '26",
     "when": "[[ $(void-bar position) == \"left\" || $(void-bar position) == \"right\" ]]",
-    "checked": "[[ $(void-bar get omarchy.clock verticalFormat) == $'dd\\nMMM\\n\\'W\\'ww\\n\\'\\'yy' ]]",
-    "action": "void-bar set omarchy.clock verticalFormat $'dd\\nMMM\\n\\'W\\'ww\\n\\'\\'yy'"
+    "checked": "[[ $(void-bar get void.clock verticalFormat) == $'dd\\nMMM\\n\\'W\\'ww\\n\\'\\'yy' ]]",
+    "action": "void-bar set void.clock verticalFormat $'dd\\nMMM\\n\\'W\\'ww\\n\\'\\'yy'"
   },
   "appearance.top-bar.indicators.clock.stacked-time": {
     "icon": "󰥔",
     "label": "14 30",
     "when": "[[ $(void-bar position) == \"left\" || $(void-bar position) == \"right\" ]]",
-    "checked": "[[ $(void-bar get omarchy.clock verticalFormat) == $'HH\\nmm' ]]",
-    "action": "void-bar set omarchy.clock verticalFormat $'HH\\nmm'"
+    "checked": "[[ $(void-bar get void.clock verticalFormat) == $'HH\\nmm' ]]",
+    "action": "void-bar set void.clock verticalFormat $'HH\\nmm'"
   },
   "appearance.top-bar.position.top": {
     "icon": "󰁝",
@@ -540,7 +540,7 @@
   "trigger.clipboard-history": {
     "icon": "󰅇",
     "label": "Clipboard History",
-    "action": "void-shell shell summon omarchy.clipboard"
+    "action": "void-shell shell summon void.clipboard"
   },
   "trigger.reminder": {
     "icon": "󰢌",
@@ -762,12 +762,12 @@
   "trigger.tests.network-speedtest": {
     "icon": "󰓅",
     "label": "Network Speed Test",
-    "action": "void-shell shell summon omarchy.speedtest"
+    "action": "void-shell shell summon void.speedtest"
   },
   "trigger.tests.disk-speedtest": {
     "icon": "󰋊",
     "label": "Disk Speed Test",
-    "action": "void-shell shell summon omarchy.disk-speedtest"
+    "action": "void-shell shell summon void.disk-speedtest"
   },
   "setup.monitors": {
     "icon": "󰍹",
@@ -831,7 +831,7 @@
       "wifi-qr"
     ],
     "when": "void-network-wifi-connected",
-    "action": "void-shell shell summon omarchy.wifiqr"
+    "action": "void-shell shell summon void.wifiqr"
   },
   "setup.config": {
     "icon": "",

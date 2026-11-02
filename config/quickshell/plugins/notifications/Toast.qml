@@ -77,9 +77,9 @@ Item {
                                                : (row.urgency === 0 ? dimColor : Commons.Color.notifications.countdown)
   readonly property bool hasBody: String(row.body || "").length > 0
   readonly property bool redacted: Store.redacted(row)
-  // Omarchy's own toasts and bare notify-send calls name no source worth a
+  // Void's own toasts and bare notify-send calls name no source worth a
   // letter, and a summary that opens with its own glyph already has its mark.
-  readonly property bool anonymous: row.app === "omarchy-action" || row.app === "void-action" || row.app === "notify-send"
+  readonly property bool anonymous: row.app === "void-action" || row.app === "void-action" || row.app === "notify-send"
   readonly property bool glyphLed: Delivery.summaryStartsWithGlyph(row.summary)
   readonly property real contentPaddingY: hasBody ? Style.space(10) : Style.space(7)
   // A card behind the front of a collapsed deck is a shape: the cards are
@@ -112,7 +112,7 @@ Item {
     return out
   }
 
-  // Buttons an Omarchy sender asked for (--action), as commands the shell runs.
+  // Buttons an Void sender asked for (--action), as commands the shell runs.
   readonly property var execActions: Security.parseExecActions(row.execActions) || []
 
   // Every button, in Delivery.deeds' order, with the code labels translated.
@@ -253,7 +253,7 @@ Item {
       spacing: thumb.compact ? Style.space(8) : Style.space(12)
 
       // The sender's image, else the icon resolved for its source, else the
-      // glyph an Omarchy sender asked for, else the first letter of the source.
+      // glyph an Void sender asked for, else the first letter of the source.
       Item {
         id: thumb
         readonly property bool pictured: picture.status === Image.Ready && best !== ""

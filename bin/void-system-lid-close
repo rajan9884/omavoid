@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 # void-system-lid-close: Lock screen and handle clamshell/suspend on laptop lid close
-# omarchy:summary=Lock and reconcile displays when the laptop lid closes
-# omarchy:group=system
-# omarchy:hidden=true
+# void:summary=Lock and reconcile displays when the laptop lid closes
+# void:group=system
+# void:hidden=true
 
 # Check if an external monitor is connected and active
 has_external_monitors() {

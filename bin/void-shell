@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# omarchy:summary=Send an IPC call to the running Omarchy shell
-# omarchy:args=[-q] <target> <method> [args...]
-# omarchy:examples=omarchy shell shell ping | void-shell shell toggle omarchy.menu '{"menu":"root"}'
+# void:summary=Send an IPC call to the running Void shell
+# void:args=[-q] <target> <method> [args...]
+# void:examples=void shell shell ping | void-shell shell toggle void.menu '{"menu":"root"}'
 
 QUIET=0
 if [[ ${1:-} == "-q" ]]; then
@@ -20,7 +20,7 @@ if (( $# == 0 )) || [[ $1 == "-h" || $1 == "--help" ]]; then
   cat <<USAGE
 Usage: void-shell [-q] <target> <method> [args...]
 
-Forwards an IPC call to the running Omarchy shell. The shell is expected
+Forwards an IPC call to the running Void shell. The shell is expected
 to already be running; this command does not start it.
 
 Options:
@@ -29,9 +29,9 @@ Options:
 
 Examples:
   void-shell shell ping
-  void-shell -q omarchy.indicators refresh
+  void-shell -q void.indicators refresh
   void-shell shell listPlugins
-  void-shell shell toggle omarchy.menu '{"menu":"root"}'
+  void-shell shell toggle void.menu '{"menu":"root"}'
 USAGE
   exit 0
 fi
@@ -48,12 +48,12 @@ if (( $# >= 1 )) && [[ $1 == *.* ]]; then
 fi
 
 (( $# >= 2 )) || fail "Usage: void-shell <target> <method> [args...]"
-if [[ -z ${OMARCHY_PATH:-} ]]; then
-  [[ -f /etc/omarchy.conf ]] && . /etc/omarchy.conf
-  export VOID_PATH="${VOID_PATH:-${OMARCHY_PATH:-/usr/share/void}}"
-export OMARCHY_PATH="$VOID_PATH"
+if [[ -z ${VOID_PATH:-} ]]; then
+  [[ -f /etc/void.conf ]] && . /etc/void.conf
+  export VOID_PATH="${VOID_PATH:-${VOID_PATH:-/usr/share/void}}"
+export VOID_PATH="$VOID_PATH"
 fi
-[[ -f $OMARCHY_PATH/shell/shell.qml ]] || fail "void-shell config not found: $OMARCHY_PATH/shell/shell.qml"
+[[ -f $VOID_PATH/shell/shell.qml ]] || fail "void-shell config not found: $VOID_PATH/shell/shell.qml"
 
 # qs matches instances by display, and a caller from outside the session (an
 # ssh or TTY void-restart-shell, and the migrations it runs for) has none,
@@ -83,7 +83,7 @@ fi
 # request is out is reported, not retried: the call may already have run.
 # Like qs ipc, the socket belongs to one shell, the one running this config on
 # this display, and the shell derives its name from the same two values.
-socket_id=$(printf '%s\n%s' "$OMARCHY_PATH/shell" "${WAYLAND_DISPLAY:-}" | md5sum)
+socket_id=$(printf '%s\n%s' "$VOID_PATH/shell" "${WAYLAND_DISPLAY:-}" | md5sum)
 socket="${XDG_RUNTIME_DIR:-/run/user/$UID}/void-shell-${socket_id:0:16}.sock"
 request="$*"
 if [[ -S $socket && $request != *$'\x1e'* && $request != *$'\x1f'* ]]; then
@@ -94,7 +94,7 @@ if [[ -S $socket && $request != *$'\x1e'* && $request != *$'\x1f'* ]]; then
   # socat waits as long as the shell takes; the timeout alone bounds the call.
   # Its own errors land in the reply too, so a connection it could not make
   # is told apart from one that failed after the request went out.
-  reply=$(printf '%s\x1e' "$request" | timeout --kill-after=1s "${OMARCHY_SHELL_IPC_TIMEOUT:-2s}" socat -t 86400 - "UNIX-CONNECT:$socket" 2>&1)
+  reply=$(printf '%s\x1e' "$request" | timeout --kill-after=1s "${VOID_SHELL_IPC_TIMEOUT:-2s}" socat -t 86400 - "UNIX-CONNECT:$socket" 2>&1)
 
   # An answer counts only once its record separator arrived: a reply cut off
   # partway must not pass for the whole of it.
@@ -121,8 +121,8 @@ fi
 # The -- keeps function names that shadow qs subcommands (e.g. show) as
 # positionals. qs reports connection failures with a nonzero exit, but IPC-level
 # failures (unknown target/function, bad arguments) go to stdout with exit 0.
-ipc_timeout=${OMARCHY_SHELL_IPC_TIMEOUT:-2s}
-output=$(timeout --kill-after=1s "$ipc_timeout" qs ipc -n -p "$OMARCHY_PATH/shell" call -- "$@" 2>/dev/null)
+ipc_timeout=${VOID_SHELL_IPC_TIMEOUT:-2s}
+output=$(timeout --kill-after=1s "$ipc_timeout" qs ipc -n -p "$VOID_PATH/shell" call -- "$@" 2>/dev/null)
 ipc_status=$?
 
 if (( ipc_status == 124 || ipc_status == 137 )); then

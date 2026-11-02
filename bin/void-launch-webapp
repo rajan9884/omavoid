@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# omarchy:summary=Launch a URL as a web app in the default supported browser
-# omarchy:args=<url>
+# void:summary=Launch a URL as a web app in the default supported browser
+# void:args=<url>
 
 browser=$(void-cmd-default-browser)
 
@@ -25,7 +25,7 @@ done
 # which fails a keybinding silently. A web app runs in a Chromium-based
 # browser, so say that rather than claiming no browser is set.
 if [[ -z $browser_exec ]]; then
-  echo "void-launch-webapp: web apps need a Chromium-based browser; install Chromium with 'omarchy install browser chromium'" >&2
+  echo "void-launch-webapp: web apps need a Chromium-based browser; install Chromium with 'void install browser chromium'" >&2
   void-notification-send -u critical -g 󰖟 "$(void-i18n browser.webappNeedsChromium)" "$(void-i18n browser.webappNeedsChromiumHint)"
   exit 1
 fi

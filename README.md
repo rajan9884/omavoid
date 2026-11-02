@@ -1,4 +1,4 @@
-# Quattro-Void: Lightweight Omarchy Quattro Desktop for Void Linux
+# Omavoid
 
 [![Void Linux](https://img.shields.io/badge/Void_Linux-runit_%7C_xbps-black?logo=voidlinux&logoColor=white)](https://voidlinux.org)
 [![Compositor](https://img.shields.io/badge/Hyprland-0.56+-58E1E1?logo=hyprland&logoColor=black)](https://hyprland.org)
@@ -6,55 +6,47 @@
 [![Audio](https://img.shields.io/badge/Audio-PipeWire_+_WirePlumber-blue)](https://pipewire.org)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-An authentic, bloat-free port of **Omarchy Quattro (4.0)** engineered specifically for **Void Linux** (`runit` + `xbps` + `pipewire`). It brings the exact visual styling, flush 26px edge-to-edge status bar, fluid flyout cards, unified application menu, dynamic multi-theme engine, wallpaper switcher, and Wayland lockscreen to Void Linux—while completely removing systemd dependencies, cloud daemons, and AI telemetry.
+A modern, responsive, and keyboard-centric Wayland desktop environment engineered natively for **Void Linux**.
 
-Fully reproducible from a clean base install on any standard Void Linux x86_64 system.
+Omavoid pairs the high-performance **Hyprland** Wayland compositor with a custom **Quickshell** (Qt6/QML) shell layer, a rich terminal utility ecosystem, and deep integration with Void's native **runit** service supervisor and **XBPS** package manager.
 
 ---
 
-## Architecture & Differences from Upstream Omarchy
+## Highlights
 
-| Component | Upstream Omarchy Quattro | Quattro-Void (This Port) |
+- **Flush Edge-to-Edge Status Bar**: Ultra-sleek 26px top panel hosting workspaces, active window titles, dynamic indicators, system tray, network status, audio volume, power management, and clock.
+- **Unified Menu & Launcher**: Fast, searchable application and command launcher with categorized navigation for tools, appearance, hardware, and system actions (`Super + Space`).
+- **Interactive Flyout Panels**: Rich modal panels for PipeWire audio routing, NetworkManager Wi-Fi/Ethernet management with QR code sharing, Bluetooth device pairing, display layouts, and battery profiles.
+- **Dynamic 23-Palette Theming Engine**: Switch instantly across 23 curated themes (Tokyo Night, Catppuccin, Nord, Gruvbox, Rose Pine, Dracula, and more) with real-time OSC escape terminal recoloring, wallpaper crossfades, and synchronized styling.
+- **Media-Aware Smart Idle & Lock**: Integrated Wayland lockscreen and screensaver with intelligent idle inhibition that detects running audio and fullscreen video streams.
+- **TUI-First Philosophy**: Preconfigured terminal workflows featuring `foot`, `yazi` file manager, `btop` system monitor, `lazygit`, `pulsemixer`, and `neovim`.
+- **Pure Native Engineering**: Zero cloud telemetry, zero background trackers, and 100% native runit services.
+
+---
+
+## Desktop Architecture
+
+| Subsystem | Technology | Purpose |
 | :--- | :--- | :--- |
-| **Operating System** | Arch Linux | **Void Linux** (x86_64 glibc) |
-| **Init & Services** | systemd + systemd user units | **Void runit** (`dbus`, `elogind`, `seatd`, `NetworkManager`, `greetd`) |
-| **Shell Engine** | Quickshell (`Qt6` + `QML`) | **Pure Quickshell** (authentic upstream components) |
-| **Package Manager** | `pacman` | **`xbps`** + Fastly CDN mirror & Hyprland-Void repo |
-| **Audio Stack** | systemd user pipewire | **PipeWire + WirePlumber** auto-spawned via `context.exec` |
-| **Display Manager** | Greetd / Systemd | **`greetd` + `tuigreet`** runit service on VT 1 |
-| **AI / Cloud Daemons** | Claude, Codex, Grok, Fireworks, Dropbox | **100% Stripped Out** (Zero AI bloat, zero background telemetry) |
-| **App Philosophy** | Heavy GNOME apps (Nautilus, Loupe) | **TUI-First & Minimal**: `yazi`, `btop`, `lazygit`, `pulsemixer`, `impala` |
-| **Hardware State** | `systemd-backlight`, `alsa-state` | **`void-backlight`** and **`alsactl`** hooked into `rc.local` / `rc.shutdown` |
-
----
-
-## Void Linux Compatibility Shims
-
-Because upstream Omarchy Quattro relies heavily on Arch Linux and systemd user services, `quattro-void-dotfiles` provides transparent compatibility shims installed to `/usr/local/bin`:
-
-- **`systemctl`**: Emulates systemctl power commands using `loginctl` with fallback to `sudo -n poweroff`, `sudo -n reboot`, `zzz` (suspend), and `ZZZ` (hibernate).
-- **`uwsm` & `uwsm-app`**: Strips wrapping arguments and launches desktop applications directly under Wayland; cleans up sessions on `stop`.
-- **`systemd-run`**: Strips systemd unit properties and directly execs target commands.
-- **`systemd-cat`**: Drops systemd logging flags and transparently executes commands.
-- **`systemd-inhibit`**: Symlinked directly to `/usr/bin/elogind-inhibit`.
-- **`pacman`**: Bridges package list requests from Quickshell/menus to `xbps-query -l`.
-- **`magick`**: Lightweight dimension extraction via `file` and regex, eliminating large ImageMagick dependencies.
-- **`omarchy-lock-password`**: `/etc/pam.d/omarchy-lock-password` configured with `system-auth` for reliable lockscreen authentication.
-- **`omarchy-system`**: Void-native power controller handling logout (`hyprctl dispatch exit`), reboot, shutdown, suspend, and display manager transitions.
-- **`void-audio-init`**: Detached background daemon that cleans stale sockets and guarantees PipeWire and WirePlumber are active before the desktop shell starts.
-- **`void-backlight`**: Saves and restores screen brightness across reboots via `/var/lib/backlight/` and `~/.local/state/void/brightness`.
+| **Compositor** | [Hyprland](https://hyprland.org) | Wayland display server, window tiling, fluid animations, and gesture handling |
+| **Desktop Shell** | [Quickshell](https://quickshell.outfoxxed.me) | Status bar, quick panels, lockscreen, flyouts, and on-screen display (OSD) |
+| **Init & Services** | [runit](https://voidlinux.org) | Lightweight, reliable service supervision (`dbus`, `elogind`, `seatd`, `NetworkManager`) |
+| **Package Manager**| [XBPS](https://voidlinux.org) | High-speed binary package management with Fastly CDN mirrors |
+| **Sound System** | [PipeWire](https://pipewire.org) + [WirePlumber](https://pipewire.org) | Modern audio routing, Bluetooth audio, and screen capture streaming |
+| **Display Manager**| [greetd](https://git.sr.ht/~kennylevinsen/greetd) + [tuigreet](https://github.com/apognu/tuigreet) | Console-based graphical display manager on virtual terminal 1 |
+| **Terminal** | [foot](https://codeberg.org/dnkl/foot) / [Alacritty](https://alacritty.org) | Fast, GPU-accelerated terminal emulators supporting true color and live OSC reloading |
 
 ---
 
 ## Prerequisites (Fresh Void Linux Install)
 
-1. **Void Linux x86_64 Base Install** (`glibc`).
-2. A non-root user added to the `wheel` group with `sudo` permissions:
+1. **Void Linux x86_64** base installation (glibc).
+2. A non-root user with `wheel` permissions and necessary hardware groups:
    ```bash
-   useradd -m -G wheel,video,audio,input -s /bin/bash <username>
-   passwd <username>
+   sudo useradd -m -G wheel,video,audio,input,storage -s /bin/bash <username>
+   sudo passwd <username>
    ```
-3. Network connection active (Ethernet or Wi-Fi configured via `wpa_supplicant` / `nmtui`).
+3. An active network connection (configured via `dhcpcd`, `wpa_supplicant`, or `nmtui`).
 4. Git installed to clone the repository:
    ```bash
    sudo xbps-install -Sy git
@@ -62,31 +54,30 @@ Because upstream Omarchy Quattro relies heavily on Arch Linux and systemd user s
 
 ---
 
-## Quick Installation
+## Installation
 
 Clone the repository and run the automated installer:
 
 ```bash
-git clone https://github.com/Rajan-08/quattro-void-dotfiles.git
-cd quattro-void-dotfiles
+git clone https://github.com/rajan9884/omavoid.git
+cd omavoid
 sudo ./install.sh
 ```
 
-### What `install.sh` Does Automatically:
-1. **Repository Setup**: Configures the Fastly CDN mirror and the Hyprland-Void community binary repository.
-2. **Package Installation**: Installs Hyprland 0.56+, Quickshell, Wayland portals, PipeWire, WirePlumber, foot, alacritty, TUI utilities (`yazi`, `btop`, `lazygit`, `neovim`), `greetd`, `tuigreet`, and JetBrains Mono Nerd Fonts.
-3. **Asset Deployment**: Deploys the official `omarchy.ttf` icon font (patched with the Void Linux logo), 23 themes, and Quattro wallpapers.
-4. **Shims & Hardware Configuration**:
-   - Deploys compatibility shims to `/usr/local/bin`.
-   - Configures `/etc/udev/rules.d/60-sound.rules` for unprivileged audio group access.
-   - Configures `/etc/pipewire/pipewire.conf.d/10-session-manager.conf`.
-   - Sets up `/etc/rc.local` and `/etc/rc.shutdown` for backlight and ALSA persistence.
-   - Configures `/etc/greetd/config.toml` with `tuigreet` on VT 1.
-   - Grants passwordless power commands and browser tinting via `/etc/sudoers.d/`.
-5. **Runit Services**: Enables `dbus`, `elogind`, `seatd`, `NetworkManager`, `bluetoothd`, `polkitd`, `acpid`, and `greetd`.
-6. **User Configuration**: Atomically symlinks all user configurations (`~/.config/*`, `~/.zshrc`, `~/.zprofile`, `~/.local/bin/*`) directly to your cloned repository, ensuring any tweak or system customization is immediately tracked in git while keeping dynamic caches and runtime hooks gitignored. Sets default login shell to `zsh`.
+### What `install.sh` Configures Automatically:
 
-After installation finishes, simply reboot:
+1. **XBPS Repositories**: Adds Fastly CDN mirrors and the `hyprland-void` binary package repository.
+2. **System Dependencies**: Installs Hyprland, Quickshell, PipeWire, WirePlumber, Wayland portals, foot, JetBrains Mono Nerd Font, and essential TUI tools (`yazi`, `btop`, `lazygit`, `neovim`).
+3. **Display Manager**: Configures `greetd` with `tuigreet` on VT 1 to launch the Hyprland session automatically upon login.
+4. **Hardware Rules & Daemons**:
+   - Deploys `/etc/udev/rules.d/60-sound.rules` for unprivileged audio hardware access.
+   - Sets up `/etc/rc.local` and `/etc/rc.shutdown` for backlight state and sound level persistence.
+   - Configures `/etc/pam.d/void-lock-password` for secure lockscreen unlocking.
+5. **Runit Services**: Enables `dbus`, `elogind`, `seatd`, `NetworkManager`, `bluetoothd`, `polkitd`, and `greetd`.
+6. **User Configuration Symlinks**: Creates atomic symlinks from your clone to `~/.config/`, ensuring that dotfile updates are immediately reflected without duplicating files.
+
+Once the installer finishes, reboot your system:
+
 ```bash
 sudo reboot
 ```
@@ -95,130 +86,168 @@ sudo reboot
 
 ## Keybindings Reference
 
-### Shell & System Controls
-| Shortcut | Action |
-| :--- | :--- |
-| `SUPER + Space` | Unified Void Menu (Search, Apps, Settings) |
-| `SUPER + Esc` | Power & Session Menu (Lock, Logout, Suspend, Reboot, Shutdown) |
-| `SUPER + Ctrl + Space` | Wallpaper Switcher |
-| `SUPER + Shift + Ctrl + Space` | Theme Switcher (23 dynamic themes) |
-| `SUPER + Shift + Space` | Toggle Top Status Bar visibility |
-| `SUPER + Shift + R` | Reload Hyprland and Quickshell |
-| `SUPER + L` / `SUPER + Ctrl + L` | Lock Screen |
+### System & Shell Controls
 
-### Window Management
-| Shortcut | Action |
+| Shortcut | Description |
+| :--- | :--- |
+| `SUPER + Space` | Open Unified Application & System Menu |
+| `SUPER + Esc` | Power Menu (Lock, Logout, Suspend, Reboot, Power Off) |
+| `SUPER + K` | Interactive Keybindings Cheatsheet |
+| `SUPER + Ctrl + L` / `SUPER + L` | Lock Session |
+| `SUPER + Shift + Space` | Toggle Status Bar visibility |
+| `SUPER + Ctrl + Space` | Wallpaper Background Selector |
+| `SUPER + Shift + Ctrl + Space` | Dynamic Theme Switcher |
+| `SUPER + Shift + R` | Restart Desktop Shell & Reload Compositor |
+
+### Window Management & Tiling
+
+| Shortcut | Description |
 | :--- | :--- |
 | `SUPER + Q` / `SUPER + W` | Close focused window |
-| `SUPER + T` | Toggle small centered floating window |
-| `SUPER + F` | Toggle fullscreen |
+| `SUPER + F` | Toggle fullscreen mode |
+| `SUPER + T` | Toggle floating mode for focused window |
 | `SUPER + H / J / K / L` | Move window focus (Left, Down, Up, Right) |
-| `SUPER + Shift + H / J / K / L` | Move window position |
+| `SUPER + Shift + H / J / K / L` | Move window position within layout |
 | `SUPER + 1 .. 9` | Switch to Workspace 1–9 |
-| `SUPER + Shift + 1 .. 9` | Move window to Workspace 1–9 |
-| `SUPER + S` | Toggle Special Scratchpad workspace |
+| `SUPER + Shift + 1 .. 9` | Move focused window to Workspace 1–9 |
+| `SUPER + S` | Toggle special scratchpad workspace |
 
-### Terminals & TUI Apps
-| Shortcut | Action |
+### Terminals & TUI Applications
+
+| Shortcut | Description |
 | :--- | :--- |
-| `SUPER + Enter` | Open Terminal (`foot` / `alacritty`) |
-| `SUPER + Shift + F` | File Manager (`yazi` floating) |
-| `SUPER + B` | System Monitor (`btop` floating) |
-| `SUPER + G` | Git Interface (`lazygit` floating) |
-| `SUPER + Shift + M` | Music Player TUI (`cliamp`) |
-| `SUPER + Alt + A` | Audio Mixer TUI (`wiremix` / `pulsemixer`) |
-| `SUPER + Alt + N` | Wi-Fi Manager TUI (`impala` / `nmtui`) |
-| `SUPER + Alt + B` | Bluetooth Manager TUI (`bluetuith`) |
+| `SUPER + Enter` | Open Terminal (`foot`) |
+| `SUPER + Shift + F` | File Manager (`yazi` floating card) |
+| `SUPER + B` | System Monitor (`btop` floating card) |
+| `SUPER + G` | Git Interface (`lazygit` floating card) |
+| `SUPER + Shift + M` | Music Player (`cliamp`) |
+| `SUPER + Alt + A` | Audio Mixer (`wiremix` / `pulsemixer`) |
+| `SUPER + Alt + N` | Wi-Fi Connection Manager (`impala` / `nmtui`) |
+| `SUPER + Alt + B` | Bluetooth Device Manager (`bluetuith`) |
 | `SUPER + Alt + X` | Interactive Void Package Manager (`xbps` + `fzf`) |
 
-### Clipboard, Screenshots & Notifications
-| Shortcut | Action |
+### Clipboard, Screenshots & Utilities
+
+| Shortcut | Description |
 | :--- | :--- |
-| `SUPER + Ctrl + V` | Clipboard History Manager Overlay |
+| `SUPER + Ctrl + V` | Open Clipboard History Drawer |
 | `SUPER + C` / `SUPER + V` | Universal Copy / Paste (smart detection for terminals vs GUI apps) |
 | `SUPER + X` / `SUPER + A` | Universal Cut / Select All |
-| `Print` | Interactive Region Screenshot (saves to `~/Pictures/Screenshots` & clipboard) |
-| `SUPER + Ctrl + Alt + C` | Region Screenshot alternative |
-| `SUPER + ,` | Dismiss newest notification toast |
+| `Print` | Interactive Region Screenshot (saved to `~/Pictures/Screenshots` & copied) |
+| `SUPER + Ctrl + Alt + C` | Alternate Region Screenshot shortcut |
+| `SUPER + ,` | Dismiss top notification toast |
 | `SUPER + Shift + ,` | Dismiss all notification toasts |
-| `SUPER + Alt + ,` | Invoke / activate notification action |
-| `SUPER + Shift + Alt + ,` | Open Notification History Drawer |
-| `SUPER + Ctrl + Alt + ,` | Toggle Do-Not-Disturb (mute notifications) |
+| `SUPER + Ctrl + Alt + ,` | Toggle Do-Not-Disturb mode |
 
 ---
 
-## Dynamic Theme Engine
+## Dynamic Theming Engine
 
-Quattro-Void includes 23 themes (Tokyo Night, Catppuccin Mocha/Macchiato/Latte, Nord, Gruvbox, Rose Pine, Dracula, Solarized, and more).
+Omavoid features 23 themes that modify the desktop palette simultaneously across GUI and TUI layers:
 
-Switch themes dynamically via `SUPER + Shift + Ctrl + Space` or through the CLI:
-```bash
-omarchy-theme-set "Tokyo Night"
-omarchy-theme-set "Catppuccin Mocha"
-omarchy-theme-set "Nord"
-```
+- **Tokyo Night** (Default)
+- **Catppuccin** (Mocha, Macchiato, Frappe, Latte)
+- **Nord**
+- **Gruvbox** (Dark & Light)
+- **Rose Pine** (Main, Moon, Dawn)
+- **Dracula**
+- **Solarized** (Dark & Light)
+- **Everforest**
+- **Kanagawa**
+- **One Dark** & **One Light**
+- **Vantablack**
 
-When switching themes, the system automatically:
-- Updates Quickshell colors, status bar, and menu styling.
-- Sends live OSC escape sequences to recolor open `foot` terminal sessions instantly.
-- Live-imports colors for `alacritty`.
-- Updates `btop` color scheme via `~/.config/btop/themes/current.theme`.
-- Sets Neovim colorscheme via `~/.config/nvim/lua/plugins/theme.lua`.
-- Tint Chromium/Chrome borders to match the theme accent color.
-- Switches desktop wallpaper with a crossfade transition.
+### Changing Themes:
+
+- **Via GUI**: Press `SUPER + Shift + Ctrl + Space` to launch the visual theme picker.
+- **Via CLI**:
+  ```bash
+  void theme set "Tokyo Night"
+  void theme set "Catppuccin Mocha"
+  void theme set "Nord"
+  ```
+
+### What Happens During Theme Switches:
+1. **Quickshell**: Recompiles semantic colors for the status bar, menus, flyouts, and lockscreen.
+2. **Terminal Recolor**: Emits live OSC escape sequences to recolor open `foot` windows instantly without restarting shells.
+3. **Configuration Templates**: Updates `alacritty.toml`, `btop.theme`, `yazi/theme.toml`, and `neovim` syntax colors.
+4. **Wallpaper**: Applies the coordinated high-resolution wallpaper with a smooth crossfade animation.
 
 ---
 
 ## Hardware & Power Management
 
 ### Screen Brightness Persistence
-Void Linux does not have `systemd-backlight`. Quattro-Void uses `void-backlight`:
-- Automatically saves brightness on shutdown (`/etc/rc.shutdown`).
-- Automatically restores brightness on boot (`/etc/rc.local`) and on user desktop login (`autostart.lua`).
-- Saves state instantly whenever changed via brightness keys or status bar slider.
+Because Void Linux does not use `systemd-backlight`, Omavoid provides `void-backlight`:
+- Saves current display brightness to `/var/lib/backlight/` upon shutdown or suspend.
+- Restores saved brightness on boot via `/etc/rc.local` and user session startup.
+- Supports fine-grained hardware brightness adjustments via dedicated laptop keys.
 
-### Audio Routing (Speakers vs Headphones)
-Sound is handled by PipeWire and WirePlumber with ALSA UCM / SOF DSP profiles:
-- Unprivileged users can access sound hardware through `/etc/udev/rules.d/60-sound.rules`.
-- Hardware mixer levels are persisted across reboots via `alsactl store` and `alsactl restore`.
-- If earphones or headphones appear silent, launch `wiremix` (`Super + Alt + A`) or run:
-  ```bash
-  amixer -c 0 sset 'Auto-Mute Mode' 'Disabled'
-  alsactl store
-  ```
+### Audio Routing & Smart Media Detection
+PipeWire and WirePlumber manage audio streams with auto-detection for headphones, USB audio DACs, and built-in speakers:
+- Hardware mixer levels are persisted across reboots via ALSA hooks.
+- **Idle Monitor Integration**: The screen locker checks if PipeWire audio sinks are actively playing before initiating idle timeouts. Streaming music or watching video (even in windowed mode) prevents unwanted screen lockouts.
 
-### Touchpad Natural Scrolling
+### Touchpad Gestures & Natural Scrolling
 Configured in `~/.config/hypr/input.lua`:
-```lua
-input = {
-  touchpad = {
-    natural_scroll = true,
-  },
-}
+- Natural scrolling enabled by default.
+- Tap-to-click and 3-finger / 4-finger workspace swipe gestures.
+
+---
+
+## CLI Management (`void` Command)
+
+Omavoid provides a unified `void` command-line helper:
+
+```bash
+# General
+void --help                  # View available CLI commands
+void menu                    # Open unified application menu
+void lock                    # Lock session immediately
+
+# Theming & Wallpaper
+void theme                   # Open theme picker
+void theme set <theme-name>  # Apply specific theme
+void bg                      # Open wallpaper picker
+
+# Status Bar & Panels
+void bar position top        # Set bar position (top, bottom, left, right)
+void bar background glassy   # Set bar styling (opaque, glassy, none)
+void shell ping              # Test communication with Quickshell
+
+# Media & Capture
+void capture screenshot      # Capture full screen
+void capture region          # Interactively pick and capture region
+void toggle idle             # Toggle stay-awake mode
 ```
 
 ---
 
 ## Troubleshooting
 
-1. **Audio status bar icon shows muted after reboot:**
-   PipeWire was likely started after Quickshell. Run `reload-desktop` or press `Super + Shift + R`. The installer ensures `omarchy-launch-shell` starts `void-audio-init` first.
-2. **First-run notifications repeatedly appearing:**
-   Markers are saved in `~/.local/state/void/done/`. Run:
+1. **Audio icon shows muted or unavailable:**
+   WirePlumber or PipeWire may need a restart. Run:
    ```bash
-   omarchy-done mark first-run-user
-   omarchy-done mark finalize-user
-   omarchy-shell -q ipc notifications.dismissAll
+   void-restart-audio
    ```
-3. **Display Manager fails to start:**
-   Check runit status:
+   Or press `SUPER + Shift + R` to reload the desktop shell.
+
+2. **Resetting Desktop State:**
+   To reinitialize all quickshell widgets and restore default layouts:
    ```bash
-   sv status greetd dbus elogind
+   void-bar defaults
+   void-restart-shell
    ```
-   If needed, switch to TTY2 (`Ctrl + Alt + F2`), log in, and check `/var/log/messages`.
+
+3. **Verifying Runit Services:**
+   Check the status of system services:
+   ```bash
+   sudo sv status greetd dbus elogind NetworkManager
+   ```
 
 ---
 
 ## License
 
-This project is open-source under the [MIT License](LICENSE). Assets, icons, and themes originate from [Omarchy Quattro](https://github.com/omacom/omarchy).
+This project is open-source under the [MIT License](LICENSE).
+Built with passion for the **Void Linux** community.

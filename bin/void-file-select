@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
-# omarchy:summary=Pick files with the desktop file chooser
-# omarchy:args=[--title <title>] [--multiple] [--directory] [--extensions "<ext ext...>"]
-# omarchy:examples=omarchy file select --title "Send with Tailscale" --multiple | omarchy file select --title "Pick image" --extensions "png svg" | omarchy file select --title "Share folder" --directory
+# void:summary=Pick files with the desktop file chooser
+# void:args=[--title <title>] [--multiple] [--directory] [--extensions "<ext ext...>"]
+# void:examples=void file select --title "Send with Tailscale" --multiple | void file select --title "Pick image" --extensions "png svg" | void file select --title "Share folder" --directory
 
 # Python rather than bash, alone among the commands here, because the portal
 # answers a request with a Response signal addressed to the connection that
@@ -33,7 +33,7 @@ EXIT_NOTHING_PICKED = 1
 EXIT_CHOOSER_FAILED = 2
 
 
-# The dialog's own title when the caller names none, in the Omarchy language.
+# The dialog's own title when the caller names none, in the Void language.
 def default_title():
     try:
         title = subprocess.run("void-i18n files.selectFile".split(), capture_output=True, text=True).stdout
@@ -83,7 +83,7 @@ def main():
     # The request path is derived from our bus name and the token we pass, so it
     # can be subscribed to up front. Asking first would race a dialog that gets
     # answered immediately.
-    token = "omarchy%d" % os.getpid()
+    token = "void%d" % os.getpid()
     sender = bus.get_unique_name()[1:].replace(".", "_")
     predicted = "/org/freedesktop/portal/desktop/request/%s/%s" % (sender, token)
     subscribe(predicted)

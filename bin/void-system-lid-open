@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # void-system-lid-open: Turn display back on and restore display on laptop lid open
-# omarchy:summary=Restore displays when the laptop lid opens
-# omarchy:group=system
-# omarchy:hidden=true
+# void:summary=Restore displays when the laptop lid opens
+# void:group=system
+# void:hidden=true
 
 void-system-wake >/dev/null 2>&1 || true

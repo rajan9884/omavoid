@@ -54,7 +54,7 @@ hl.window_rule({
 -- Media Floating
 hl.window_rule({
   name = "float-terminal-dialog",
-  match = { class = "^(floating-terminal|org.void.terminal|org.omarchy.terminal)$" },
+  match = { class = "^(floating-terminal|org.void.terminal|org.void.terminal)$" },
   float = true,
   center = true,
   size = { 920, 620 },
@@ -88,13 +88,13 @@ hl.window_rule({
 -- Screensaver (Fullscreen, Floating, Slide Animation)
 hl.window_rule({
   name = "screensaver-fullscreen",
-  match = { class = "^(org.omarchy.screensaver|org.void.screensaver)$" },
+  match = { class = "^(org.void.screensaver|org.void.screensaver)$" },
   fullscreen = true,
   float = true,
   animation = "slide",
 })
 
 -- Layer rules for instant Quickshell UI responses
-hl.layer_rule({ match = { namespace = "^(omarchy-bar|void-bar)$" }, blur = true, ignore_alpha = 0.3, no_anim = true, animation = "none" })
-hl.layer_rule({ match = { namespace = "^(omarchy-menu|void-menu|omarchy-image-selector|omarchy-clipboard|omarchy-osd|omarchy-network-qr)$" }, no_anim = true, animation = "none" })
-hl.layer_rule({ match = { namespace = "^(omarchy-background|owe-background)$" }, no_anim = true, animation = "none" })
+hl.layer_rule({ match = { namespace = "^(void-bar|void-bar)$" }, blur = true, ignore_alpha = 0.3, no_anim = true, animation = "none" })
+hl.layer_rule({ match = { namespace = "^(void-menu|void-menu|void-image-selector|void-clipboard|void-osd|void-network-qr)$" }, no_anim = true, animation = "none" })
+hl.layer_rule({ match = { namespace = "^(void-background|owe-background)$" }, no_anim = true, animation = "none" })

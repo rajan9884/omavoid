@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# omarchy:summary=Scale text everywhere — omarchy shell, GTK apps, and terminals
-# omarchy:args=[size|reset]
-# omarchy:examples=omarchy display text size | omarchy display text size 16 | omarchy display text size reset
+# void:summary=Scale text everywhere — void shell, GTK apps, and terminals
+# void:args=[size|reset]
+# void:examples=void display text size | void display text size 16 | void display text size reset
 
 # One knob for apparent text size across the desktop. It drives three settings
 # in lockstep, all anchored to the shell default of 12px:
-#   • the omarchy shell's font base-size (~/.config/void/shell.toml [font])
+#   • the void shell's font base-size (~/.config/void/shell.toml [font])
 #   • GNOME/GTK's text-scaling-factor    (12px -> 1.0, quantized so the GTK
 #     interface font lands on a whole point size, so 16 -> 15pt/11pt = 1.3636)
 #   • the terminal font point size       (12px -> 9pt, so terminal_pt = px * 9/12)
@@ -222,7 +222,7 @@ if [[ ! $size =~ ^[0-9]+$ ]] || ((size < MIN || size > MAX)); then
   exit 1
 fi
 
-# Shell side: base-size in px (the omarchy shell's rem root).
+# Shell side: base-size in px (the void shell's rem root).
 set_base_size "$size"
 
 # GTK side: multiplier anchored so 12px == 1.0, quantized so the interface

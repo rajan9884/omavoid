@@ -3,7 +3,7 @@
 # void:summary=Configure the bar and its widget layout
 # void:group=bar
 # void:args=use <id> | reset | defaults | position [top|bottom|left|right] | background [opaque|glassy|none|cycle] | put <id> [placement] | move <id> [placement] | set <id> <key> <value> [--json] [placement] | get <id> <key>
-# void:examples=void-bar use local.neon-bar | void-bar put omarchy.keyboard-layout --after omarchy.clock | void-bar move omarchy.weather --section centerBegin --index 0 | void-bar set omarchy.clock format HH:mm
+# void:examples=void-bar use local.neon-bar | void-bar put void.keyboard-layout --after void.clock | void-bar move void.weather --section centerBegin --index 0 | void-bar set void.clock format HH:mm
 
 set -euo pipefail
 
@@ -52,10 +52,10 @@ already on the bar where it is, and falls back to the widget's usual spot when
 
 Examples:
   void-bar use local.neon-bar
-  void-bar put omarchy.keyboard-layout --after omarchy.clock
-  void-bar move omarchy.media left
-  void-bar move omarchy.weather --section centerBegin --index 0
-  void-bar set omarchy.clock format HH:mm
+  void-bar put void.keyboard-layout --after void.clock
+  void-bar move void.media left
+  void-bar move void.weather --section centerBegin --index 0
+  void-bar set void.clock format HH:mm
 USAGE
 }
 
@@ -156,11 +156,11 @@ cmd_use() {
   [[ -n $plugin ]] || fail "bar option id is required"
   (( $# == 1 )) || fail "use takes a single bar option id"
   if [[ $plugin == "default" || $plugin == "built-in" ]]; then
-    plugin="omarchy.bar"
+    plugin="void.bar"
   fi
   bar_option_exists "$plugin" || fail "$plugin is not a known bar option; run 'void-shell plugin list'"
 
-  if [[ $plugin == "omarchy.bar" ]]; then
+  if [[ $plugin == "void.bar" ]]; then
     commit "$NORMALIZE | del(.bar.id)"
   else
     commit "$NORMALIZE | .bar.id = \$plugin" --arg plugin "$plugin"
@@ -176,8 +176,8 @@ cmd_defaults() {
   for service in dropbox tailscale; do
     if "void-installed-service-$service"; then
       widget=$(jq -cn \
-        --arg id "omarchy.$service" \
-        --arg section "$(bar_widget_default_section "omarchy.$service")" \
+        --arg id "void.$service" \
+        --arg section "$(bar_widget_default_section "void.$service")" \
         '{id: $id, section: $section}')
       optional_widgets=$(jq -c --argjson widget "$widget" '. + [$widget]' <<<"$optional_widgets")
     fi
@@ -188,7 +188,7 @@ cmd_defaults() {
   commit "$NORMALIZE
     | .bar = \$defaults[0].bar
     | def entry_id: if type == \"object\" then (.id // \"\" | tostring) else tostring end;
-      def anchor_for(\$section): { left: \"omarchy.workspaces\", centerEnd: \"omarchy.weather\", right: \"omarchy.tray\" }[\$section];
+      def anchor_for(\$section): { left: \"void.workspaces\", centerEnd: \"void.weather\", right: \"void.tray\" }[\$section];
       reduce \$widgets[] as \$widget (.;
         .bar.layout |= map_values(if type == \"array\" then map(select(entry_id != \$widget.id)) end)
         | (.bar.layout[\$widget.section] | map(entry_id) | index(anchor_for(\$widget.section))) as \$anchor
@@ -465,7 +465,7 @@ case "$command" in
     ;;
   reset)
     (( $# == 0 )) || fail "reset does not take arguments"
-    cmd_use omarchy.bar
+    cmd_use void.bar
     ;;
   defaults)
     cmd_defaults "$@"

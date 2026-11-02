@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# omarchy:summary=Set and remember the power profile for AC or battery use
-# omarchy:args=[autodetect|ac|battery] [power-saver|balanced|performance]
+# void:summary=Set and remember the power profile for AC or battery use
+# void:args=[autodetect|ac|battery] [power-saver|balanced|performance]
 
 action="${1:-autodetect}"
 requested_profile="${2:-}"
@@ -33,7 +33,7 @@ profile_available() {
   [[ " ${profiles[*]} " == *" $1 "* ]]
 }
 
-state_dir="${OMARCHY_POWERPROFILES_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/void/powerprofiles}"
+state_dir="${VOID_POWERPROFILES_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/void/powerprofiles}"
 state_file="$state_dir/$action"
 
 if [[ -n $requested_profile ]]; then

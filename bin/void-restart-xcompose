@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# omarchy:summary=Restart the XCompose input method service (fcitx5) to apply new compose key settings.
+# void:summary=Restart the XCompose input method service (fcitx5) to apply new compose key settings.
 
 set -euo pipefail
 
