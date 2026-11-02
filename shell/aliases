@@ -1,0 +1,55 @@
+# Common Shell Aliases (Shared across Bash & Zsh)
+# Pure Void Linux architecture
+
+# Navigation
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+
+# File system (eza)
+if command -v eza >/dev/null 2>&1; then
+  alias ls='eza --icons=auto'
+  alias ll='eza -lah --icons=auto --git'
+  alias la='eza -a --icons=auto'
+  alias lsa='eza -a -lh --group-directories-first --icons=auto'
+  alias lt='eza --tree --level=2 --long --icons --git'
+  alias lta='lt -a'
+fi
+
+# Development & Tools
+alias d='docker'
+alias t='tmux attach || tmux new -s Work'
+alias lg='lazygit'
+alias top='btop'
+alias v='nvim'
+alias zed='zed-editor'
+alias qs='qshell-ctl'
+
+n() {
+  if [ "$#" -eq 0 ]; then
+    command nvim .
+  else
+    command nvim "$@"
+  fi
+}
+
+open() (
+  xdg-open "$@" >/dev/null 2>&1 &
+)
+
+# Git
+alias g='git'
+alias gcm='git commit -m'
+alias gcam='git commit -a -m'
+alias gcad='git commit -a --amend'
+
+# Void Linux XBPS Power Aliases
+alias xi='sudo xbps-install -S'
+alias xu='sudo xbps-install -Su'
+alias xr='sudo xbps-remove -R'
+alias xq='xbps-query -Rs'
+alias xclean='sudo xbps-remove -Oo'
+alias svstatus='sudo sv status /var/service/*'
+alias vsv='sudo vsv'
+alias vp-sync='XBPS_DISTDIR="$HOME/.local/share/pkg/void-packages" "$HOME/.local/share/pkg/void-packages/vp-sync"'
+export XBPS_DISTDIR="${XBPS_DISTDIR:-$HOME/.local/share/pkg/void-packages}"

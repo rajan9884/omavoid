@@ -18,8 +18,10 @@ export BAT_THEME="ansi"
 export MANROFFOPT="-c"
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 
-# Load inputrc
-[[ -f $VOID_PATH/default/bash/inputrc ]] && bind -f $VOID_PATH/default/bash/inputrc
+# Load inputrc (Bash only)
+if [[ -n "$BASH_VERSION" ]]; then
+  [[ -f $VOID_PATH/default/bash/inputrc ]] && bind -f $VOID_PATH/default/bash/inputrc
+fi
 
 # FZF Environment & Key Bindings
 if command -v fd >/dev/null 2>&1; then
@@ -28,89 +30,65 @@ if command -v fd >/dev/null 2>&1; then
   export FZF_ALT_C_COMMAND="fd --type d --hidden --follow --exclude .git"
 fi
 
-[[ -f /usr/share/fzf/key-bindings.bash ]] && source /usr/share/fzf/key-bindings.bash
-[[ -f /usr/share/fzf/completion.bash ]] && source /usr/share/fzf/completion.bash
+if [[ -n "$BASH_VERSION" ]]; then
+  [[ -f /usr/share/fzf/key-bindings.bash ]] && source /usr/share/fzf/key-bindings.bash
+  [[ -f /usr/share/fzf/completion.bash ]] && source /usr/share/fzf/completion.bash
+fi
 [[ -f "$HOME/.local/state/void/current/theme/fzf.sh" ]] && source "$HOME/.local/state/void/current/theme/fzf.sh"
 
-# Tool Initializers
-if command -v zoxide >/dev/null 2>&1; then
-  eval "$(zoxide init bash)"
+# Tool Initializers (Bash only)
+if [[ -n "$BASH_VERSION" ]]; then
+  if command -v zoxide >/dev/null 2>&1; then
+    eval "$(zoxide init bash)"
+  fi
+
+  if command -v starship >/dev/null 2>&1; then
+    eval "$(starship init bash --print-full-init)"
+  fi
 fi
 
-if command -v starship >/dev/null 2>&1; then
-  eval "$(starship init bash --print-full-init)"
+# Common Shell Aliases
+if [ -f "$HOME/.bash_aliases" ]; then
+  source "$HOME/.bash_aliases"
+elif [ -f "$HOME/quattro-void-dotfiles/shell/aliases" ]; then
+  source "$HOME/quattro-void-dotfiles/shell/aliases"
 fi
 
-# Omarchy Standard Aliases
-if command -v eza >/dev/null 2>&1; then
-  alias ls='eza -lh --group-directories-first --icons=auto'
-  alias lsa='ls -a'
-  alias lt='eza --tree --level=2 --long --icons --git'
-  alias lta='lt -a'
-fi
+# Bash-specific interactive helpers
+if [[ -n "$BASH_VERSION" ]]; then
+  if [[ "$TERM" == "xterm-kitty" ]]; then
+    alias ff="fzf --preview 'case \$(file --mime-type -b {}) in image/*) kitty icat --clear --transfer-mode=memory --stdin=no --place=\${FZF_PREVIEW_COLUMNS}x\${FZF_PREVIEW_LINES}@0x0 {} ;; *) bat --style=numbers --color=always {} ;; esac'"
+  else
+    alias ff="fzf --preview 'bat --style=numbers --color=always {}'"
+  fi
+  alias eff='$EDITOR "$(ff)"'
+  sff() { if [ $# -eq 0 ]; then echo "Usage: sff <destination> (e.g. sff host:/tmp/)"; return 1; fi; local file; file=$(find . -type f -printf '%T@\t%p\n' | sort -rn | cut -f2- | ff) && [ -n "$file" ] && scp "$file" "$1"; }
 
-if [[ "$TERM" == "xterm-kitty" ]]; then
-  alias ff="fzf --preview 'case \$(file --mime-type -b {}) in image/*) kitty icat --clear --transfer-mode=memory --stdin=no --place=\${FZF_PREVIEW_COLUMNS}x\${FZF_PREVIEW_LINES}@0x0 {} ;; *) bat --style=numbers --color=always {} ;; esac'"
-else
-  alias ff="fzf --preview 'bat --style=numbers --color=always {}'"
-fi
-alias eff='$EDITOR "$(ff)"'
-sff() { if [ $# -eq 0 ]; then echo "Usage: sff <destination> (e.g. sff host:/tmp/)"; return 1; fi; local file; file=$(find . -type f -printf '%T@\t%p\n' | sort -rn | cut -f2- | ff) && [ -n "$file" ] && scp "$file" "$1"; }
-
-if command -v zoxide >/dev/null 2>&1; then
-  alias cd="zd"
-  zd() {
-    if (( $# == 0 )); then
-      builtin cd ~ || return
-    elif [[ -d $1 ]]; then
-      builtin cd "$1" || return
-    else
-      if ! z "$@"; then
-        echo "Error: Directory not found"
-        return 1
+  if command -v zoxide >/dev/null 2>&1; then
+    alias cd="zd"
+    zd() {
+      if (( $# == 0 )); then
+        builtin cd ~ || return
+      elif [[ -d $1 ]]; then
+        builtin cd "$1" || return
+      else
+        if ! z "$@"; then
+          echo "Error: Directory not found"
+          return 1
+        fi
+        printf "\U000F17A9 "
+        pwd
       fi
-      printf "\U000F17A9 "
-      pwd
+    }
+  fi
+
+  # Yazi file manager wrapper
+  function y() {
+    local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+    yazi "$@" --cwd-file="$tmp"
+    if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+      builtin cd -- "$cwd"
     fi
+    rm -f -- "$tmp"
   }
 fi
-
-open() (
-  xdg-open "$@" >/dev/null 2>&1 &
-)
-
-# Navigation
-alias ..='cd ..'
-alias ...='cd ../..'
-alias ....='cd ../../..'
-
-# Development & Tools
-alias d='docker'
-alias t='tmux attach || tmux new -s Work'
-alias lg='lazygit'
-alias top='btop'
-n() { if [ "$#" -eq 0 ]; then command nvim . ; else command nvim "$@"; fi; }
-
-# Git
-alias g='git'
-alias gcm='git commit -m'
-alias gcam='git commit -a -m'
-alias gcad='git commit -a --amend'
-
-# Void Linux XBPS Power Aliases
-alias xi='sudo xbps-install -S'
-alias xu='sudo xbps-install -Su'
-alias xr='sudo xbps-remove -R'
-alias xq='xbps-query -Rs'
-alias xclean='sudo xbps-remove -Oo'
-alias svstatus='sudo sv status /var/service/*'
-
-# Yazi file manager wrapper
-function y() {
-  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
-  yazi "$@" --cwd-file="$tmp"
-  if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-    builtin cd -- "$cwd"
-  fi
-  rm -f -- "$tmp"
-}
