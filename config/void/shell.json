@@ -56,7 +56,8 @@
         }
       ]
     },
-    "position": "top"
+    "position": "top",
+    "transparent": true
   },
   "idle": {
     "lock": 300,

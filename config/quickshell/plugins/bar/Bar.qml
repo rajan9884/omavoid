@@ -1041,10 +1041,24 @@ Item {
     Util.execDetached(command)
   }
 
+  // Toggles the bar background between transparent and opaque
+  function toggleTransparency() {
+    var nextTransparent = !(root.requestedTransparent === true)
+    if (root.shell && typeof root.shell.mutateShellConfig === "function") {
+      root.shell.mutateShellConfig(function(config) {
+        if (!Util.isPlainObject(config.bar)) config.bar = {}
+        config.bar.background = nextTransparent ? "none" : "opaque"
+        config.bar.transparent = nextTransparent
+      })
+    } else {
+      root.setRequestedTransparency(nextTransparent)
+    }
+  }
+
   // Steps the bar background from clear to glassy to opaque and around. Through
   // void-bar, which keeps Hyprland's blur behind a glassy bar in step.
   function cycleBackground() {
-    Util.execDetached("void-bar background cycle")
+    root.toggleTransparency()
   }
 
   function moduleDropAtScene(scenePoint, sourceSlot) {
