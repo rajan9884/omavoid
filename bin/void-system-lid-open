@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# void-system-lid-open: Turn display back on and restore display on laptop lid open
+# omarchy:summary=Restore displays when the laptop lid opens
+# omarchy:group=system
+# omarchy:hidden=true
+
+if command -v hyprctl >/dev/null 2>&1; then
+  # Turn on all displays via DPMS
+  hyprctl dispatch "hl.dsp.dpms({ action = 'on' })" >/dev/null 2>&1 || true
+fi

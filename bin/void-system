@@ -63,9 +63,11 @@ do_power_action() {
       loginctl poweroff 2>/dev/null || sudo -n poweroff 2>/dev/null || exit 1
       ;;
     suspend)
+      void-system-lock >/dev/null 2>&1 || true
       loginctl suspend 2>/dev/null || zzz 2>/dev/null || sudo -n zzz 2>/dev/null || exit 1
       ;;
     hibernate)
+      void-system-lock >/dev/null 2>&1 || true
       loginctl hibernate 2>/dev/null || ZZZ 2>/dev/null || sudo -n ZZZ 2>/dev/null || exit 1
       ;;
   esac
