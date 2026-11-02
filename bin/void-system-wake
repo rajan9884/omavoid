@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+# void-system-wake: Wake displays and restore backlight after lock/idle
+# omarchy:summary=Wake displays and restore brightness after idle
+# omarchy:group=system
+# omarchy:name=wake
+# omarchy:examples=void-system-wake
+
+void-brightness-display on >/dev/null 2>&1 || true
+void-brightness-keyboard restore >/dev/null 2>&1 || true
