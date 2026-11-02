@@ -460,14 +460,6 @@
     "when": "! void-hyprland-toggle-enabled no-animations",
     "action": "void-toggle-animations"
   },
-  "appearance.unlock": {
-    "icon": "󰟵",
-    "label": "Unlock",
-    "aliases": [
-      "unlock"
-    ],
-    "action": "unlock=$(void-plymouth-switcher); if [[ $unlock == default ]]; then void-launch-floating-terminal-with-presentation void-plymouth-reset; elif [[ -n $unlock ]]; then void-launch-floating-terminal-with-presentation \"void-plymouth-set-by-theme $(printf %q \"$unlock\")\"; fi"
-  },
   "trigger.toggle": {
     "icon": "󰔎",
     "label": "Toggle",
@@ -785,8 +777,8 @@
   "setup.keybindings": {
     "icon": "",
     "label": "Keybindings",
-    "when": "[[ -f ~/.config/hypr/bindings.lua ]]",
-    "action": "void-launch-config-editor \"$HOME/.config/hypr/bindings.lua\""
+    "when": "[[ -f ~/.config/hypr/keybinds.lua || -f ~/.config/hypr/bindings.lua ]]",
+    "action": "if [[ -f ~/.config/hypr/keybinds.lua ]]; then void-launch-config-editor \"$HOME/.config/hypr/keybinds.lua\"; else void-launch-config-editor \"$HOME/.config/hypr/bindings.lua\"; fi"
   },
   "setup.input": {
     "icon": "",
@@ -853,7 +845,7 @@
   "setup.config.hyprland": {
     "icon": "",
     "label": "Hyprland",
-    "action": "void-launch-config-editor \"$HOME/.config/hypr/hyprland.conf\""
+    "action": "if [[ -f ~/.config/hypr/hyprland.lua ]]; then void-launch-config-editor \"$HOME/.config/hypr/hyprland.lua\"; else void-launch-config-editor \"$HOME/.config/hypr/hyprland.conf\"; fi"
   },
   "setup.config.hyprsunset": {
     "icon": "",

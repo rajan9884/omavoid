@@ -1,0 +1,3 @@
+#!/bin/bash
+# Hardware check for Dell XPS haptic touchpad
+exit 1

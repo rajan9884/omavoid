@@ -53,7 +53,7 @@ exec {events}< <(socat -U - "UNIX-CONNECT:$SOCKET")
 wait_for_screensaver_window() {
   local line deadline=$((SECONDS + 5))
   while ((SECONDS < deadline)) && IFS= read -r -t $((deadline - SECONDS)) -u "$events" line; do
-    [[ $line == openwindow\>\>*,org.omarchy.screensaver,* ]] && return 0
+    [[ $line == openwindow\>\>*,org.void.screensaver,* || $line == openwindow\>\>*,org.omarchy.screensaver,* ]] && return 0
   done
 }
 
@@ -62,16 +62,16 @@ for m in $(hyprctl monitors -j | jq -r '.[] | .name'); do
 
   case $terminal in
   *Alacritty*)
-    hypr_exec alacritty --class=org.omarchy.screensaver -o font.size=18 -o window.padding.x=0 -o window.padding.y=0 -o colors.primary.background=\"#000000\" -o colors.primary.foreground=\"#ffffff\" -e void-screensaver
+    hypr_exec alacritty --class=org.void.screensaver -o font.size=18 -o window.padding.x=0 -o window.padding.y=0 -o colors.primary.background=\"#000000\" -o colors.primary.foreground=\"#ffffff\" -e void-screensaver
     ;;
   *ghostty*)
-    hypr_exec ghostty --class=org.omarchy.screensaver --font-size=18 --background=000000 --foreground=ffffff -e void-screensaver
+    hypr_exec ghostty --class=org.void.screensaver --font-size=18 --background=000000 --foreground=ffffff -e void-screensaver
     ;;
   *foot*)
-    hypr_exec foot --app-id=org.omarchy.screensaver --font="JetBrainsMono Nerd Font:size=18" --override=pad=0x0 --override=colors.background=000000 --override=colors.foreground=ffffff -e void-screensaver
+    hypr_exec foot --app-id=org.void.screensaver --font="JetBrainsMono Nerd Font:size=18" --override=pad=0x0 --override=colors.background=000000 --override=colors.foreground=ffffff -e void-screensaver
     ;;
   *kitty*)
-    hypr_exec kitty --class=org.omarchy.screensaver --override font_size=18 --override window_padding_width=0 --override background=#000000 --override foreground=#ffffff -e void-screensaver
+    hypr_exec kitty --class=org.void.screensaver --override font_size=18 --override window_padding_width=0 --override background=#000000 --override foreground=#ffffff -e void-screensaver
     ;;
   esac
 
@@ -81,7 +81,7 @@ done
 hypr_focus_monitor "$focused"
 
 (
-  while hyprctl clients -j | SCREENSAVER=org.omarchy.screensaver jq -e 'any(.[]; .mapped and .class == env.SCREENSAVER)' >/dev/null; do
+  while hyprctl clients -j | SCREENSAVER=org.void.screensaver jq -e 'any(.[]; .mapped and (.class == env.SCREENSAVER or .class == "org.omarchy.screensaver"))' >/dev/null; do
     IFS= read -r -u "$events" line || exit
   done
   hypr_focus_monitor "$focused"

@@ -88,7 +88,7 @@ hl.window_rule({
 -- Screensaver (Fullscreen, Floating, Slide Animation)
 hl.window_rule({
   name = "screensaver-fullscreen",
-  match = { class = "^org.omarchy.screensaver$" },
+  match = { class = "^(org.omarchy.screensaver|org.void.screensaver)$" },
   fullscreen = true,
   float = true,
   animation = "slide",
