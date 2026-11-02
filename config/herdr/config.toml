@@ -1,0 +1,10 @@
+# Herdr configuration
+onboarding = false
+
+[ui]
+# Pane scrollback lines to scroll per mouse wheel notch (default was 3)
+mouse_scroll_lines = 7
+
+[keys]
+# Fast keyboard navigation through scrollback (tmux standard)
+copy_mode = "prefix+["
