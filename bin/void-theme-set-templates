@@ -3,7 +3,7 @@
 # void:summary=Generate themed config files from Void templates
 # void:hidden=true
 
-TEMPLATES_DIR="${VOID_PATH:-/home/rajan/quattro-void-dotfiles}/themes/templates"
+TEMPLATES_DIR="${VOID_PATH:-/home/rajan/omavoid}/themes/templates"
 USER_TEMPLATES_DIR="$HOME/.config/void/themed"
 NEXT_THEME_DIR="$HOME/.local/state/void/current/next-theme"
 COLORS_FILE="$NEXT_THEME_DIR/colors.toml"

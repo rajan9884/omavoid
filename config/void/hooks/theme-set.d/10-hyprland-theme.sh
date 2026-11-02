@@ -78,7 +78,7 @@ cat << CONF > "$THEME_CONF"
 CONF
 
 # Also update dotfiles repo copy if exists and different
-DOTFILES_CONF="$HOME/quattro-void-dotfiles/config/hypr/conf/theme.conf"
+DOTFILES_CONF="$HOME/omavoid/config/hypr/conf/theme.conf"
 if [[ -d "$(dirname "$DOTFILES_CONF")" && "$(readlink -f "$THEME_CONF" 2>/dev/null)" != "$(readlink -f "$DOTFILES_CONF" 2>/dev/null)" ]]; then
   cp "$THEME_CONF" "$DOTFILES_CONF"
 fi

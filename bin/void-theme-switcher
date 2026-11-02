@@ -16,7 +16,7 @@ fi
 
 USER_THEMES_PATH="$HOME/.config/void/themes"
 VOID_THEMES_PATH="$VOID_PATH/themes"
-[[ -d $VOID_THEMES_PATH ]] || VOID_THEMES_PATH="$HOME/quattro-void-dotfiles/themes"
+[[ -d $VOID_THEMES_PATH ]] || VOID_THEMES_PATH="$HOME/omavoid/themes"
 CACHE_PATH="${XDG_CACHE_HOME:-$HOME/.cache}/void/theme-selector"
 preview_dir="$CACHE_PATH/previews"
 signature_file="$CACHE_PATH/signature"

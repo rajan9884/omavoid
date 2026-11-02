@@ -23,7 +23,7 @@ THEME_GENERATION_PATH="$HOME/.local/state/void/current/theme.generation"
 USER_THEMES_PATH="$HOME/.config/void/themes"
 if [[ -z ${VOID_PATH:-} || ! -d "$VOID_PATH" ]]; then
   VOID_PATH="/usr/share/void"
-  [[ -d "$VOID_PATH" ]] || VOID_PATH="/home/rajan/quattro-void-dotfiles"
+  [[ -d "$VOID_PATH" ]] || VOID_PATH="/home/rajan/omavoid"
 fi
 VOID_THEMES_PATH="$VOID_PATH/themes"
 export VOID_PATH="$VOID_PATH"

@@ -742,7 +742,7 @@ main() {
     if [[ -z "$template_file" ]]; then
         for cand in \
             "$script_dir/../themes/templates/zed-theme.json.tpl" \
-            "$HOME/quattro-void-dotfiles/themes/templates/zed-theme.json.tpl" \
+            "$HOME/omavoid/themes/templates/zed-theme.json.tpl" \
             "/usr/share/void/themes/templates/zed-theme.json.tpl" \
             "$script_dir/zed-theme.json.tpl"; do
             if [[ -f "$cand" ]]; then

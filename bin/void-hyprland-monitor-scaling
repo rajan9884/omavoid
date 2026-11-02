@@ -55,7 +55,7 @@ set_scale() {
   hyprctl eval "hl.monitor({ output = \"$active_monitor\", mode = \"preferred\", position = \"auto\", scale = $new_scale })" >/dev/null 2>&1 || true
 
   # Persist to monitors.lua
-  for m_lua in "$HOME/.config/hypr/monitors.lua" "$HOME/quattro-void-dotfiles/config/hypr/monitors.lua"; do
+  for m_lua in "$HOME/.config/hypr/monitors.lua" "$HOME/omavoid/config/hypr/monitors.lua"; do
     if [[ -f "$m_lua" ]]; then
       sed -i -E \
         -e "s|^local void_monitor_scale = .*|local void_monitor_scale = ${new_scale}|" \
