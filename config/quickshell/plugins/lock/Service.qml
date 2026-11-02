@@ -765,7 +765,7 @@ Item {
 
   Timer {
     id: idleBlankTimer
-    interval: 5000
+    interval: 45000
     repeat: false
     property double armedAt: 0
     onTriggered: {
@@ -773,13 +773,16 @@ Item {
       // blank the freshly woken unlock screen under the user. Wall-clock time
       // exposes the gap: take a fresh run-up instead of blanking.
       if (Date.now() - armedAt > interval + 2000) {
+        root.enteredPassword = ""
         root.armBlankTimer()
         return
       }
-      // Only a password check in flight should hold the display up. The
-      // fingerprint PAM stays armed for the whole lock, so gating on
-      // `authenticating` here would keep the panel lit until unlock.
-      if (root.lockRequested && !root.authenticatingPassword) root.runBlank()
+      // Never blank while the user has text entered in the password field or is authenticating
+      if (root.enteredPassword.length > 0 || root.authenticatingPassword) {
+        root.armBlankTimer()
+        return
+      }
+      if (root.lockRequested) root.runBlank()
     }
   }
 
@@ -837,6 +840,13 @@ Item {
     if (!lockRequested) return
     if (authenticatingPassword) idleBlankTimer.stop()
     else armBlankTimer()
+  }
+
+  onEnteredPasswordChanged: {
+    if (lockRequested) {
+      runWake()
+      armBlankTimer()
+    }
   }
 
   FileView {
