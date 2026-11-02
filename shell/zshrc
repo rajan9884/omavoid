@@ -18,8 +18,8 @@ export BAT_THEME="ansi"
 # Common Aliases (shared with bashrc / bash_aliases)
 if [ -f "$HOME/.bash_aliases" ]; then
   source "$HOME/.bash_aliases"
-elif [ -f "$HOME/quattro-void-dotfiles/shell/aliases" ]; then
-  source "$HOME/quattro-void-dotfiles/shell/aliases"
+elif [ -f "$HOME/omavoid/shell/aliases" ]; then
+  source "$HOME/omavoid/shell/aliases"
 fi
 
 # Also source ~/.bashrc if present (for any custom aliases defined in bashrc)
