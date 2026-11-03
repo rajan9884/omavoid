@@ -47,12 +47,22 @@ setup_void_repos() {
     if [ ! -f /etc/xbps.d/hyprland-void.conf ]; then
         echo "repository=https://github.com/void-land/hyprland-void-packages/releases/latest/download/" | sudo tee /etc/xbps.d/hyprland-void.conf >/dev/null
     fi
+    if [ ! -f /etc/xbps.d/creations.conf ]; then
+        echo "repository=https://void.creations.works" | sudo tee /etc/xbps.d/creations.conf >/dev/null
+    fi
     echo "repository=https://repo-fastly.voidlinux.org/current" | sudo tee /etc/xbps.d/00-repository-main.conf >/dev/null
 
-    if [ -d "$HOME/.local/share/pkg/void-packages/hostdir/binpkgs/custom" ]; then
+    local vp_dir="${TARGET_HOME}/.local/share/pkg/void-packages"
+    if [ ! -d "$vp_dir" ]; then
+        log_info "Cloning void-packages (custom branch) for standalone custom builds..."
+        sudo -u "$TARGET_USER" mkdir -p "$(dirname "$vp_dir")"
+        sudo -u "$TARGET_USER" git clone -b custom https://github.com/rajan9884/void-packages.git "$vp_dir" 2>/dev/null || log_warn "Could not clone void-packages repo; skipping."
+    fi
+
+    if [ -d "$vp_dir/hostdir/binpkgs/custom" ]; then
         cat << EOF | sudo tee /etc/xbps.d/10-custom.conf >/dev/null
-repository=$HOME/.local/share/pkg/void-packages/hostdir/binpkgs/custom
-repository=$HOME/.local/share/pkg/void-packages/hostdir/binpkgs/custom/nonfree
+repository=$vp_dir/hostdir/binpkgs/custom
+repository=$vp_dir/hostdir/binpkgs/custom/nonfree
 EOF
     fi
 
@@ -77,11 +87,12 @@ install_packages() {
         xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk
         mesa-dri vulkan-loader
         pipewire wireplumber alsa-pipewire libspa-bluetooth lsp-plugins-lv2
-        pulsemixer alsa-utils playerctl
-        NetworkManager bluez upower inotify-tools socat power-profiles-daemon
+        pulsemixer alsa-utils playerctl pamixer cava
+        NetworkManager bluez upower inotify-tools socat power-profiles-daemon udiskie
         foot alacritty
         wl-clipboard cliphist wtype
-        grim slurp brightnessctl file imv xdg-utils psmisc
+        grim slurp brightnessctl file imv mpv xdg-utils psmisc
+        tesseract-ocr tesseract-ocr-eng
         qt6-wayland qt6-declarative qt6-svg qt6-shadertools qt6-imageformats qt6ct
         python3 python3-dbus fontconfig
         zsh starship fzf zoxide eza bat fd ripgrep jq gum yt-dlp nodejs
@@ -102,7 +113,7 @@ install_packages() {
     sudo vkpurge rm all 2>/dev/null || true
     sudo update-grub 2>/dev/null || true
 
-    HYPR_PKGS=(hyprland hyprpicker xdg-desktop-portal-hyprland quickshell wiremix impala bluetuith)
+    HYPR_PKGS=(hyprland hypridle hyprsunset hyprpicker xdg-desktop-portal-hyprland quickshell wiremix impala bluetuith)
     for hpkg in "${HYPR_PKGS[@]}"; do
         sudo xbps-install -y "$hpkg" 2>/dev/null || log_warn "Package '$hpkg' not in binary mirror; skipping."
     done
@@ -324,7 +335,6 @@ SHIM
 ${TARGET_USER} ALL=(root) NOPASSWD: /usr/bin/reboot, /usr/bin/poweroff, /usr/bin/shutdown, /usr/bin/halt, /usr/bin/zzz, /usr/bin/ZZZ, /usr/local/bin/void-enable-greetd
 SUDO
     sudo chmod 0440 /etc/sudoers.d/zz-void-power
-    sudo rm -f /etc/sudoers.d/zz-void-power /etc/sudoers.d/zz-void-theme-browser /etc/sudoers.d/zz-void-theme-browser /etc/pam.d/void-lock-password 2>/dev/null || true
 
     # pacman shim for xbps queries and package operations
     cat <<'SHIM' | sudo tee /usr/local/bin/pacman >/dev/null

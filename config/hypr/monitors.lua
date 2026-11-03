@@ -1,4 +1,4 @@
-local home = os.getenv("HOME") or "/home/rajan"
+local home = os.getenv("HOME") or ("/home/" .. (os.getenv("USER") or "user"))
 local state_home = os.getenv("XDG_STATE_HOME") or (home .. "/.local/state")
 local hdr_flag = state_home .. "/void/toggles/hdr-on"
 local is_hdr = io.open(hdr_flag, "r") ~= nil

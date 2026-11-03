@@ -66,11 +66,11 @@ sudo ./install.sh
 
 ### What `install.sh` Configures Automatically:
 
-1. **XBPS Repositories**: Adds Fastly CDN mirrors and the `hyprland-void` binary package repository.
-2. **System Dependencies**: Installs Hyprland, Quickshell, PipeWire, WirePlumber, Wayland portals, foot, JetBrains Mono Nerd Font, and essential TUI tools (`yazi`, `btop`, `lazygit`, `neovim`).
+1. **XBPS Repositories**: Adds Fastly CDN mirrors, the `hyprland-void` repository, and `void.creations.works` for the modern Wayland compositor stack. Auto-clones `void-packages` (`custom` branch) for custom binary packaging.
+2. **System Dependencies**: Installs Hyprland, Quickshell, PipeWire, WirePlumber, Wayland portals, foot, JetBrains Mono Nerd Font, and essential TUI tools (`yazi`, `btop`, `lazygit`, `neovim`, `tesseract-ocr`, `cava`, `mpv`).
 3. **Display Manager**: Configures `greetd` with `tuigreet` on VT 1 to launch the Hyprland session automatically upon login.
 4. **Hardware Rules & Daemons**:
-   - Deploys `/etc/udev/rules.d/60-sound.rules` for unprivileged audio hardware access.
+   - Deploys `/etc/udev/rules.d/72-sound.rules` for unprivileged audio hardware access.
    - Sets up `/etc/rc.local` and `/etc/rc.shutdown` for backlight state and sound level persistence.
    - Configures `/etc/pam.d/void-lock-password` for secure lockscreen unlocking.
 5. **Runit Services**: Enables `dbus`, `elogind`, `seatd`, `NetworkManager`, `bluetoothd`, `polkitd`, and `greetd`.
