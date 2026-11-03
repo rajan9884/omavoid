@@ -3,7 +3,7 @@
 
 o = o or {}
 
-local home = os.getenv("HOME") or "/home/rajan"
+local home = os.getenv("HOME") or ("/home/" .. (os.getenv("USER") or "user"))
 local state_home = os.getenv("XDG_STATE_HOME") or (home .. "/.local/state")
 
 local FLOATED_TAG = "void-mode-floated"
