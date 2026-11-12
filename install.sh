@@ -576,14 +576,14 @@ deploy_dotfiles() {
         log_ok "Deployed ~/.asoundrc for PipeWire ALSA routing."
     fi
 
-    # Stage initial Tokyo Night / Quattro theme state
-    THEME_SRC="${REPO_DIR}/themes/tokyo-night"
+    # Stage initial Matte Black theme state
+    THEME_SRC="${REPO_DIR}/themes/matte-black"
 
     if [ -d "$THEME_SRC" ]; then
         cp "$THEME_SRC/colors.toml" "${TARGET_HOME}/.local/state/void/current/theme/colors.toml" 2>/dev/null || true
         cp "$THEME_SRC/shell.lock.toml" "${TARGET_HOME}/.local/state/void/current/theme/shell.lock.toml" 2>/dev/null || true
-        echo "tokyo-night" > "${TARGET_HOME}/.local/state/void/current/theme.name"
-        WP=$(find "$THEME_SRC/backgrounds" -name "2-quattro.webp" -o -name "*.webp" 2>/dev/null | head -n1 || true)
+        echo "matte-black" > "${TARGET_HOME}/.local/state/void/current/theme.name"
+        WP=$(find "$THEME_SRC/backgrounds" -name "*.webp" -o -name "*.jpg" -o -name "*.png" 2>/dev/null | head -n1 || true)
         if [ -n "$WP" ]; then
             ln -sf "$WP" "${TARGET_HOME}/.local/state/void/current/background"
         fi

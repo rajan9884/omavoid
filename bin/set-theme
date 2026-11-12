@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-theme="${1:-tokyo-night}"
+theme="${1:-matte-black}"
 
 if command -v void-theme-set >/dev/null 2>&1; then
     exec void-theme-set "$theme"

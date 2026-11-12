@@ -17,7 +17,7 @@ Omavoid pairs the high-performance **Hyprland** Wayland compositor with a custom
 - **Flush Edge-to-Edge Status Bar**: Ultra-sleek 26px top panel hosting workspaces, active window titles, dynamic indicators, system tray, network status, audio volume, power management, and clock.
 - **Unified Menu & Launcher**: Fast, searchable application and command launcher with categorized navigation for tools, appearance, hardware, and system actions (`Super + Space`).
 - **Interactive Flyout Panels**: Rich modal panels for PipeWire audio routing, NetworkManager Wi-Fi/Ethernet management with QR code sharing, Bluetooth device pairing, display layouts, and battery profiles.
-- **Dynamic 23-Palette Theming Engine**: Switch instantly across 23 curated themes (Tokyo Night, Catppuccin, Nord, Gruvbox, Rose Pine, Dracula, and more) with real-time OSC escape terminal recoloring, wallpaper crossfades, and synchronized styling.
+- **Curated Theming Engine**: Switch instantly across curated themes (Matte Black, Vantablack, Jade Horse, Last Horizon) with real-time OSC escape terminal recoloring, wallpaper crossfades, and synchronized styling.
 - **Media-Aware Smart Idle & Lock**: Integrated Wayland lockscreen and screensaver with intelligent idle inhibition that detects running audio and fullscreen video streams.
 - **TUI-First Philosophy**: Preconfigured terminal workflows featuring `foot`, `yazi` file manager, `btop` system monitor, `lazygit`, `pulsemixer`, and `neovim`.
 - **Pure Native Engineering**: Zero cloud telemetry, zero background trackers, and 100% native runit services.
@@ -145,28 +145,22 @@ sudo reboot
 
 ## Dynamic Theming Engine
 
-Omavoid features 23 themes that modify the desktop palette simultaneously across GUI and TUI layers:
+Omavoid features 4 curated themes that modify the desktop palette simultaneously across GUI and TUI layers:
 
-- **Tokyo Night** (Default)
-- **Catppuccin** (Mocha, Macchiato, Frappe, Latte)
-- **Nord**
-- **Gruvbox** (Dark & Light)
-- **Rose Pine** (Main, Moon, Dawn)
-- **Dracula**
-- **Solarized** (Dark & Light)
-- **Everforest**
-- **Kanagawa**
-- **One Dark** & **One Light**
+- **Matte Black** (Default)
 - **Vantablack**
+- **Jade Horse**
+- **Last Horizon**
 
 ### Changing Themes:
 
 - **Via GUI**: Press `SUPER + Shift + Ctrl + Space` to launch the visual theme picker.
 - **Via CLI**:
   ```bash
-  void theme set "Tokyo Night"
-  void theme set "Catppuccin Mocha"
-  void theme set "Nord"
+  void theme set "Matte Black"
+  void theme set "Vantablack"
+  void theme set "Jade Horse"
+  void theme set "Last Horizon"
   ```
 
 ### What Happens During Theme Switches:
