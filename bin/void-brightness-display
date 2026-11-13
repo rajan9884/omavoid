@@ -119,24 +119,22 @@ else
   # Current brightness percentage
   current=$(backlight_brightness "$device") || exit 1
 
-  # Apply non-uniform step size: 1% steps if at or below 5%, otherwise set an
-  # absolute target percentage to avoid raw backlight rounding causing uneven OSD steps.
-  if [[ $step == "+5%" || $step == "up" ]]; then
-    if (( current < 5 )); then
-      (( target = current + 1 ))
-    else
-      (( target = current + 5 ))
-    fi
-
+  # Step brightness: 1% for fine adjustments (up-fine/down-fine/+1%/1%-),
+  # 5% for standard adjustments (up/down/+5%/5%-).
+  if [[ $step == "+1%" || $step == "1%+" || $step == "up-fine" ]]; then
+    (( target = current + 1 ))
+    (( target > 100 )) && target=100
+    step="$target%"
+  elif [[ $step == "-1%" || $step == "1%-" || $step == "down-fine" ]]; then
+    (( target = current - 1 ))
+    (( target < 1 )) && target=1
+    step="$target%"
+  elif [[ $step == "+5%" || $step == "up" ]]; then
+    (( target = current + 5 ))
     (( target > 100 )) && target=100
     step="$target%"
   elif [[ $step == "5%-" || $step == "-5%" || $step == "down" ]]; then
-    if (( current <= 5 )); then
-      (( target = current - 1 ))
-    else
-      (( target = current - 5 ))
-    fi
-
+    (( target = current - 5 ))
     (( target < 1 )) && target=1
     step="$target%"
   fi

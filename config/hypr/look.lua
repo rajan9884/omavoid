@@ -14,80 +14,80 @@ local active_border_color = { colors = { "rgba(33ccffee)", "rgba(00ff99ee)" }, a
 local inactive_border_color = "rgba(595959aa)"
 
 hl.config({
-  general = {
-    gaps_in = 5,
-    gaps_out = 10,
-    border_size = 2,
-    col = {
-      active_border = active_border_color,
-      inactive_border = inactive_border_color,
-    },
-    resize_on_border = true,
-    extend_border_grab_area = 8,
-    hover_icon_on_border = true,
-    allow_tearing = false,
-    layout = "dwindle",
-  },
+	general = {
+		gaps_in = 2,
+		gaps_out = 10,
+		border_size = 2,
+		col = {
+			active_border = active_border_color,
+			inactive_border = inactive_border_color,
+		},
+		resize_on_border = true,
+		extend_border_grab_area = 8,
+		hover_icon_on_border = true,
+		allow_tearing = false,
+		layout = "dwindle",
+	},
 
-  decoration = {
-    rounding = 8,
-    shadow = {
-      enabled = false,
-    },
-    blur = {
-      enabled = false,
-    },
-  },
+	decoration = {
+		rounding = 8,
+		shadow = {
+			enabled = false,
+		},
+		blur = {
+			enabled = false,
+		},
+	},
 
-  dwindle = {
-    preserve_split = true,
-    force_split = 2,
-  },
+	dwindle = {
+		preserve_split = true,
+		force_split = 2,
+	},
 
-  scrolling = {
-    column_width = 0.49,
-  },
+	scrolling = {
+		column_width = 0.49,
+	},
 
-  master = {
-    new_status = "master",
-  },
+	master = {
+		new_status = "master",
+	},
 
-  misc = {
-    disable_hyprland_logo = true,
-    disable_splash_rendering = true,
-    background_color = "rgb(000000)",
-    disable_scale_notification = true,
-    focus_on_activate = true,
-    anr_missed_pings = 3,
-    on_focus_under_fullscreen = 1,
-    initial_workspace_tracking = 0,
-    allow_session_lock_restore = true,
-    disable_watchdog_warning = true,
-    key_press_enables_dpms = true,
-    mouse_move_enables_dpms = true,
-  },
+	misc = {
+		disable_hyprland_logo = true,
+		disable_splash_rendering = true,
+		background_color = "rgb(000000)",
+		disable_scale_notification = true,
+		focus_on_activate = true,
+		anr_missed_pings = 3,
+		on_focus_under_fullscreen = 1,
+		initial_workspace_tracking = 0,
+		allow_session_lock_restore = true,
+		disable_watchdog_warning = true,
+		key_press_enables_dpms = true,
+		mouse_move_enables_dpms = true,
+	},
 
-  render = {
-    cm_auto_hdr = is_hdr and 1 or 0,
-    direct_scanout = 0,
-  },
+	render = {
+		cm_auto_hdr = is_hdr and 1 or 0,
+		direct_scanout = 0,
+	},
 
-  experimental = {
-    wp_cm_1_2 = is_hdr,
-  },
+	experimental = {
+		wp_cm_1_2 = is_hdr,
+	},
 
-  cursor = {
-    hide_on_key_press = true,
-    warp_on_change_workspace = 1,
-  },
+	cursor = {
+		hide_on_key_press = true,
+		warp_on_change_workspace = 1,
+	},
 
-  binds = {
-    hide_special_on_workspace_change = true,
-  },
+	binds = {
+		hide_special_on_workspace_change = true,
+	},
 
-  animations = {
-    enabled = true,
-  },
+	animations = {
+		enabled = true,
+	},
 })
 
 -- Animations
@@ -117,6 +117,6 @@ hl.animation({ leaf = "workspaces", enabled = false })
 local theme_lua = state_home .. "/void/current/theme/hyprland.lua"
 local tf = io.open(theme_lua, "r")
 if tf then
-  tf:close()
-  dofile(theme_lua)
+	tf:close()
+	dofile(theme_lua)
 end

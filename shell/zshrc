@@ -138,3 +138,10 @@ function fkill() {
 function fxbps() {
   tui-xbps
 }
+
+
+# Added by Antigravity CLI installer
+export PATH="/home/rajan/.local/bin:$PATH"
+
+# kilo
+export PATH=/home/rajan/.kilo/bin:$PATH

@@ -860,7 +860,7 @@
   "install.package": {
     "icon": "",
     "label": "Package",
-    "action": "xdg-terminal-exec --app-id=org.void.terminal void-pkg-install"
+    "action": "void-launch-floating-terminal-with-presentation void-pkg-install"
   },
   "install.webapp": {
     "icon": "",
@@ -870,11 +870,11 @@
   "remove.package": {
     "icon": "",
     "label": "Package",
-    "action": "xdg-terminal-exec --app-id=org.void.terminal void-pkg-remove"
+    "action": "void-launch-floating-terminal-with-presentation void-pkg-remove"
   },
   "remove.webapp": {
     "icon": "",
     "label": "Web App",
-    "action": "void-webapp-remove"
+    "action": "void-launch-floating-terminal-with-presentation void-webapp-remove"
   }
 }

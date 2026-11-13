@@ -59,9 +59,12 @@ fi
 if command -v amixer >/dev/null 2>&1; then
     for card in sofhdadsp 0 1; do
         amixer -c "$card" sset 'Auto-Mute Mode' 'Disabled' >/dev/null 2>&1 || true
-        amixer -c "$card" set Master unmute >/dev/null 2>&1 || true
-        amixer -c "$card" set Headphone unmute >/dev/null 2>&1 || true
-        amixer -c "$card" set Speaker unmute >/dev/null 2>&1 || true
+        amixer -c "$card" cset name='Master Playback Switch' on >/dev/null 2>&1 || true
+        amixer -c "$card" cset name='Headphone Playback Switch' on,on >/dev/null 2>&1 || true
+        amixer -c "$card" cset name='Speaker Playback Switch' on,on >/dev/null 2>&1 || true
+        amixer -c "$card" cset name='Master Playback Volume' 87 >/dev/null 2>&1 || true
+        amixer -c "$card" cset name='Speaker Playback Volume' 87,87 >/dev/null 2>&1 || true
+        amixer -c "$card" cset name='Headphone Playback Volume' 87,87 >/dev/null 2>&1 || true
         amixer -c "$card" cset name='Dmic0 Capture Switch' on >/dev/null 2>&1 || true
         amixer -c "$card" cset name='Capture Switch' on >/dev/null 2>&1 || true
         amixer -c "$card" cset name='Capture Volume' 50,50 >/dev/null 2>&1 || true
@@ -84,27 +87,3 @@ if command -v pactl >/dev/null 2>&1; then
     fi
 fi
 
-# If Void speaker tuning is installed, ensure its filter-chain host client is running
-tuning_conf="${XDG_CONFIG_HOME:-$HOME/.config}/pipewire/void-speaker-tuning.conf"
-if [ -f "$tuning_conf" ]; then
-    if ! pgrep -u "$USER" -f "pipewire -c .*void-speaker-tuning.conf" >/dev/null 2>&1; then
-        setsid nohup /usr/bin/pipewire -c "$tuning_conf" >/dev/null 2>&1 200>&- &
-        sleep 0.5
-    fi
-fi
-
-# Ensure virtual tuning sink is unity volume and default sink is properly assigned
-if command -v pactl >/dev/null 2>&1; then
-    if timeout 2s pactl list sinks short 2>/dev/null | grep -q "void_speaker_tuning"; then
-        timeout 2s pactl set-sink-volume void_speaker_tuning 100% >/dev/null 2>&1 || true
-        current_sink="$(timeout 2s pactl get-default-sink 2>/dev/null || true)"
-        if [ "$current_sink" != "void_speaker_tuning" ] && [[ "$current_sink" == *"Speaker"* || "$current_sink" == "auto_null" || -z "$current_sink" ]]; then
-            timeout 2s pactl set-default-sink void_speaker_tuning >/dev/null 2>&1 || true
-        fi
-    fi
-fi
-
-# Start dynamic jack monitor daemon in background if not already running
-if ! pgrep -u "$USER" -f "python3 /usr/local/bin/void-audio-jack-monitor" >/dev/null 2>&1; then
-    setsid nohup python3 /usr/local/bin/void-audio-jack-monitor >/dev/null 2>&1 200>&- &
-fi

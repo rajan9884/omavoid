@@ -1,6 +1,6 @@
 {
   "bar": {
-    "background": "none",
+    "background": "opaque",
     "layout": {
       "center": [
         {
@@ -57,7 +57,7 @@
       ]
     },
     "position": "top",
-    "transparent": true
+    "transparent": false
   },
   "idle": {
     "lock": 300,

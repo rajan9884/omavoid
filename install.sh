@@ -40,17 +40,19 @@ echo "  Omavoid Desktop Setup for Void Linux"
 echo "  Target User: ${TARGET_USER} (${TARGET_HOME})"
 echo "======================================================================"
 
-# 1. Configure Fastly CDN & Hyprland-Void XBPS Repositories
+# 1. Configure Fastly CDN & Hyprland XBPS Repositories
+# NOTE: void-land/hyprland-void-packages intentionally removed — older packages (0.47.x vs 0.57.x).
+# void.creations.works is the actively-maintained community mirror with hyprland-guiutils,
+# hyprland-qt-support and all latest Hyprland packages.
 setup_void_repos() {
     log_info "Configuring fast Void Linux XBPS repositories and kernel tracking..."
     sudo mkdir -p /etc/xbps.d
-    if [ ! -f /etc/xbps.d/hyprland-void.conf ]; then
-        echo "repository=https://github.com/void-land/hyprland-void-packages/releases/latest/download/" | sudo tee /etc/xbps.d/hyprland-void.conf >/dev/null
-    fi
+    # Remove legacy void-land repo if present (outdated; superseded by void.creations.works)
+    sudo rm -f /etc/xbps.d/hyprland-void.conf
     if [ ! -f /etc/xbps.d/creations.conf ]; then
-        echo "repository=https://void.creations.works" | sudo tee /etc/xbps.d/creations.conf >/dev/null
+        echo "repository=https://void.creations.works" | sudo tee /etc/xbps.d/creations.conf > /dev/null
     fi
-    echo "repository=https://repo-fastly.voidlinux.org/current" | sudo tee /etc/xbps.d/00-repository-main.conf >/dev/null
+    echo "repository=https://repo-fastly.voidlinux.org/current" | sudo tee /etc/xbps.d/00-repository-main.conf > /dev/null
 
     local vp_dir="${TARGET_HOME}/.local/share/pkg/void-packages"
     if [ ! -d "$vp_dir" ]; then
@@ -99,12 +101,36 @@ install_packages() {
         btop yazi lazygit calcurse neovim fastfetch git curl unzip vips ffmpegthumbnailer
         greetd tuigreet
         linux-mainline linux-mainline-headers
-        nerd-fonts-symbols-ttf font-jetbrains-mono-ttf noto-fonts-ttf noto-fonts-emoji
+        nerd-fonts-symbols-ttf noto-fonts-ttf noto-fonts-emoji
     )
 
-    for pkg in "${CORE_PKGS[@]}"; do
-        sudo xbps-install -y "$pkg" 2>/dev/null || log_warn "Optional package '$pkg' skipped."
+    HYPR_PKGS=(
+        hyprland hypridle hyprsunset hyprpicker xdg-desktop-portal-hyprland
+        hyprland-guiutils hyprland-qt-support quickshell wiremix impala bluetuith
+    )
+
+    # Filter out already installed packages to avoid redundant RSA/hash verification & I/O
+    local installed_pkgs
+    installed_pkgs="$(xbps-query -l 2>/dev/null | awk '{print $2}' | sed -E 's/-[^-]+_[0-9]+$//')"
+
+    local to_install=()
+    for pkg in "${CORE_PKGS[@]}" "${HYPR_PKGS[@]}"; do
+        if ! grep -Fxq "$pkg" <<< "$installed_pkgs"; then
+            to_install+=("$pkg")
+        fi
     done
+
+    if [ ${#to_install[@]} -gt 0 ]; then
+        log_info "Batch installing missing packages in a single transaction (${#to_install[@]} pkgs): ${to_install[*]}"
+        if ! sudo xbps-install -y "${to_install[@]}"; then
+            log_warn "Batch install encountered missing/optional package; falling back to per-package install..."
+            for pkg in "${to_install[@]}"; do
+                sudo xbps-install -y "$pkg" 2>/dev/null || log_warn "Package '$pkg' skipped or unavailable."
+            done
+        fi
+    else
+        log_ok "All required core and desktop packages are already installed."
+    fi
 
     # Purge legacy LTS kernels and clean boot images
     if xbps-query -l 2>/dev/null | grep -q 'linux6.12'; then
@@ -112,11 +138,6 @@ install_packages() {
     fi
     sudo vkpurge rm all 2>/dev/null || true
     sudo update-grub 2>/dev/null || true
-
-    HYPR_PKGS=(hyprland hypridle hyprsunset hyprpicker xdg-desktop-portal-hyprland quickshell wiremix impala bluetuith)
-    for hpkg in "${HYPR_PKGS[@]}"; do
-        sudo xbps-install -y "$hpkg" 2>/dev/null || log_warn "Package '$hpkg' not in binary mirror; skipping."
-    done
     log_ok "Core packages installed."
 }
 
@@ -312,11 +333,13 @@ done
 SHIM
     sudo chmod +x /usr/local/bin/systemd-run
 
-    # xdg-terminal-exec fallback shim if not present
-    if [ ! -f /usr/local/bin/xdg-terminal-exec ]; then
+    # xdg-terminal-exec fallback shim if not present or empty
+    if [ ! -s /usr/local/bin/xdg-terminal-exec ] || [ ! -x /usr/local/bin/xdg-terminal-exec ]; then
         curl -sL https://raw.githubusercontent.com/Vladimir-csp/xdg-terminal-exec/refs/heads/master/xdg-terminal-exec | sudo tee /usr/local/bin/xdg-terminal-exec >/dev/null
         sudo chmod +x /usr/local/bin/xdg-terminal-exec
     fi
+    sudo mkdir -p /etc/xdg
+    echo "foot.desktop" | sudo tee /etc/xdg/xdg-terminals.list >/dev/null
 
     # omasnap screenshot compatibility shim
     cat <<'SHIM' | sudo tee /usr/local/bin/omasnap >/dev/null
@@ -414,6 +437,11 @@ setup_runit_and_groups() {
         fi
     done
 
+    # Prevent acpid from double-stepping backlight brightness (handled by Hyprland/void-brightness-display)
+    if [ -f /etc/acpi/handler.sh ]; then
+        sudo sed -i 's/^\([[:space:]]*step_backlight\)/#\1/' /etc/acpi/handler.sh 2>/dev/null || true
+    fi
+
     # Enable bluetoothd experimental flags for modern BLE/LE Audio profiles
     if [ -d /etc/sv/bluetoothd ]; then
         echo 'OPTS="-E"' | sudo tee /etc/sv/bluetoothd/conf >/dev/null
@@ -471,14 +499,9 @@ UDEV
     sudo udevadm control --reload 2>/dev/null || true
     sudo udevadm trigger --subsystem-match=sound 2>/dev/null || true
 
-    # Install snd-perms runit service to re-trigger sound udev events for WirePlumber
-    if [ -f "${REPO_DIR}/scripts/runit/snd-perms/run" ]; then
-        sudo mkdir -p /etc/sv/snd-perms
-        sudo cp -f "${REPO_DIR}/scripts/runit/snd-perms/run" /etc/sv/snd-perms/run
-        sudo chmod +x /etc/sv/snd-perms/run
-        sudo ln -sf /etc/sv/snd-perms /var/service/
-        log_ok "Enabled snd-perms sound device udev monitor service."
-    fi
+    # Remove redundant snd-perms runit service if present (handled natively by user session void-audio-init)
+    sudo rm -f /var/service/snd-perms
+    sudo rm -rf /etc/sv/snd-perms
 
     # PipeWire session manager auto-spawn (WirePlumber + PipeWire-Pulse)
     sudo mkdir -p /etc/pipewire/pipewire.conf.d
@@ -491,6 +514,7 @@ CONF
 
     # Deploy WirePlumber configuration drop-ins
     sudo mkdir -p /etc/wireplumber/wireplumber.conf.d
+    sudo rm -f /etc/wireplumber/wireplumber.conf.d/50-acp-auto-profile.conf
     if [ -d "${REPO_DIR}/config/wireplumber/wireplumber.conf.d" ]; then
         sudo cp -r "${REPO_DIR}"/config/wireplumber/wireplumber.conf.d/* /etc/wireplumber/wireplumber.conf.d/
     fi

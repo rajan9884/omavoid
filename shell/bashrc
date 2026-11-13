@@ -13,7 +13,7 @@ export PATH="$HOME/.local/bin:$VOID_PATH/bin:/usr/local/sbin:/usr/local/bin:/usr
 export EDITOR="nvim"
 export SUDO_EDITOR="nvim"
 export VISUAL="nvim"
-export BROWSER="helium-browser"
+export BROWSER="$HOME/.local/bin/browser"
 export BAT_THEME="ansi"
 export MANROFFOPT="-c"
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
@@ -92,3 +92,7 @@ if [[ -n "$BASH_VERSION" ]]; then
     rm -f -- "$tmp"
   }
 fi
+
+
+# Added by Antigravity CLI installer
+export PATH="/home/rajan/.local/bin:$PATH"

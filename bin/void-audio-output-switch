@@ -5,10 +5,7 @@
 set -uo pipefail
 
 hp_sink="alsa_output.pci-0000_00_1f.3-platform-skl_hda_dsp_generic.HiFi__Headphones__sink"
-spk_sink="void_speaker_tuning"
-if ! pactl list sinks short 2>/dev/null | grep -q "void_speaker_tuning"; then
-  spk_sink="alsa_output.pci-0000_00_1f.3-platform-skl_hda_dsp_generic.HiFi__Speaker__sink"
-fi
+spk_sink="alsa_output.pci-0000_00_1f.3-platform-skl_hda_dsp_generic.HiFi__Speaker__sink"
 
 current_sink_name="$(timeout 2 pactl get-default-sink 2>/dev/null || true)"
 
@@ -18,7 +15,7 @@ card_exists="$(pactl list cards short 2>/dev/null | grep -E 'sof-hda-dsp|skl_hda
 if [[ -n $card_exists ]]; then
   if [[ "$current_sink_name" == *"Headphones"* ]]; then
     target_sink="$spk_sink"
-    target_desc="Laptop Speakers (Tuned)"
+    target_desc="Speakers"
   else
     target_sink="$hp_sink"
     target_desc="Headphones"

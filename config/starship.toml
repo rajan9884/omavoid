@@ -11,7 +11,7 @@ format = """
 disabled = false
 style = "bg:#1a1a1a fg:#ffffff bold"
 [os.symbols]
-Void = "   "
+Void = "    "
 Linux = " "
 
 [username]
