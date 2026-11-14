@@ -273,6 +273,25 @@ function isUntypedSource(node, sourceAvailability) {
   return name !== "" && !!sourceAvailability && Object.prototype.hasOwnProperty.call(sourceAvailability, name)
 }
 
+function parseHeadphoneJack(text) {
+  var lines = String(text || "").split("\n")
+  var inJack = false
+  for (var i = 0; i < lines.length; i++) {
+    if (lines[i].indexOf("Front Headphone Jack") !== -1) { inJack = true; continue }
+    if (inJack) {
+      var match = /values=(on|off)/i.exec(lines[i])
+      if (match) return match[1].toLowerCase() === "on"
+    }
+  }
+  // Fall back to a bare values= line when the caller already isolated the control.
+  var bare = /values=(on|off)/i.exec(String(text || ""))
+  if (bare) return bare[1].toLowerCase() === "on"
+  return null
+}
+
+
+function parseJackState(text) { return parseHeadphoneJack(text) }
+function parseHeadphoneJackState(text) { return parseHeadphoneJack(text) }
 if (typeof module !== "undefined") {
   module.exports = {
     isPlaybackStream: isPlaybackStream,
@@ -299,6 +318,9 @@ if (typeof module !== "undefined") {
     unmatchedMprisStreamLabel: unmatchedMprisStreamLabel,
     streamLabel: streamLabel,
     streamRepresentsPlayer: streamRepresentsPlayer,
-    isUntypedSource: isUntypedSource
+    isUntypedSource: isUntypedSource,
+    parseHeadphoneJack: parseHeadphoneJack,
+    parseJackState: parseJackState,
+    parseHeadphoneJackState: parseHeadphoneJackState
   }
 }

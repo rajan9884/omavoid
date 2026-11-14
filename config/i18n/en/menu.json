@@ -23,9 +23,6 @@
   "remove": {
     "label": "Remove"
   },
-  "update": {
-    "label": "Update"
-  },
   "about": {
     "label": "About"
   },
@@ -1198,92 +1195,5 @@
   },
   "remove.development.elixir.phoenix": {
     "label": "Phoenix"
-  },
-  "update.void": {
-    "label": "Void"
-  },
-  "update.channel": {
-    "label": "Channel"
-  },
-  "update.kernel": {
-    "label": "Kernel"
-  },
-  "update.config": {
-    "label": "Config",
-    "title": "Reset to default"
-  },
-  "update.themes": {
-    "label": "Extra Themes"
-  },
-  "update.process": {
-    "label": "Process",
-    "title": "Restart"
-  },
-  "update.hardware": {
-    "label": "Hardware",
-    "title": "Restart"
-  },
-  "update.firmware": {
-    "label": "Firmware"
-  },
-  "update.password": {
-    "label": "Password"
-  },
-  "update.timezone": {
-    "label": "Timezone"
-  },
-  "update.time": {
-    "label": "Time"
-  },
-  "update.channel.stable": {
-    "label": "Stable"
-  },
-  "update.channel.rc": {
-    "label": "RC"
-  },
-  "update.channel.edge": {
-    "label": "Edge"
-  },
-  "update.channel.dev": {
-    "label": "Dev"
-  },
-  "update.process.hyprsunset": {
-    "label": "Hyprsunset"
-  },
-  "update.process.shell": {
-    "label": "Shell"
-  },
-  "update.config.hyprland": {
-    "label": "Hyprland"
-  },
-  "update.config.hyprsunset": {
-    "label": "Hyprsunset"
-  },
-  "update.config.plymouth": {
-    "label": "Plymouth"
-  },
-  "update.config.tmux": {
-    "label": "Tmux"
-  },
-  "update.config.shell": {
-    "label": "Shell"
-  },
-  "update.hardware.audio": {
-    "label": "Audio"
-  },
-  "update.hardware.wifi": {
-    "label": "Wi-Fi"
-  },
-  "update.hardware.bluetooth": {
-    "label": "Bluetooth"
-  },
-  "update.hardware.trackpad": {
-    "label": "Trackpad"
-  },
-  "update.password.drive": {
-    "label": "Drive Encryption"
-  },
-  "update.password.user": {
-    "label": "User"
   }
 }

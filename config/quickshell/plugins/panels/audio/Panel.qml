@@ -14,7 +14,17 @@ Panel {
   moduleName: "void.audio"
   ipcTarget: "void.audio"
 
-  readonly property var sink: Pipewire.defaultAudioSink
+  readonly property var sink: {
+    var ds = Pipewire.defaultAudioSink
+    if (!ds) return null
+    var vals = Pipewire.nodes ? (Pipewire.nodes.values || Pipewire.nodes) : []
+    if (!vals || !vals.length) return ds
+    for (var i = 0; i < vals.length; i++) {
+      var n = vals[i]
+      if (n && n.id === ds.id && String(n.name || "") === String(ds.name || "")) return n
+    }
+    return ds
+  }
   readonly property var source: Pipewire.defaultAudioSource
   readonly property var nodes: Pipewire.nodes ? Pipewire.nodes.values : []
   readonly property var mprisPlayers: Mpris.players ? Mpris.players.values : []
@@ -74,6 +84,16 @@ Panel {
   property var sinkAvailability: ({})
   property bool sinkAvailabilityLoaded: false
   property var sourceAvailability: ({})
+
+  property bool headphonesJackKnown: false
+  property bool headphonesJackConnected: false
+
+  function updateHeadphoneJack(text) {
+    var result = Model.parseHeadphoneJack(text)
+    if (result === null) return
+    headphonesJackKnown = true
+    headphonesJackConnected = result
+  }
 
   // Identify true playback streams without reading node.properties here:
   // PwNode.properties is invalid until the node is bound, and reading it while
@@ -503,8 +523,13 @@ Panel {
   function outputIcon(volume) {
     // Match the old Waybar pulseaudio glyph set. The Material Design speaker
     // icons render visually smaller in JetBrainsMono Nerd Font.
+    if (headphonesJackKnown && headphonesJackConnected) return "󰋋"
     if (!sink || !sink.audio) return ""
-    if (isHeadphones(sink)) return "󰋋"
+    if (isHeadphones(sink)) {
+      var lname = String(sink.name || "").toLowerCase()
+      var localJackSink = lname.indexOf("headphone") !== -1
+      if (!(headphonesJackKnown && !headphonesJackConnected && localJackSink)) return "󰋋"
+    }
     if (outputMuted) return ""
     var v = volume === undefined ? outputVolume : volume
     if (v >= 0.67) return ""
@@ -763,6 +788,25 @@ Panel {
     id: volumeSinkResolveTimer
     interval: 500
     onTriggered: root.resolveVolumeSink()
+  }
+
+  Process {
+    id: headphoneJackProc
+    command: ["sh", "-c", "amixer -c 0 contents 2>/dev/null"]
+    stdout: StdioCollector {
+      waitForEnd: true
+      onStreamFinished: root.updateHeadphoneJack(text)
+    }
+  }
+
+  Timer {
+    interval: 1000
+    running: true
+    repeat: true
+    triggeredOnStart: true
+    onTriggered: {
+      if (!headphoneJackProc.running) headphoneJackProc.running = true
+    }
   }
 
   Component.onCompleted: root.resolveVolumeSink()

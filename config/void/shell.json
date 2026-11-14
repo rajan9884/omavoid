@@ -18,9 +18,6 @@
       "centerEnd": [
         {
           "id": "void.weather"
-        },
-        {
-          "id": "void.system-update"
         }
       ],
       "left": [
