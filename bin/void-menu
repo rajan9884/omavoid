@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# void:summary=Control the Void menu (toggle / summon / close / refresh)
+# void:args=[toggle|summon|close|refresh|ping] [route]
+# void:examples=void menu | void menu toggle system | void menu summon appearance.theme | void menu refresh
+
+# Thin wrapper around the standard plugin IPC surface. The menu is the
+# first-party `void.menu` plugin; routes are passed as JSON payload.
+
+set -euo pipefail
+
+verb="${1-toggle}"
+route="${2-root}"
+
+menu_payload() {
+  jq -nc --arg menu "$1" '{ menu: $menu }'
+}
+
+case "$verb" in
+  toggle)
+    exec void-shell shell toggle void.menu "$(menu_payload "$route")"
+    ;;
+  summon)
+    exec void-shell shell summon void.menu "$(menu_payload "$route")"
+    ;;
+  close)
+    exec void-shell shell hide void.menu
+    ;;
+  refresh | ping)
+    exec void-shell shell call void.menu "$verb" "{}"
+    ;;
+  -h | --help | help)
+    cat <<USAGE
+Usage: void menu [verb] [route]
+
+Verbs:
+  toggle [route]   Open the menu at <route>, or close it if already open. Default verb.
+  summon [route]   Always open the menu (no close-if-visible toggle).
+  close            Close the menu if it is visible.
+  refresh          Re-parse the menu JSONC files.
+  ping             Health check.
+
+Route is an item id (e.g. setup.power) or alias (e.g. power). Defaults to
+"root", which opens the top-level menu.
+USAGE
+    exit 0
+    ;;
+  *)
+    echo "void-menu: unknown verb '$verb'. Try 'void menu --help'." >&2
+    exit 2
+    ;;
+esac

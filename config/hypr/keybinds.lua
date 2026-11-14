@@ -69,7 +69,7 @@ hl.bind(
 )
 
 -- ── Core Applications ──
-hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd("foot"), { description = "Terminal" })
+hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd("void-launch-terminal"), { description = "Terminal" })
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("foot -e btop"), { description = "System Monitor" })
 hl.bind(mainMod .. " + SHIFT + B", hl.dsp.exec_cmd("firefox"), { description = "Browser" })
 hl.bind(mainMod .. " + SHIFT + ALT + B", hl.dsp.exec_cmd("firefox --incognito"), { description = "Private Browser" })
@@ -405,11 +405,15 @@ hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true,
 hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true, description = "Play/pause" })
 
 -- Screenshot & OCR
-hl.bind("Print", hl.dsp.exec_cmd("void-capture-screenshot fullscreen"), { description = "Screenshot fullscreen" })
-hl.bind(mainMod .. " + Print", hl.dsp.exec_cmd("void-capture-screenshot region"), { description = "Screenshot region" })
+hl.bind("Print", hl.dsp.exec_cmd("void-capture-screenshot region"), { description = "Screenshot region (interactive)" })
+hl.bind(mainMod .. " + Print", hl.dsp.exec_cmd("void-capture-screenshot fullscreen"), { description = "Screenshot fullscreen" })
 hl.bind(
 	mainMod .. " + SHIFT + S",
 	hl.dsp.exec_cmd("void-capture-screenshot region"),
-	{ description = "Screenshot region" }
+	{ description = "Screenshot region (interactive)" }
 )
 hl.bind(mainMod .. " + CTRL + Print", hl.dsp.exec_cmd("ocr-extract"), { description = "OCR region to clipboard" })
+
+-- Screen Recording
+hl.bind("ALT + Print", hl.dsp.exec_cmd("void-capture-screenrecording"), { description = "Screen recording (toggle)" })
+hl.bind(mainMod .. " + ALT + Print", hl.dsp.exec_cmd("void-menu toggle trigger.capture.screenrecord"), { description = "Screen recording menu" })

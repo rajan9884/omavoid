@@ -13,6 +13,8 @@ BarIndicator {
   inactiveText: "󰻂"
   activeTooltipText: I18n.t("bar.stopRecording")
   inactiveTooltipText: I18n.t("bar.screenRecording")
+  useActiveColor: true
+  activeColor: bar ? bar.urgent : Color.urgent
 
   function refresh() {
     if (!root.bar || statusProc.running) return
@@ -22,6 +24,13 @@ BarIndicator {
 
   onBarChanged: refresh()
   Component.onCompleted: refresh()
+
+  Timer {
+    running: root.recording
+    interval: 2000
+    repeat: true
+    onTriggered: root.refresh()
+  }
 
   Connections {
     target: root.indicatorHost

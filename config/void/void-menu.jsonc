@@ -573,7 +573,13 @@
   },
   "trigger.capture.screenrecord": {
     "icon": "",
-    "label": "Screenrecord"
+    "label": "Screenrecord",
+    "aliases": [
+      "screenrecord",
+      "screen-record",
+      "screenrecording",
+      "record"
+    ]
   },
   "trigger.capture.text": {
     "icon": "󰴑",
