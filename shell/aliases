@@ -17,7 +17,7 @@ if command -v eza >/dev/null 2>&1; then
 fi
 
 # Development & Tools
-alias d='docker'
+alias ld='lazydocker'
 alias t='tmux attach || tmux new -s Work'
 alias lg='lazygit'
 alias top='btop'

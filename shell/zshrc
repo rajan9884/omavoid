@@ -53,11 +53,6 @@ export EZA_COLORS="uu=bright-black:gu=bright-black:da=bright-black:ur=white:uw=b
 # Dual-GitHub helpers if present
 [ -f "$HOME/.config/shell/git-accounts.sh" ] && source "$HOME/.config/shell/git-accounts.sh"
 
-# Zoxide
-if command -v zoxide >/dev/null 2>&1; then
-  eval "$(zoxide init zsh --cmd z)"
-fi
-
 # FZF Environment & Key Bindings
 if command -v fd >/dev/null 2>&1; then
   export FZF_DEFAULT_COMMAND="fd --type f --hidden --follow --exclude .git"
@@ -139,6 +134,12 @@ function fxbps() {
   tui-xbps
 }
 
+# Zoxide (cd replaces cd command, with z/zi aliases)
+if command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init zsh --cmd cd)"
+  alias z=cd
+  alias zi=cdi
+fi
 
 # Added by Antigravity CLI installer
 export PATH="/home/rajan/.local/bin:$PATH"

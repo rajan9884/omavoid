@@ -38,10 +38,6 @@ fi
 
 # Tool Initializers (Bash only)
 if [[ -n "$BASH_VERSION" ]]; then
-  if command -v zoxide >/dev/null 2>&1; then
-    eval "$(zoxide init bash)"
-  fi
-
   if command -v starship >/dev/null 2>&1; then
     eval "$(starship init bash --print-full-init)"
   fi
@@ -64,24 +60,6 @@ if [[ -n "$BASH_VERSION" ]]; then
   alias eff='$EDITOR "$(ff)"'
   sff() { if [ $# -eq 0 ]; then echo "Usage: sff <destination> (e.g. sff host:/tmp/)"; return 1; fi; local file; file=$(find . -type f -printf '%T@\t%p\n' | sort -rn | cut -f2- | ff) && [ -n "$file" ] && scp "$file" "$1"; }
 
-  if command -v zoxide >/dev/null 2>&1; then
-    alias cd="zd"
-    zd() {
-      if (( $# == 0 )); then
-        builtin cd ~ || return
-      elif [[ -d $1 ]]; then
-        builtin cd "$1" || return
-      else
-        if ! z "$@"; then
-          echo "Error: Directory not found"
-          return 1
-        fi
-        printf "\U000F17A9 "
-        pwd
-      fi
-    }
-  fi
-
   # Yazi file manager wrapper
   function y() {
     local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
@@ -93,6 +71,12 @@ if [[ -n "$BASH_VERSION" ]]; then
   }
 fi
 
-
 # Added by Antigravity CLI installer
 export PATH="/home/rajan/.local/bin:$PATH"
+
+# Zoxide (cd replaces cd command, with z/zi aliases)
+if [[ -n "$BASH_VERSION" ]] && command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init bash --cmd cd)"
+  alias z=cd
+  alias zi=cdi
+fi

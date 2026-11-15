@@ -576,6 +576,7 @@ visible_theme_commands=(
 # policy, editors, and the input method.
 other_theme_commands=(
   void-theme-set-gnome
+  void-theme-set-strata
 )
 
 theme_still_current() {

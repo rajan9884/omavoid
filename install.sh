@@ -105,8 +105,9 @@ install_packages() {
     )
 
     HYPR_PKGS=(
-        hyprland hypridle hyprsunset hyprpicker xdg-desktop-portal-hyprland
+        hyprland hypridle hyprpicker xdg-desktop-portal-hyprland
         hyprland-guiutils hyprland-qt-support quickshell wiremix impala bluetuith
+        cmake ninja hyprland-protocols hyprwayland-scanner
     )
 
     # Filter out already installed packages to avoid redundant RSA/hash verification & I/O
@@ -130,6 +131,22 @@ install_packages() {
         fi
     else
         log_ok "All required core and desktop packages are already installed."
+    fi
+
+    # Ensure hyprsunset is built and installed
+    if ! command -v hyprsunset >/dev/null 2>&1; then
+        log_info "Building and installing hyprsunset from source..."
+        local sunset_dir
+        sunset_dir=$(mktemp -d)
+        if git clone --depth 1 https://github.com/hyprwm/hyprsunset.git "$sunset_dir" 2>/dev/null && \
+           cmake -B "$sunset_dir/build" -S "$sunset_dir" -G Ninja -DCMAKE_BUILD_TYPE=Release 2>/dev/null && \
+           cmake --build "$sunset_dir/build" 2>/dev/null && \
+           sudo cmake --install "$sunset_dir/build" 2>/dev/null; then
+            log_ok "hyprsunset built and installed successfully."
+        else
+            log_warn "Failed to compile hyprsunset."
+        fi
+        rm -rf "$sunset_dir"
     fi
 
     # Purge legacy LTS kernels and clean boot images

@@ -55,10 +55,10 @@ if ! pgrep -u "$USER" -x pipewire-pulse >/dev/null 2>&1 && ! pgrep -u "$USER" -f
     sleep 0.3
 fi
 
-# Ensure hardware ALSA mixer controls are unmuted and auto-mute disabled
+# Ensure hardware ALSA mixer controls are unmuted and auto-mute enabled
 if command -v amixer >/dev/null 2>&1; then
     for card in sofhdadsp 0 1; do
-        amixer -c "$card" sset 'Auto-Mute Mode' 'Disabled' >/dev/null 2>&1 || true
+        amixer -c "$card" sset 'Auto-Mute Mode' 'Enabled' >/dev/null 2>&1 || true
         amixer -c "$card" cset name='Master Playback Switch' on >/dev/null 2>&1 || true
         amixer -c "$card" cset name='Headphone Playback Switch' on,on >/dev/null 2>&1 || true
         amixer -c "$card" cset name='Speaker Playback Switch' on,on >/dev/null 2>&1 || true

@@ -74,7 +74,7 @@ hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("foot -e btop"), { description = "Sys
 hl.bind(mainMod .. " + SHIFT + B", hl.dsp.exec_cmd("firefox"), { description = "Browser" })
 hl.bind(mainMod .. " + SHIFT + ALT + B", hl.dsp.exec_cmd("firefox --incognito"), { description = "Private Browser" })
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd("thunar"), { description = "File Manager" })
-hl.bind(mainMod .. " + SHIFT + F", hl.dsp.exec_cmd("foot -e yazi"), { description = "Yazi File Manager" })
+hl.bind(mainMod .. " + SHIFT + F", hl.dsp.exec_cmd("strata"), { description = "Strata File Manager" })
 hl.bind(mainMod .. " + SHIFT + M", hl.dsp.exec_cmd("foot -e cliamp"), { description = "Music Player" })
 
 -- ── Package & App Management ──
@@ -107,6 +107,7 @@ hl.bind(mainMod .. " + slash", hl.dsp.exec_cmd("void-menu-keybindings"), { descr
 hl.bind(mainMod .. " + W", hl.dsp.window.close(), { description = "Close window" })
 hl.bind(mainMod .. " + T", hl.dsp.exec_cmd("void-toggle-floating-centered"), { description = "Toggle float" })
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen({ mode = "fullscreen" }), { description = "Toggle fullscreen" })
+hl.bind(mainMod .. " + ALT + F", hl.dsp.window.fullscreen({ mode = "maximized" }), { description = "Toggle maximize" })
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"), { description = "Toggle split" })
 
 -- Window Focus Navigation

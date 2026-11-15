@@ -2,4 +2,7 @@
 
 # void:summary=Restart the hyprsunset service (used for blue light filtering/night light).
 
-void-restart-app hyprsunset
+pkill -x hyprsunset 2>/dev/null || true
+sleep 0.2
+setsid uwsm-app -- hyprsunset >/dev/null 2>&1 &
+
