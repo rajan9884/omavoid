@@ -110,6 +110,8 @@ Item {
     root.disarmPointer()
     root.clearConfirmOpen = false
     root.rebuildDisplay()
+    Quickshell.execDetached(["cliphist", "wipe"])
+    Quickshell.execDetached(["wl-copy", "--clear"])
     Qt.callLater(function() { keyCatcher.forceActiveFocus() })
   }
 
@@ -366,9 +368,12 @@ Item {
           } else if (Util.editsFilter(event, root.filterText)) {
             root.setFilter(Util.editedFilter(event, root.filterText))
             event.accepted = true
-          } else if (event.key === Qt.Key_Delete) {
+          } else if (event.key === Qt.Key_Delete || ((event.key === Qt.Key_D || event.text === "D") && (event.modifiers & Qt.ShiftModifier))) {
             if (event.modifiers & Qt.ShiftModifier) root.requestClearHistory()
             else root.removeDisplayIndex(root.selectedIndex)
+            event.accepted = true
+          } else if (event.key === Qt.Key_D && (event.modifiers & (Qt.ControlModifier | Qt.AltModifier))) {
+            root.removeDisplayIndex(root.selectedIndex)
             event.accepted = true
           } else if (event.key === Qt.Key_Up) {
             root.select(-1)
@@ -437,7 +442,8 @@ Item {
           Text {
             textFormat: Text.PlainText
             anchors.left: parent.left
-            anchors.right: parent.right
+            anchors.right: hintText.left
+            anchors.rightMargin: Style.space(8)
             anchors.verticalCenter: parent.verticalCenter
             text: root.filterText || Commons.I18n.t("clipboard.search")
             color: root.foreground
@@ -445,6 +451,18 @@ Item {
             font.family: root.fontFamily
             font.pixelSize: Style.font.heading
             elide: Text.ElideRight
+          }
+
+          Text {
+            id: hintText
+            textFormat: Text.PlainText
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            text: "Shift+D: Clear all"
+            color: root.foreground
+            opacity: 0.38
+            font.family: root.fontFamily
+            font.pixelSize: Style.font.caption
           }
         }
 

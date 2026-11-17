@@ -24,14 +24,14 @@ Item {
   function handleKey(event) {
     if (!root.opened) return false
 
-    if (event.key === Qt.Key_Escape) {
+    if (event.key === Qt.Key_Escape || event.key === Qt.Key_N) {
       root.canceled()
       return true
     } else if (event.key === Qt.Key_Left || event.key === Qt.Key_Right || event.key === Qt.Key_Tab || event.key === Qt.Key_Backtab) {
       root.selectedIndex = root.selectedIndex === 0 ? 1 : 0
       return true
-    } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-      if (root.selectedIndex === 0) root.canceled()
+    } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Y || event.key === Qt.Key_D || event.text === "D") {
+      if ((event.key === Qt.Key_Return || event.key === Qt.Key_Enter) && root.selectedIndex === 0) root.canceled()
       else root.confirmed()
       return true
     }

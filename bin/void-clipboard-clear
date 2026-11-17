@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# void:summary=Clear clipboard history and active clipboard
+# void:group=clipboard
+
+history_path="$HOME/.local/state/void/clipboard-history.json"
+mkdir -p "$(dirname "$history_path")"
+echo "[]" > "$history_path"
+
+if command -v cliphist >/dev/null 2>&1; then
+  cliphist wipe 2>/dev/null || true
+fi
+
+if command -v wl-copy >/dev/null 2>&1; then
+  wl-copy --clear 2>/dev/null || true
+fi
+
+if command -v notify-send >/dev/null 2>&1; then
+  notify-send -u low "Clipboard" "Clipboard history cleared" 2>/dev/null || true
+fi

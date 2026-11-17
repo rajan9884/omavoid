@@ -67,6 +67,11 @@ hl.bind(
 	hl.dsp.exec_cmd("void-shell shell toggle void.clipboard"),
 	{ description = "Clipboard manager" }
 )
+hl.bind(
+	mainMod .. " + SHIFT + D",
+	hl.dsp.exec_cmd("void-clipboard-clear"),
+	{ description = "Clear clipboard history" }
+)
 
 -- ── Core Applications ──
 hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd("void-launch-terminal"), { description = "Terminal" })
