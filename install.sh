@@ -109,6 +109,7 @@ setup_void_repos() {
     # Enable nonfree repository for firmware, proprietary drivers, and media utilities
     sudo xbps-install -Sy void-repo-nonfree 2>/dev/null || true
 
+    # Setup void-packages (custom branch) and register local custom repository
     local vp_dir="${TARGET_HOME}/.local/share/pkg/void-packages"
     if [ ! -d "$vp_dir" ]; then
         log_info "Cloning void-packages (custom branch) for standalone custom builds..."
@@ -116,11 +117,39 @@ setup_void_repos() {
         sudo -u "$TARGET_USER" git clone -b custom https://github.com/rajan9884/void-packages.git "$vp_dir" 2>/dev/null || log_warn "Could not clone void-packages repo; skipping."
     fi
 
-    if [ -d "$vp_dir/hostdir/binpkgs/custom" ]; then
+    if [ -d "$vp_dir" ]; then
+        # Ensure restricted builds are permitted (chatgpt, claude, warp)
+        mkdir -p "$vp_dir/etc"
+        echo "XBPS_ALLOW_RESTRICTED=yes" | sudo -u "$TARGET_USER" tee "$vp_dir/etc/conf" >/dev/null
+
+        # Ensure local custom binpkgs directory structure exists
+        sudo -u "$TARGET_USER" mkdir -p "$vp_dir/hostdir/binpkgs/custom" "$vp_dir/hostdir/binpkgs/custom/nonfree"
+
+        # Index any local custom packages if present
+        if compgen -G "$vp_dir/hostdir/binpkgs/custom/*.xbps" >/dev/null; then
+            sudo -u "$TARGET_USER" xbps-rindex -a "$vp_dir/hostdir/binpkgs/custom/"*.xbps 2>/dev/null || true
+        fi
+        if compgen -G "$vp_dir/hostdir/binpkgs/custom/nonfree/*.xbps" >/dev/null; then
+            sudo -u "$TARGET_USER" xbps-rindex -a "$vp_dir/hostdir/binpkgs/custom/nonfree/"*.xbps 2>/dev/null || true
+        fi
+
+        # Register local custom repository in XBPS
         cat << EOF | sudo tee /etc/xbps.d/10-custom.conf >/dev/null
 repository=$vp_dir/hostdir/binpkgs/custom
 repository=$vp_dir/hostdir/binpkgs/custom/nonfree
 EOF
+
+        # In full desktop mode, ensure xbps-src masterdir is bootstrapped for on-demand builds
+        if [ "$INSTALL_MODE" != "minimal" ]; then
+            local arch
+            arch="$(uname -m)"
+            if [ ! -d "$vp_dir/masterdir-$arch" ] && [ ! -d "$vp_dir/masterdir" ]; then
+                log_info "Bootstrapping xbps-src masterdir ($arch) for custom package builds..."
+                sudo -u "$TARGET_USER" "$vp_dir/xbps-src" binary-bootstrap 2>/dev/null || log_warn "xbps-src binary-bootstrap can be initialized later via 'xbps-src binary-bootstrap'."
+            fi
+        fi
+
+        sudo chown -R "${TARGET_USER}:${TARGET_USER}" "$vp_dir" 2>/dev/null || true
     fi
 
     # Route generic kernel packages to upstream mainline series (rolling-release)

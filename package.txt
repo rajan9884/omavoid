@@ -134,3 +134,17 @@ evince
 libevince
 imv
 mpv
+
+[custom]
+# Custom apps managed via ~/.local/share/pkg/void-packages (custom branch)
+# Built using 'vp-sync <app>' or './xbps-src pkg <app>'
+helium-browser
+zed-editor
+warp-cli
+zapfast
+deckcraft
+wordcraft
+# Additional templates ready to build on demand via: vp-sync <pkg>
+# zen-browser
+# chatgpt-desktop
+# claude-desktop

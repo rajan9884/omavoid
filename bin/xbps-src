@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Global helper to run xbps-src inside void-packages repository
+
+VP_DIR="${XBPS_DISTDIR:-${HOME}/.local/share/pkg/void-packages}"
+
+if [ ! -d "$VP_DIR" ]; then
+    echo "Error: void-packages directory not found at $VP_DIR" >&2
+    exit 1
+fi
+
+export XBPS_DISTDIR="$VP_DIR"
+cd "$VP_DIR" && exec ./xbps-src "$@"
