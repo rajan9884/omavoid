@@ -71,7 +71,7 @@ hl.window_rule({
 
 hl.window_rule({
   name = "doc-float",
-  match = { class = "^org.pwmt.zathura$" },
+  match = { class = "^(evince|org.gnome.Evince)$" },
   float = true,
   center = true,
   size = { 900, 700 },

@@ -1,0 +1,37 @@
+# Omavoid Global Git Configuration
+# Automatically switches identity based on directory path
+
+[includeIf "gitdir:~/Projects/personal/"]
+    path = ~/.gitconfig-personal
+
+[includeIf "gitdir:~/personal/"]
+    path = ~/.gitconfig-personal
+
+[includeIf "gitdir:~/Projects/work/"]
+    path = ~/.gitconfig-work
+
+[includeIf "gitdir:~/work/"]
+    path = ~/.gitconfig-work
+
+[init]
+    defaultBranch = master
+
+[credential "https://github.com"]
+    helper = 
+    helper = !/usr/bin/gh auth git-credential
+
+[credential "https://gist.github.com"]
+    helper = 
+    helper = !/usr/bin/gh auth git-credential
+
+[core]
+    autocrlf = input
+    editor = nvim
+
+[pull]
+    rebase = false
+
+# Default fallback identity (Work account)
+[user]
+    name = rajan9884
+    email = rajan.dev.jaiswal@gmail.com

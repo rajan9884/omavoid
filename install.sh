@@ -3,15 +3,55 @@
 # OMAVOID: LIGHTWEIGHT DESKTOP ENVIRONMENT FOR VOID LINUX
 # Fully reproducible fresh-install automation for Void Linux (x86_64 runit)
 #
-# 1. Configures Fastly Void XBPS repos & Hyprland-Void community repo
-# 2. Installs Wayland, Quickshell, PipeWire, TUI, and CLI packages
-# 3. Synchronizes official Omavoid assets (wallpapers, themes, shell)
-# 4. Installs Void compatibility shims (uwsm, systemd-cat, systemctl, pacman, magick, PAM)
-# 5. Configures Runit services, udev sound rules, and user groups
-# 6. Deploys pure Quickshell desktop, Hyprland configs, and TUI shortcuts
+# Flags:
+#   -m, --minimal  : Installs minimal core environment and essential configs
+#   --dry-run      : Previews actions without making changes
+#   -h, --help     : Shows usage instructions
+#
+# Default (full) mode installs all packages defined in package.txt and configures
+# complete desktop, utilities, tools, and user workflows.
 # ==============================================================================
 
 set -euo pipefail
+
+INSTALL_MODE="full"
+DRY_RUN=0
+
+usage() {
+    cat <<USAGE
+Usage: ./install.sh [OPTIONS]
+
+Options:
+  -m, --minimal    Minimal desktop install (installs only [minimal] core packages & configs)
+  --dry-run        Print actions without modifying the system
+  -h, --help       Show this help message
+
+By default, Omavoid installer runs in full mode, installing all core, utility, and desktop apps
+defined in package.txt and skipping any packages already installed.
+USAGE
+}
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -m|--minimal)
+            INSTALL_MODE="minimal"
+            shift
+            ;;
+        --dry-run)
+            DRY_RUN=1
+            shift
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1" >&2
+            usage >&2
+            exit 1
+            ;;
+    esac
+done
 
 # Determine target non-root user and home directory dynamically
 if [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != "root" ]; then
@@ -29,23 +69,35 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BLUE='\033[1;34m'
 GREEN='\033[1;32m'
 YELLOW='\033[1;33m'
+CYAN='\033[1;36m'
 NC='\033[0m'
 
 log_info()  { printf "${BLUE}[INFO]${NC} %s\n" "$1"; }
 log_ok()    { printf "${GREEN}[OK]${NC}   %s\n" "$1"; }
 log_warn()  { printf "${YELLOW}[WARN]${NC} %s\n" "$1"; }
+log_mode()  { printf "${CYAN}[MODE]${NC} %s\n" "$1"; }
 
 echo "======================================================================"
 echo "  Omavoid Desktop Setup for Void Linux"
 echo "  Target User: ${TARGET_USER} (${TARGET_HOME})"
+log_mode "Installation Mode: ${INSTALL_MODE^^}"
+[ "$DRY_RUN" -eq 1 ] && log_warn "DRY-RUN enabled: No changes will be committed."
 echo "======================================================================"
 
+# Ensure sudo credentials upfront if not dry-run
+if [ "$(id -u)" -ne 0 ] && [ "$DRY_RUN" -eq 0 ]; then
+    log_info "Elevating privileges for system packages and service configuration..."
+    sudo -v || { echo "Administrator privileges required to continue." >&2; exit 1; }
+    while true; do sudo -n true; sleep 50; kill -0 "$$" || exit; done 2>/dev/null &
+    SUDO_PID=$!
+    trap 'kill "$SUDO_PID" 2>/dev/null || true' EXIT
+fi
+
 # 1. Configure Fastly CDN & Hyprland XBPS Repositories
-# NOTE: void-land/hyprland-void-packages intentionally removed — older packages (0.47.x vs 0.57.x).
-# void.creations.works is the actively-maintained community mirror with hyprland-guiutils,
-# hyprland-qt-support and all latest Hyprland packages.
 setup_void_repos() {
-    log_info "Configuring fast Void Linux XBPS repositories and kernel tracking..."
+    log_info "Configuring Void Linux XBPS repositories and kernel tracking..."
+    if [ "$DRY_RUN" -eq 1 ]; then return 0; fi
+
     sudo mkdir -p /etc/xbps.d
     # Remove legacy void-land repo if present (outdated; superseded by void.creations.works)
     sudo rm -f /etc/xbps.d/hyprland-void.conf
@@ -53,6 +105,9 @@ setup_void_repos() {
         echo "repository=https://void.creations.works" | sudo tee /etc/xbps.d/creations.conf > /dev/null
     fi
     echo "repository=https://repo-fastly.voidlinux.org/current" | sudo tee /etc/xbps.d/00-repository-main.conf > /dev/null
+
+    # Enable nonfree repository for firmware, proprietary drivers, and media utilities
+    sudo xbps-install -Sy void-repo-nonfree 2>/dev/null || true
 
     local vp_dir="${TARGET_HOME}/.local/share/pkg/void-packages"
     if [ ! -d "$vp_dir" ]; then
@@ -79,61 +134,103 @@ EOF
     sudo xbps-install -Sy
 }
 
-# 2. Install Core Packages via XBPS
+# Helper to read package list from package.txt
+parse_package_file() {
+    local pkg_file="$1"
+    local mode="$2"
+    local in_minimal=0
+    local raw_pkgs=()
+
+    if [ ! -f "$pkg_file" ]; then
+        log_warn "Package file '$pkg_file' not found!"
+        return 0
+    fi
+
+    while IFS= read -r line || [ -n "$line" ]; do
+        # Strip comments and surrounding whitespace
+        line="$(echo "$line" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+        [[ -z "$line" || "$line" =~ ^# ]] && continue
+
+        # Section header check
+        if [[ "$line" =~ ^\[(.*)\]$ ]]; then
+            local section="${BASH_REMATCH[1]}"
+            if [ "$section" = "minimal" ]; then
+                in_minimal=1
+            else
+                in_minimal=0
+            fi
+            continue
+        fi
+
+        local pkg
+        pkg="$(echo "$line" | awk '{print $1}')"
+        [ -z "$pkg" ] && continue
+
+        if [ "$mode" = "minimal" ]; then
+            if [ "$in_minimal" -eq 1 ]; then
+                raw_pkgs+=("$pkg")
+            fi
+        else
+            raw_pkgs+=("$pkg")
+        fi
+    done < "$pkg_file"
+
+    # Deduplicate package names preserving order
+    printf '%s\n' "${raw_pkgs[@]}" | awk '!seen[$0]++'
+}
+
+# 2. Install Packages via XBPS from package.txt
 install_packages() {
-    log_info "Installing Wayland, Quickshell, PipeWire, Networking, TUI, and CLI tools..."
+    local pkg_file="${REPO_DIR}/package.txt"
+    log_info "Parsing packages from ${pkg_file} (mode: ${INSTALL_MODE})..."
 
-    CORE_PKGS=(
-        dbus elogind seatd polkit
-        wayland wayland-protocols xorg-server-xwayland
-        xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk
-        mesa-dri vulkan-loader
-        pipewire wireplumber alsa-pipewire libspa-bluetooth lsp-plugins-lv2
-        pulsemixer alsa-utils playerctl pamixer cava
-        NetworkManager bluez upower inotify-tools socat power-profiles-daemon udiskie
-        foot alacritty
-        wl-clipboard cliphist wtype
-        grim slurp brightnessctl file imv mpv xdg-utils psmisc
-        tesseract-ocr tesseract-ocr-eng
-        qt6-wayland qt6-declarative qt6-svg qt6-shadertools qt6-imageformats qt6ct
-        python3 python3-dbus fontconfig
-        zsh starship fzf zoxide eza bat fd ripgrep jq gum yt-dlp nodejs
-        btop yazi lazygit calcurse neovim fastfetch git curl unzip vips ffmpegthumbnailer
-        greetd tuigreet
-        linux-mainline linux-mainline-headers
-        nerd-fonts-symbols-ttf noto-fonts-ttf noto-fonts-emoji
-    )
+    local pkgs=()
+    mapfile -t pkgs < <(parse_package_file "$pkg_file" "$INSTALL_MODE")
 
-    HYPR_PKGS=(
-        hyprland hypridle hyprpicker xdg-desktop-portal-hyprland
-        hyprland-guiutils hyprland-qt-support quickshell wiremix impala bluetuith
-        cmake ninja hyprland-protocols hyprwayland-scanner
-    )
+    if [ ${#pkgs[@]} -eq 0 ]; then
+        log_warn "No packages found in ${pkg_file} for mode '${INSTALL_MODE}'."
+        return 0
+    fi
+
+    log_info "Evaluating ${#pkgs[@]} requested packages against system..."
 
     # Filter out already installed packages to avoid redundant RSA/hash verification & I/O
     local installed_pkgs
     installed_pkgs="$(xbps-query -l 2>/dev/null | awk '{print $2}' | sed -E 's/-[^-]+_[0-9]+$//')"
 
     local to_install=()
-    for pkg in "${CORE_PKGS[@]}" "${HYPR_PKGS[@]}"; do
+    for pkg in "${pkgs[@]}"; do
         if ! grep -Fxq "$pkg" <<< "$installed_pkgs"; then
             to_install+=("$pkg")
         fi
     done
 
     if [ ${#to_install[@]} -gt 0 ]; then
-        log_info "Batch installing missing packages in a single transaction (${#to_install[@]} pkgs): ${to_install[*]}"
-        if ! sudo xbps-install -y "${to_install[@]}"; then
-            log_warn "Batch install encountered missing/optional package; falling back to per-package install..."
-            for pkg in "${to_install[@]}"; do
-                sudo xbps-install -y "$pkg" 2>/dev/null || log_warn "Package '$pkg' skipped or unavailable."
-            done
+        log_info "Batch installing ${#to_install[@]} missing packages: ${to_install[*]}"
+        if [ "$DRY_RUN" -eq 0 ]; then
+            if ! sudo xbps-install -y "${to_install[@]}"; then
+                log_warn "Batch install encountered missing/unavailable package; falling back to resilient per-package install..."
+                for pkg in "${to_install[@]}"; do
+                    sudo xbps-install -y "$pkg" 2>/dev/null || log_warn "Package '$pkg' skipped or unavailable in repositories."
+                done
+            fi
         fi
     else
-        log_ok "All required core and desktop packages are already installed."
+        log_ok "All ${#pkgs[@]} requested packages are already installed."
     fi
 
-    # Ensure hyprsunset is built and installed
+    if [ "$DRY_RUN" -eq 1 ]; then return 0; fi
+
+    # Standalone Tool: herdr (AI workspace manager)
+    if ! command -v herdr >/dev/null 2>&1 && [ ! -x "${TARGET_HOME}/.local/bin/herdr" ] && [ "$INSTALL_MODE" != "minimal" ]; then
+        log_info "Installing herdr (AI workspace manager)..."
+        sudo -u "$TARGET_USER" sh -c "curl -fsSL https://herdr.dev/install.sh | sh" 2>/dev/null || log_warn "Could not install herdr automatically."
+    fi
+    if [ -x "${TARGET_HOME}/.local/bin/herdr" ]; then
+        sudo ln -sf "${TARGET_HOME}/.local/bin/herdr" /usr/local/bin/herdr 2>/dev/null || true
+    fi
+
+    # Standalone Tool: hyprsunset (Night light filter for Hyprland)
     if ! command -v hyprsunset >/dev/null 2>&1; then
         log_info "Building and installing hyprsunset from source..."
         local sunset_dir
@@ -155,13 +252,15 @@ install_packages() {
     fi
     sudo vkpurge rm all 2>/dev/null || true
     sudo update-grub 2>/dev/null || true
-    log_ok "Core packages installed."
+    log_ok "Package installation step finished."
 }
 
-# 3. Synchronize Void Quattro Assets
+# 3. Synchronize Desktop Assets
 sync_dotfiles_assets() {
     log_info "Synchronizing Omavoid assets and linking system defaults to dotfiles..."
-    sudo mkdir -p /usr/share/void
+    if [ "$DRY_RUN" -eq 1 ]; then return 0; fi
+
+    sudo mkdir -p /usr/share/void /usr/local/bin
 
     # Unify /usr/share/void directly with dotfiles
     sudo rm -rf /usr/share/void/bin \
@@ -202,13 +301,15 @@ sync_dotfiles_assets() {
         sudo ln -sf "$(command -v quickshell)" /usr/local/bin/qs
     fi
 
-    log_ok "Void assets synchronized and unified with dotfiles."
+    log_ok "Desktop assets synchronized and unified with dotfiles."
 }
 
 # 4. Install Void Linux Environment and Shims
 install_void_shims() {
     log_info "Configuring Void Linux environment and desktop integration..."
-    sudo mkdir -p /usr/local/bin /etc/pam.d /etc/profile.d
+    if [ "$DRY_RUN" -eq 1 ]; then return 0; fi
+
+    sudo mkdir -p /usr/local/bin /etc/pam.d /etc/profile.d /etc/udev/hwdb.d
 
     echo "export VOID_PATH=/usr/share/void" | sudo tee /etc/profile.d/void.sh >/dev/null
     sudo chmod +x /etc/profile.d/void.sh
@@ -262,8 +363,6 @@ SHIM
         sudo ln -sf /usr/bin/elogind-inhibit /usr/local/bin/systemd-inhibit
     fi
 
-
-
     # Configure greetd with tuigreet
     if command -v tuigreet >/dev/null 2>&1; then
         sudo mkdir -p /etc/greetd
@@ -290,6 +389,16 @@ RUN
             sudo chmod +x /etc/sv/greetd/run
         fi
     fi
+
+    # Hardware Fix: Acer Swift Go microphone mute key (scancode 0x8a -> f20)
+    cat <<'HWDB' | sudo tee /etc/udev/hwdb.d/99-acer-swift-micmute.hwdb >/dev/null
+# Acer Swift laptop mic mute key (F4 bare press scancode 0x8a)
+evdev:atkbd:dmi:bvn*:bvr*:bd*:svnAcer*:pn*Swift*:*
+evdev:atkbd:dmi:bvn*:bvr*:bd*:svnAcer*:pn*SFG14-71*:*
+ KEYBOARD_KEY_8a=f20
+HWDB
+    sudo systemd-hwdb update 2>/dev/null || sudo udevadm hwdb --update 2>/dev/null || true
+    sudo udevadm trigger --subsystem-match=input 2>/dev/null || true
 
     # Backlight and ALSA save/restore across reboots
     sudo mkdir -p /var/lib/backlight
@@ -329,7 +438,7 @@ command -v alsactl >/dev/null 2>&1 && alsactl store
 RC
     sudo chmod +x /etc/rc.shutdown
 
-    # Mark Void first-run as completed so repetitive notifications do not pop up on every login
+    # Mark Void first-run as completed
     mkdir -p "${TARGET_HOME}/.local/state/void/done"
     touch "${TARGET_HOME}/.local/state/void/done/first-run-user"
     touch "${TARGET_HOME}/.local/state/void/done/finalize-user"
@@ -379,7 +488,6 @@ SUDO
     # pacman shim for xbps queries and package operations
     cat <<'SHIM' | sudo tee /usr/local/bin/pacman >/dev/null
 #!/usr/bin/env bash
-# Compatibility shim translating pacman queries/installs to xbps on Void Linux
 set -euo pipefail
 
 cmd="${1:-}"
@@ -437,6 +545,8 @@ SHIM
 # 5. Configure Runit Services, Hardware Rules, and User Groups
 setup_runit_and_groups() {
     log_info "Configuring user groups & Void runit services for '${TARGET_USER}'..."
+    if [ "$DRY_RUN" -eq 1 ]; then return 0; fi
+
     for grp in wheel video audio input _seatd bluetooth network storage; do
         getent group "$grp" >/dev/null 2>&1 && sudo usermod -aG "$grp" "$TARGET_USER" || true
     done
@@ -454,7 +564,7 @@ setup_runit_and_groups() {
         fi
     done
 
-    # Prevent acpid from double-stepping backlight brightness (handled by Hyprland/void-brightness-display)
+    # Prevent acpid from double-stepping backlight brightness
     if [ -f /etc/acpi/handler.sh ]; then
         sudo sed -i 's/^\([[:space:]]*step_backlight\)/#\1/' /etc/acpi/handler.sh 2>/dev/null || true
     fi
@@ -494,16 +604,14 @@ setup_runit_and_groups() {
     [ -f /usr/share/alsa/alsa.conf.d/50-pipewire.conf ] && sudo ln -sf /usr/share/alsa/alsa.conf.d/50-pipewire.conf /etc/alsa/conf.d/
     [ -f /usr/share/alsa/alsa.conf.d/99-pipewire-default.conf ] && sudo ln -sf /usr/share/alsa/alsa.conf.d/99-pipewire-default.conf /etc/alsa/conf.d/
 
-    # Ensure Headphones are always available on Intel SOF Realtek ALC256 (prevent jack detection pin dropout)
+    # Ensure Headphones are always available on Intel SOF Realtek ALC256
     if [ -f /usr/share/alsa/ucm2/HDA/HiFi-analog.conf ]; then
         sudo sed -i 's/^[[:space:]]*JackControl "\${var:hpjack}"/# JackControl "\${var:hpjack}"/' /usr/share/alsa/ucm2/HDA/HiFi-analog.conf
     fi
 
-    # Udev sound hardware permissions for audio group (overrides elogind uaccess race condition)
+    # Udev sound hardware permissions for audio group
     sudo mkdir -p /etc/udev/rules.d
     cat <<'UDEV' | sudo tee /etc/udev/rules.d/72-sound.rules >/dev/null
-# Ensure sound hardware always belongs to audio group with 0660 mode
-# Remove uaccess so elogind does not revoke access during seat changes or early boot
 SUBSYSTEM=="sound", TAG-="uaccess", GROUP="audio", MODE="0660"
 KERNEL=="controlC[0-9]*", SUBSYSTEM=="sound", TAG-="uaccess", GROUP="audio", MODE="0660"
 KERNEL=="pcmC[0-9]*", SUBSYSTEM=="sound", TAG-="uaccess", GROUP="audio", MODE="0660"
@@ -512,9 +620,8 @@ KERNEL=="midiC[0-9]*", SUBSYSTEM=="sound", TAG-="uaccess", GROUP="audio", MODE="
 KERNEL=="timer", SUBSYSTEM=="sound", TAG-="uaccess", GROUP="audio", MODE="0660"
 KERNEL=="seq", SUBSYSTEM=="sound", TAG-="uaccess", GROUP="audio", MODE="0660"
 UDEV
-    # Ensure SOUND_INITIALIZED is set on add as well as change events under eudev
+
     cat <<'UDEV' | sudo tee /etc/udev/rules.d/78-sound-card.rules >/dev/null
-# Custom Void Linux sound card rules - ensure SOUND_INITIALIZED is set on both add and change
 SUBSYSTEM!="sound", GOTO="sound_end"
 ACTION=="add|change", KERNEL=="controlC*", ATTR{../uevent}="change"
 KERNEL!="card*", GOTO="sound_end"
@@ -553,7 +660,7 @@ UDEV
     sudo udevadm control --reload 2>/dev/null || true
     sudo udevadm trigger --subsystem-match=sound 2>/dev/null || true
 
-    # Remove redundant snd-perms runit service if present (handled natively by user session void-audio-init)
+    # Remove redundant snd-perms runit service if present
     sudo rm -f /var/service/snd-perms
     sudo rm -rf /etc/sv/snd-perms
 
@@ -574,11 +681,13 @@ CONF
     fi
 }
 
-# 6. Deploy Dotfiles to Target User Home (via Symlinks)
+# 6. Deploy Dotfiles and Workflows to Target User Home (via Symlinks)
 deploy_dotfiles() {
-    log_info "Deploying Omavoid dotfiles via symlinks to ${TARGET_HOME}..."
+    log_info "Deploying Omavoid dotfiles and workflows via symlinks to ${TARGET_HOME}..."
+    if [ "$DRY_RUN" -eq 1 ]; then return 0; fi
+
     BACKUP_DIR="${TARGET_HOME}/.config-backup-$(date +%Y%m%d-%H%M%S)"
-    mkdir -p "${TARGET_HOME}/.config" "${TARGET_HOME}/.local/bin" "${TARGET_HOME}/.local/state/void/current/theme" "${TARGET_HOME}/Pictures/Screenshots"
+    mkdir -p "${TARGET_HOME}/.config" "${TARGET_HOME}/.local/bin" "${TARGET_HOME}/.local/state/void/current/theme" "${TARGET_HOME}/Pictures/Screenshots" "${TARGET_HOME}/.ssh"
 
     # Symlink all configs from REPO_DIR/config to TARGET_HOME/.config
     for item in "${REPO_DIR}"/config/*; do
@@ -597,7 +706,7 @@ deploy_dotfiles() {
             cp -r "$target" "$BACKUP_DIR/" 2>/dev/null || true
         fi
 
-        # Atomic symlink replacement to prevent inotify reload race conditions
+        # Atomic symlink replacement
         ln -sfn "$item" "${target}.tmp.$$"
         mv -Tf "${target}.tmp.$$" "$target"
         log_ok "Symlinked ~/.config/${base} -> ${item}"
@@ -648,6 +757,52 @@ deploy_dotfiles() {
         fi
     done
 
+    # Symlink Git Configurations (gitconfig, gitconfig-personal, gitconfig-work)
+    declare -A GIT_FILES=(
+        [".gitconfig"]="git/gitconfig"
+        [".gitconfig-personal"]="git/gitconfig-personal"
+        [".gitconfig-work"]="git/gitconfig-work"
+    )
+    for gf in "${!GIT_FILES[@]}"; do
+        repo_gf="${REPO_DIR}/${GIT_FILES[$gf]}"
+        target_gf="${TARGET_HOME}/${gf}"
+        if [ -f "$repo_gf" ]; then
+            if [ -L "$target_gf" ] && [ "$(readlink -f "$target_gf" 2>/dev/null)" = "$(readlink -f "$repo_gf")" ]; then
+                continue
+            fi
+            if [ -e "$target_gf" ] || [ -L "$target_gf" ]; then
+                mkdir -p "$BACKUP_DIR"
+                cp -f "$target_gf" "$BACKUP_DIR/" 2>/dev/null || true
+            fi
+            ln -sf "$repo_gf" "${target_gf}.tmp.$$"
+            mv -f "${target_gf}.tmp.$$" "$target_gf"
+            log_ok "Symlinked ~/${gf} -> ${repo_gf}"
+        fi
+    done
+
+    # Ensure SSH configuration contains dual-account GitHub entries
+    local ssh_conf="${TARGET_HOME}/.ssh/config"
+    touch "$ssh_conf"
+    if ! grep -q "Host github.com-personal" "$ssh_conf" 2>/dev/null; then
+        cat <<'SSH_SNIP' >> "$ssh_conf"
+
+# Personal Account
+Host github.com-personal
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519_personal
+
+# Work Account
+Host github.com-work
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519_work
+SSH_SNIP
+        log_ok "Added dual-account GitHub hosts to ~/.ssh/config"
+    fi
+    chmod 700 "${TARGET_HOME}/.ssh" 2>/dev/null || true
+    chmod 600 "$ssh_conf" 2>/dev/null || true
+
     # Deploy ~/.asoundrc for ALSA-to-PipeWire routing
     if [ -f "${REPO_DIR}/shell/asoundrc" ]; then
         cp -f "${REPO_DIR}/shell/asoundrc" "${TARGET_HOME}/.asoundrc"
@@ -656,7 +811,6 @@ deploy_dotfiles() {
 
     # Stage initial Matte Black theme state
     THEME_SRC="${REPO_DIR}/themes/matte-black"
-
     if [ -d "$THEME_SRC" ]; then
         cp "$THEME_SRC/colors.toml" "${TARGET_HOME}/.local/state/void/current/theme/colors.toml" 2>/dev/null || true
         cp "$THEME_SRC/shell.lock.toml" "${TARGET_HOME}/.local/state/void/current/theme/shell.lock.toml" 2>/dev/null || true
@@ -679,9 +833,9 @@ deploy_dotfiles() {
     fi
 
     # Ensure proper non-root ownership on deployed user symlinks and files
-    sudo chown -h "${TARGET_USER}:${TARGET_USER}" "${TARGET_HOME}/.config/"* "${TARGET_HOME}/.zshrc" "${TARGET_HOME}/.zprofile" "${TARGET_HOME}/.bashrc" "${TARGET_HOME}/.bash_aliases" 2>/dev/null || true
-    sudo chown -R "${TARGET_USER}:${TARGET_USER}" "${REPO_DIR}" "${TARGET_HOME}/.local" "${TARGET_HOME}/Pictures" 2>/dev/null || true
-    log_ok "Dotfiles deployed to ${TARGET_HOME}."
+    sudo chown -h "${TARGET_USER}:${TARGET_USER}" "${TARGET_HOME}/.config/"* "${TARGET_HOME}/.zshrc" "${TARGET_HOME}/.zprofile" "${TARGET_HOME}/.bashrc" "${TARGET_HOME}/.bash_aliases" "${TARGET_HOME}/.gitconfig"* 2>/dev/null || true
+    sudo chown -R "${TARGET_USER}:${TARGET_USER}" "${REPO_DIR}" "${TARGET_HOME}/.local" "${TARGET_HOME}/Pictures" "${TARGET_HOME}/.ssh" 2>/dev/null || true
+    log_ok "Dotfiles and workflows deployed to ${TARGET_HOME}."
 }
 
 setup_void_repos
@@ -693,5 +847,6 @@ deploy_dotfiles
 
 echo ""
 echo "======================================================================"
-log_ok "Omavoid setup complete! Log in on VT 1 as '${TARGET_USER}'."
+log_ok "Omavoid setup complete! (Mode: ${INSTALL_MODE^^})"
+echo "Log in on VT 1 as '${TARGET_USER}'."
 echo "======================================================================"

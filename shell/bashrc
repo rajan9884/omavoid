@@ -50,6 +50,9 @@ elif [ -f "$HOME/omavoid/shell/aliases" ]; then
   source "$HOME/omavoid/shell/aliases"
 fi
 
+# Dual-GitHub helpers if present
+[ -f "$HOME/.config/shell/git-accounts.sh" ] && source "$HOME/.config/shell/git-accounts.sh"
+
 # Bash-specific interactive helpers
 if [[ -n "$BASH_VERSION" ]]; then
   if [[ "$TERM" == "xterm-kitty" ]]; then

@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+source /usr/share/void/config/shell/git-accounts.sh 2>/dev/null || source "$HOME/.config/shell/git-accounts.sh" 2>/dev/null || true
+git-whoami "$@"

@@ -1,0 +1,136 @@
+# ==============================================================================
+# Omavoid Package List
+#
+# Sections:
+#   [minimal]   - Essential core packages installed when --minimal is used
+#   [desktop]   - Display manager and login greeting
+#   [utilities] - CLI & TUI utilities, shell plugins, developer tools
+#   [apps]      - Graphical applications and document viewers
+#
+# Rules:
+#   - Full mode (default): ALL uncommented packages in this file are installed.
+#   - Minimal mode (--minimal): only packages under [minimal] are installed.
+#   - Lines starting with '#' and blank lines are ignored.
+#   - You can add or remove packages directly in this file.
+# ==============================================================================
+
+[minimal]
+dbus
+elogind
+seatd
+polkit
+wayland
+wayland-protocols
+xorg-server-xwayland
+xdg-desktop-portal
+xdg-desktop-portal-wlr
+xdg-desktop-portal-gtk
+xdg-desktop-portal-hyprland
+mesa-dri
+vulkan-loader
+pipewire
+wireplumber
+alsa-pipewire
+libspa-bluetooth
+lsp-plugins-lv2
+pulsemixer
+alsa-utils
+playerctl
+pamixer
+cava
+NetworkManager
+bluez
+upower
+inotify-tools
+socat
+power-profiles-daemon
+udiskie
+foot
+alacritty
+wl-clipboard
+cliphist
+wtype
+grim
+slurp
+brightnessctl
+file
+xdg-utils
+psmisc
+procps-ng
+tesseract-ocr
+tesseract-ocr-eng
+qt6-wayland
+qt6-declarative
+qt6-svg
+qt6-shadertools
+qt6-imageformats
+qt6ct
+python3
+python3-dbus
+fontconfig
+nerd-fonts-symbols-ttf
+noto-fonts-ttf
+noto-fonts-emoji
+linux-mainline
+linux-mainline-headers
+hyprland
+hypridle
+hyprpicker
+hyprland-guiutils
+hyprland-qt-support
+quickshell
+wiremix
+impala
+bluetuith
+cmake
+ninja
+hyprland-protocols
+hyprwayland-scanner
+zsh
+starship
+fzf
+zoxide
+eza
+bat
+fd
+ripgrep
+jq
+gum
+git
+curl
+unzip
+
+[desktop]
+greetd
+tuigreet
+
+[utilities]
+zsh-autosuggestions
+zsh-completions
+zsh-syntax-highlighting
+tree
+btop
+yazi
+lazygit
+lazydocker
+calcurse
+neovim
+fastfetch
+tmux
+vsv
+yt-dlp
+nodejs
+github-cli
+chafa
+resvg
+vips
+ffmpegthumbnailer
+unar
+xz
+7zip
+
+[apps]
+evince
+libevince
+imv
+mpv
