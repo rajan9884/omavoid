@@ -110,6 +110,11 @@ hl.bind(mainMod .. " + slash", hl.dsp.exec_cmd("void-menu-keybindings"), { descr
 
 -- ── Window Management ──
 hl.bind(mainMod .. " + W", hl.dsp.window.close(), { description = "Close window" })
+hl.bind(
+	mainMod .. " + M",
+	hl.dsp.exec_cmd("void-hyprland-window-minimize"),
+	{ description = "Minimize window to dock (floating mode only)" }
+)
 hl.bind(mainMod .. " + T", hl.dsp.exec_cmd("void-toggle-floating-centered"), { description = "Toggle float" })
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen({ mode = "fullscreen" }), { description = "Toggle fullscreen" })
 hl.bind(mainMod .. " + ALT + F", hl.dsp.window.fullscreen({ mode = "maximized" }), { description = "Toggle maximize" })
@@ -313,7 +318,11 @@ hl.bind(mainMod .. " + ALT + A", hl.dsp.exec_cmd("void-audio-output-switch"), { 
 hl.bind(mainMod .. " + ALT + M", hl.dsp.exec_cmd("void-audio-source-switch"), { description = "Switch audio input/mic" })
 hl.bind(mainMod .. " + ALT + O", hl.dsp.exec_cmd("void-hyprland-window-transparency-toggle"), { description = "Toggle window transparency" })
 hl.bind(mainMod .. " + ALT + B", hl.dsp.exec_cmd("void-toggle-bar-transparency"), { description = "Toggle bar transparency" })
-hl.bind(mainMod .. " + ALT + X", hl.dsp.exec_cmd("foot -e tui-xbps"), { description = "Package manager TUI" })
+hl.bind(
+	mainMod .. " + ALT + X",
+	hl.dsp.exec_cmd("foot --app-id=floating-terminal --title=\"Void XBPS\" -e tui-xbps"),
+	{ description = "Package manager TUI (tui-xbps)" }
+)
 hl.bind(
 	mainMod .. " + SHIFT + X",
 	hl.dsp.exec_cmd("void-capture-screenshot region"),
@@ -402,6 +411,16 @@ hl.bind(
 	"F4",
 	hl.dsp.exec_cmd("void-audio-input-mute toggle"),
 	{ locked = true, description = "Mute mic (F4)" }
+)
+hl.bind(
+	"code:248",
+	hl.dsp.exec_cmd("void-audio-input-mute toggle"),
+	{ locked = true, description = "Mute mic (code:248)" }
+)
+hl.bind(
+	"code:256",
+	hl.dsp.exec_cmd("void-audio-input-mute toggle"),
+	{ locked = true, description = "Mute mic (code:256)" }
 )
 
 hl.bind(

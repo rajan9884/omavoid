@@ -172,5 +172,4 @@ if [[ ${#missing_pkgs[@]} -gt 0 ]]; then
   done
 fi
 
-void-show-done "$overall_status" 2>/dev/null || true
 exit "$overall_status"

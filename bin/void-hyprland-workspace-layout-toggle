@@ -90,12 +90,3 @@ if (( APPLIED )); then
   void-shell -q void.dock refresh
 fi
 
-# A workspace starting to float sets up its titlebars as the mode applies. The
-# titlebar plugin itself is only loaded while the config loads, so the first
-# floating workspace of a session still needs a reload to bring it in.
-TITLEBARS_SO="$HOME/.local/lib/void-hyprland-titlebars/titlebars.so"
-[[ -f /usr/lib/void-hyprland-titlebars/titlebars.so ]] && TITLEBARS_SO="/usr/lib/void-hyprland-titlebars/titlebars.so"
-if (( APPLIED )) && [[ $NEW_MODE == "floating" ]] && [[ -f "$TITLEBARS_SO" ]] && ! hyprctl plugin list -j 2>/dev/null | jq -e 'any(.[]?; .name == "hyprbars")' >/dev/null 2>&1; then
-  hyprctl reload >/dev/null
-fi
-

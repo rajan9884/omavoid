@@ -21,6 +21,5 @@ if [[ -n "${pkg_names// /}" ]]; then
   readarray -t selected_pkgs < <(printf "%s\n" "$pkg_names" | awk 'NF')
   if [[ ${#selected_pkgs[@]} -gt 0 ]]; then
     sudo xbps-remove -Ry "${selected_pkgs[@]}" < /dev/tty
-    void-show-done $? 2>/dev/null || true
   fi
 fi
