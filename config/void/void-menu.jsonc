@@ -97,7 +97,7 @@
       "background",
       "wallpaper"
     ],
-    "action": "background=$(void-theme-bg-switcher); [[ -n $background ]] && void-theme-bg-set \"$background\""
+    "action": "sh -c 'background=$(void-theme-bg-switcher); [[ -n $background ]] && void-theme-bg-set \"$background\"'"
   },
   "appearance.font": {
     "icon": "",
@@ -689,31 +689,6 @@
     "when": "void-hw-touchpad && [[ ! -f ~/.local/state/void/toggles/hypr/touchpad-disabled-name ]]",
     "action": "void-toggle-touchpad"
   },
-  "trigger.hardware.touchpad-haptics": {
-    "icon": "󰌌",
-    "label": "Touchpad Haptics"
-  },
-  "trigger.hardware.touchpad-haptics.low": {
-    "icon": "󰌌",
-    "label": "low",
-    "when": "void-hw-dell-xps-haptic-touchpad && void-cmd-present dell-xps-touchpad-haptics",
-    "checked": "[[ \"$(dell-xps-touchpad-haptics get)\" == \"low\" ]]",
-    "action": "dell-xps-touchpad-haptics set low"
-  },
-  "trigger.hardware.touchpad-haptics.mid": {
-    "icon": "󰌌",
-    "label": "mid",
-    "when": "void-hw-dell-xps-haptic-touchpad && void-cmd-present dell-xps-touchpad-haptics",
-    "checked": "[[ \"$(dell-xps-touchpad-haptics get)\" == \"mid\" ]]",
-    "action": "dell-xps-touchpad-haptics set mid"
-  },
-  "trigger.hardware.touchpad-haptics.high": {
-    "icon": "󰌌",
-    "label": "high",
-    "when": "void-hw-dell-xps-haptic-touchpad && void-cmd-present dell-xps-touchpad-haptics",
-    "checked": "[[ \"$(dell-xps-touchpad-haptics get)\" == \"high\" ]]",
-    "action": "dell-xps-touchpad-haptics set high"
-  },
   "trigger.hardware.touchscreen-on": {
     "icon": "󰆽",
     "label": "Enable Touchscreen",
@@ -784,7 +759,7 @@
     "icon": "",
     "label": "Keybindings",
     "when": "[[ -f ~/.config/hypr/keybinds.lua || -f ~/.config/hypr/bindings.lua ]]",
-    "action": "if [[ -f ~/.config/hypr/keybinds.lua ]]; then void-launch-config-editor \"$HOME/.config/hypr/keybinds.lua\"; else void-launch-config-editor \"$HOME/.config/hypr/bindings.lua\"; fi"
+    "action": "sh -c 'if [[ -f ~/.config/hypr/keybinds.lua ]]; then void-launch-config-editor \"$HOME/.config/hypr/keybinds.lua\"; else void-launch-config-editor \"$HOME/.config/hypr/bindings.lua\"; fi'"
   },
   "setup.input": {
     "icon": "",
@@ -851,7 +826,7 @@
   "setup.config.hyprland": {
     "icon": "",
     "label": "Hyprland",
-    "action": "if [[ -f ~/.config/hypr/hyprland.lua ]]; then void-launch-config-editor \"$HOME/.config/hypr/hyprland.lua\"; else void-launch-config-editor \"$HOME/.config/hypr/hyprland.conf\"; fi"
+    "action": "sh -c 'if [[ -f ~/.config/hypr/hyprland.lua ]]; then void-launch-config-editor \"$HOME/.config/hypr/hyprland.lua\"; else void-launch-config-editor \"$HOME/.config/hypr/hyprland.conf\"; fi'"
   },
   "setup.config.hyprsunset": {
     "icon": "",

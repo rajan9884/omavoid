@@ -45,6 +45,9 @@
           "id": "void.audio"
         },
         {
+          "id": "void.microphone"
+        },
+        {
           "id": "void.monitor"
         },
         {
@@ -56,10 +59,22 @@
     "position": "top",
     "transparent": false
   },
+  "dock": {
+    "autohide": true,
+    "pinned": [
+      "firefox",
+      "foot",
+      "yazi",
+      "mpv"
+    ]
+  },
   "idle": {
     "lock": 300,
     "screensaver": 150
   },
-  "plugins": [],
+  "plugins": [
+    "void.speedtest",
+    "void.wifiqr"
+  ],
   "version": 1
 }

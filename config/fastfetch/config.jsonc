@@ -24,122 +24,122 @@
 
     {
       "type": "custom",
-      "format": "\u001b[1;38;2;139,203,177m╭─────────────────────── SYSTEM ──────────────────────╮\u001b[0m"
+      "format": "\u001b[1;38;2;181,151,144m╭─────────────────────── SYSTEM ──────────────────────╮\u001b[0m"
     },
     {
       "type": "os",
       "key": " OS",
-      "keyColor": "#8bcbb1"
+      "keyColor": "#b59790"
     },
     {
       "type": "host",
       "key": "󰌢 Host",
-      "keyColor": "#8bcbb1"
+      "keyColor": "#b59790"
     },
     {
       "type": "kernel",
       "key": "󰌽 Kernel",
-      "keyColor": "#8bcbb1"
+      "keyColor": "#b59790"
     },
     {
       "type": "uptime",
       "key": "󰅐 Uptime",
-      "keyColor": "#8bcbb1"
+      "keyColor": "#b59790"
     },
     {
       "type": "packages",
       "key": "󰏖 Packages",
-      "keyColor": "#8bcbb1"
+      "keyColor": "#b59790"
     },
     {
       "type": "shell",
       "key": " Shell",
-      "keyColor": "#8bcbb1"
+      "keyColor": "#b59790"
     },
     {
       "type": "custom",
-      "format": "\u001b[1;38;2;139,203,177m╰─────────────────────────────────────────────────────╯\u001b[0m"
+      "format": "\u001b[1;38;2;181,151,144m╰─────────────────────────────────────────────────────╯\u001b[0m"
     },
 
     {
       "type": "custom",
-      "format": "\u001b[1;38;2;134,199,197m╭────────────────────── DESKTOP ──────────────────────╮\u001b[0m"
+      "format": "\u001b[1;38;2;165,160,182m╭────────────────────── DESKTOP ──────────────────────╮\u001b[0m"
     },
     {
       "type": "display",
       "key": "󰍹 Display",
-      "keyColor": "#86c7c5",
+      "keyColor": "#a5a0b6",
       "format": "{width}x{height} @ {refresh-rate} Hz {scale-factor}x {inch}''"
     },
     {
       "type": "de",
       "key": "󰘔 DE",
-      "keyColor": "#86c7c5"
+      "keyColor": "#a5a0b6"
     },
     {
       "type": "wm",
       "key": "󰖲 WM",
-      "keyColor": "#86c7c5"
+      "keyColor": "#a5a0b6"
     },
     {
       "type": "wmtheme",
       "key": "󰋜 WM Theme",
-      "keyColor": "#86c7c5"
+      "keyColor": "#a5a0b6"
     },
     {
       "type": "font",
       "key": "󰛖 Font",
-      "keyColor": "#86c7c5"
+      "keyColor": "#a5a0b6"
     },
     {
       "type": "cursor",
       "key": "󰇀 Cursor",
-      "keyColor": "#86c7c5"
+      "keyColor": "#a5a0b6"
     },
     {
       "type": "terminal",
       "key": " Terminal",
-      "keyColor": "#86c7c5"
+      "keyColor": "#a5a0b6"
     },
     {
       "type": "terminalfont",
       "key": " Term Font",
-      "keyColor": "#86c7c5"
+      "keyColor": "#a5a0b6"
     },
     {
       "type": "custom",
-      "format": "\u001b[1;38;2;134,199,197m╰─────────────────────────────────────────────────────╯\u001b[0m"
+      "format": "\u001b[1;38;2;165,160,182m╰─────────────────────────────────────────────────────╯\u001b[0m"
     },
 
     {
       "type": "custom",
-      "format": "\u001b[1;38;2;183,161,200m╭────────────────────── HARDWARE ─────────────────────╮\u001b[0m"
+      "format": "\u001b[1;38;2;196,216,226m╭────────────────────── HARDWARE ─────────────────────╮\u001b[0m"
     },
     {
       "type": "cpu",
       "key": " CPU",
-      "keyColor": "#b7a1c8",
+      "keyColor": "#c4d8e2",
       "format": "{name} ({cores-online})"
     },
     {
       "type": "gpu",
       "key": "󰢮 GPU",
-      "keyColor": "#b7a1c8",
+      "keyColor": "#c4d8e2",
       "format": "{vendor} {name} ({type})"
     },
     {
       "type": "memory",
       "key": "󰍛 Memory",
-      "keyColor": "#b7a1c8"
+      "keyColor": "#c4d8e2"
     },
     {
       "type": "disk",
       "key": "󰋊 Disk",
-      "keyColor": "#b7a1c8"
+      "keyColor": "#c4d8e2"
     },
     {
       "type": "custom",
-      "format": "\u001b[1;38;2;183,161,200m╰─────────────────────────────────────────────────────╯\u001b[0m"
+      "format": "\u001b[1;38;2;196,216,226m╰─────────────────────────────────────────────────────╯\u001b[0m"
     },
 
     "separator",

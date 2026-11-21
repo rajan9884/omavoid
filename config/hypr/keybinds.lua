@@ -240,10 +240,29 @@ for i = 1, 10 do
 end
 
 -- ── Scratchpad ──
+local function toggle_window_scratchpad()
+	local win = hl.get_active_window()
+	if not win then
+		return
+	end
+
+	local ws_name = (win.workspace and win.workspace.name) or ""
+	if ws_name:find("^special") then
+		local active_ws = hl.get_active_workspace()
+		local target = (active_ws and active_ws.id) or (active_ws and active_ws.name) or 1
+		hl.dispatch(hl.dsp.window.move({ workspace = target, follow = true }))
+		if hl.get_active_special_workspace() then
+			hl.dispatch(hl.dsp.workspace.toggle_special("scratchpad"))
+		end
+	else
+		hl.dispatch(hl.dsp.window.move({ workspace = "special:scratchpad", follow = false }))
+	end
+end
+
 hl.bind(mainMod .. " + S", hl.dsp.workspace.toggle_special("scratchpad"), { description = "Toggle scratchpad" })
 hl.bind(
 	mainMod .. " + ALT + S",
-	hl.dsp.window.move({ workspace = "special:scratchpad", follow = false }),
+	toggle_window_scratchpad,
 	{ description = "Move window to scratchpad" }
 )
 
@@ -287,9 +306,19 @@ hl.bind(
 	{ description = "Theme switcher" }
 )
 
--- ── Toggles (HDR, Nightlight, Screensaver, WARP, DND) ──
+-- ── Toggles (HDR, Nightlight, Screensaver, WARP, DND, Audio, Transparency) ──
 hl.bind(mainMod .. " + ALT + H", hl.dsp.exec_cmd("void-toggle-hdr"), { description = "Toggle HDR" })
 hl.bind(mainMod .. " + ALT + N", hl.dsp.exec_cmd("void-toggle-nightlight"), { description = "Toggle nightlight" })
+hl.bind(mainMod .. " + ALT + A", hl.dsp.exec_cmd("void-audio-output-switch"), { description = "Switch audio output" })
+hl.bind(mainMod .. " + ALT + M", hl.dsp.exec_cmd("void-audio-source-switch"), { description = "Switch audio input/mic" })
+hl.bind(mainMod .. " + ALT + O", hl.dsp.exec_cmd("void-hyprland-window-transparency-toggle"), { description = "Toggle window transparency" })
+hl.bind(mainMod .. " + ALT + B", hl.dsp.exec_cmd("void-toggle-bar-transparency"), { description = "Toggle bar transparency" })
+hl.bind(mainMod .. " + ALT + X", hl.dsp.exec_cmd("foot -e tui-xbps"), { description = "Package manager TUI" })
+hl.bind(
+	mainMod .. " + SHIFT + X",
+	hl.dsp.exec_cmd("void-capture-screenshot region"),
+	{ description = "Screenshot region (interactive)" }
+)
 hl.bind(
 	mainMod .. " + CTRL + ALT + S",
 	hl.dsp.exec_cmd("void-launch-screensaver force"),
@@ -368,6 +397,11 @@ hl.bind(
 	"XF86AudioMicMute",
 	hl.dsp.exec_cmd("void-audio-input-mute toggle"),
 	{ locked = true, description = "Mute mic" }
+)
+hl.bind(
+	"F4",
+	hl.dsp.exec_cmd("void-audio-input-mute toggle"),
+	{ locked = true, description = "Mute mic (F4)" }
 )
 
 hl.bind(

@@ -1,0 +1,107 @@
+#!/usr/bin/env python3
+"""
+Dynamic headphone jack monitor for Void Linux / SOF HDA DSP.
+Monitors /dev/input event device for headphone insert/remove events
+and synchronizes ALSA mixer switches and PipeWire/Pulse card profiles.
+"""
+
+import os
+import sys
+import struct
+import subprocess
+import re
+import fcntl
+import time
+
+def find_jack_device():
+    try:
+        with open("/proc/bus/input/devices", "r") as f:
+            text = f.read()
+        for section in text.split("\n\n"):
+            if "Headphone" in section:
+                m = re.search(r"Handlers=.*?(event\d+)", section)
+                if m:
+                    dev = "/dev/input/" + m.group(1)
+                    if os.path.exists(dev):
+                        return dev
+    except Exception:
+        pass
+    return None
+
+def apply_jack_state(is_plugged):
+    card = "sofhdadsp"
+    card_name = "alsa_card.pci-0000_00_1f.3-platform-skl_hda_dsp_generic"
+    if is_plugged:
+        profile = "HiFi (HDMI1, HDMI2, HDMI3, Headphones, Mic1, Mic2)"
+        subprocess.run(["pactl", "set-card-profile", card_name, profile], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(["amixer", "-c", card, "cset", "name=Headphone Playback Switch", "on,on"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(["amixer", "-c", card, "cset", "name=Speaker Playback Switch", "off,off"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        # Find headphones sink and set default
+        time.sleep(0.1)
+        hp_id = subprocess.run(["sh", "-c", "wpctl status | awk '/Headphones/ {gsub(/[^0-9]/, \"\", $1); if ($1 != \"\") {print $1; exit}}'"], capture_output=True, text=True).stdout.strip()
+        if hp_id:
+            subprocess.run(["wpctl", "set-default", hp_id], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    else:
+        profile = "HiFi (HDMI1, HDMI2, HDMI3, Mic1, Mic2, Speaker)"
+        subprocess.run(["pactl", "set-card-profile", card_name, profile], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(["amixer", "-c", card, "cset", "name=Speaker Playback Switch", "on,on"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(["amixer", "-c", card, "cset", "name=Headphone Playback Switch", "off,off"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        time.sleep(0.1)
+        spk_id = subprocess.run(["sh", "-c", "wpctl status | awk '/Speaker/ {gsub(/[^0-9]/, \"\", $1); if ($1 != \"\") {print $1; exit}}'"], capture_output=True, text=True).stdout.strip()
+        if spk_id:
+            subprocess.run(["wpctl", "set-default", spk_id], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+def get_current_jack_state():
+    try:
+        out = subprocess.run(["amixer", "-c", "sofhdadsp", "cget", "iface=CARD,name=Front Headphone Jack"], capture_output=True, text=True).stdout
+        for line in out.splitlines():
+            if "values=" in line:
+                return "on" in line.lower()
+    except Exception:
+        pass
+    return False
+
+def main():
+    runtime_dir = os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}")
+    lock_path = os.path.join(runtime_dir, "void-audio-jack-monitor.lock")
+    try:
+        lock_file = open(lock_path, "w")
+        fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except (IOError, OSError):
+        sys.exit(0)
+
+    # Initial state
+    current_state = get_current_jack_state()
+    apply_jack_state(current_state)
+
+    dev_path = find_jack_device()
+    if not dev_path:
+        sys.exit(0)
+
+    try:
+        fd = open(dev_path, "rb")
+    except Exception:
+        sys.exit(1)
+
+    # struct input_event: timeval (16 bytes), type (2 bytes), code (2 bytes), value (4 bytes) = 24 bytes
+    fmt = "llHHI"
+    event_size = struct.calcsize(fmt)
+
+    EV_SW = 0x05
+    SW_HEADPHONE_INSERT = 0x02
+
+    while True:
+        try:
+            data = fd.read(event_size)
+            if not data or len(data) < event_size:
+                time.sleep(0.5)
+                continue
+            sec, usec, ev_type, ev_code, ev_value = struct.unpack(fmt, data)
+            if ev_type == EV_SW and ev_code == SW_HEADPHONE_INSERT:
+                is_plugged = (ev_value != 0)
+                apply_jack_state(is_plugged)
+        except Exception:
+            time.sleep(1)
+
+if __name__ == "__main__":
+    main()

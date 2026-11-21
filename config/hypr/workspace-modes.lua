@@ -11,7 +11,16 @@ local WORKSPACE_TAG = "void-floating-workspace"
 local OPENED_TAG = "void-mode-opened"
 local OPEN_RULE = "void-floating-open-"
 local LAST_WORKSPACE = 2147483647
-local TITLEBARS = "/usr/lib/void-hyprland-titlebars/titlebars.so"
+local TITLEBARS = (function()
+  local home = os.getenv("HOME") or "/home/rajan"
+  local user_path = home .. "/.local/lib/void-hyprland-titlebars/titlebars.so"
+  local tf = io.open(user_path, "r")
+  if tf then
+    tf:close()
+    return user_path
+  end
+  return "/usr/lib/void-hyprland-titlebars/titlebars.so"
+end)()
 
 local M = {}
 local modes = {}
@@ -270,6 +279,97 @@ local function watch()
   hl.on("monitor.focused", update_input)
 end
 
+local function theme_colors()
+  local colors = {}
+  local home = os.getenv("HOME") or "/home/rajan"
+  local file = io.open(home .. "/.local/state/void/current/theme/colors.toml", "r")
+
+  if file then
+    for line in file:lines() do
+      local key, value = line:match('^%s*([%w_]+)%s*=%s*"#(%x%x%x%x%x%x)"')
+      if key then
+        colors[key] = "rgb(" .. value .. ")"
+      end
+    end
+    file:close()
+  end
+
+  local background = colors.background or "rgb(1a1b26)"
+  local titlebar = colors.lighter_background
+  if not titlebar or titlebar == background then
+    titlebar = colors.selection or background
+  end
+
+  return {
+    background = background,
+    foreground = colors.foreground or "rgb(c0caf5)",
+    titlebar = titlebar,
+  }
+end
+
+local function titlebars_installed()
+  local file = io.open(TITLEBARS, "r")
+  if not file then
+    return false
+  end
+  file:close()
+  return true
+end
+
+local function titlebars()
+  if not titlebars_installed() then
+    return
+  end
+
+  hl.plugin.load(TITLEBARS)
+
+  if not hl.plugin.hyprbars then
+    return
+  end
+
+  local colors = theme_colors()
+  local window = [[window = "address:%WINDOW%"]]
+
+  hl.config({
+    plugin = {
+      hyprbars = {
+        enabled = true,
+        workspace_tag = WORKSPACE_TAG,
+        bar_height = 30,
+        bar_color = colors.titlebar,
+        col = { text = colors.foreground },
+        bar_text_font = "monospace",
+        bar_text_size = 12,
+        bar_text_weight = "normal",
+        bar_text_align = "left",
+        bar_buttons_alignment = "right",
+        bar_part_of_window = true,
+        bar_precedence_over_border = true,
+        bar_padding = 10,
+        bar_button_padding = 8,
+        button_rounding = 0,
+        icon_on_hover = false,
+        inactive_button_color = colors.titlebar,
+        on_double_click = "hyprctl dispatch 'hl.dsp.window.fullscreen({ mode = \"maximized\", action = \"toggle\", " .. window .. " })'",
+      },
+    },
+  })
+
+  for _, button in ipairs({
+    { icon = "×", action = "hyprctl dispatch 'hl.dsp.window.close({ " .. window .. " })'" },
+    { icon = "□", action = "hyprctl dispatch 'hl.dsp.window.fullscreen({ mode = \"maximized\", action = \"toggle\", " .. window .. " })'" },
+    { icon = "−", action = "void-hyprland-window-minimize %WINDOW%" },
+  }) do
+    hl.plugin.hyprbars.add_button({
+      bg_color = colors.titlebar,
+      fg_color = colors.foreground,
+      size = 20,
+      icon = button.icon,
+      action = button.action,
+    })
+  end
+end
+
 set_up_floating = function()
   if floating_ready then return end
   floating_ready = true
@@ -282,11 +382,7 @@ set_up_floating = function()
 
   hl.window_rule({ match = { tag = WORKSPACE_TAG }, opacity = "1.0 override 1.0 override" })
 
-  local tf = io.open(TITLEBARS, "r")
-  if tf then
-    tf:close()
-    hl.plugin.load(TITLEBARS)
-  end
+  titlebars()
 end
 
 function o.workspace_mode(spec)

@@ -21,16 +21,16 @@ for i in $(seq 1 50); do
     sleep 0.1
 done
 
-# Clean up any stale sockets if PipeWire is not running
-if ! pgrep -u "$USER" -x pipewire >/dev/null 2>&1; then
+# Clean up any stale sockets if PipeWire is not running or not responding
+if ! pw-cli info 0 >/dev/null 2>&1; then
+    pkill -9 -u "$USER" -x wireplumber 2>/dev/null || true
+    pkill -9 -u "$USER" -f "/usr/bin/pipewire" 2>/dev/null || true
     rm -f "$XDG_RUNTIME_DIR"/pipewire-*.lock "$XDG_RUNTIME_DIR"/pipewire-0* "$XDG_RUNTIME_DIR"/pulse/native 2>/dev/null || true
     setsid nohup /usr/bin/pipewire >/dev/null 2>&1 200>&- &
     sleep 0.5
 fi
 
 # Ensure WirePlumber is running:
-# PipeWire spawns wireplumber via context.exec in /etc/pipewire/pipewire.conf.d/10-session-manager.conf.
-# Wait up to 3 seconds for it to appear before attempting a manual fallback start.
 for i in $(seq 1 30); do
     if pgrep -u "$USER" -x wireplumber >/dev/null 2>&1; then
         break
@@ -38,19 +38,20 @@ for i in $(seq 1 30); do
     sleep 0.1
 done
 if ! pgrep -u "$USER" -x wireplumber >/dev/null 2>&1; then
+    pkill -9 -u "$USER" -x wireplumber 2>/dev/null || true
     setsid nohup /usr/bin/wireplumber >/dev/null 2>&1 200>&- &
     sleep 0.3
 fi
 
-# Ensure PipeWire-Pulse is running:
-# Wait up to 2 seconds for context.exec to appear before fallback start.
+# Ensure PipeWire-Pulse is running and responding:
 for i in $(seq 1 20); do
-    if pgrep -u "$USER" -x pipewire-pulse >/dev/null 2>&1 || pgrep -u "$USER" -f "pipewire.*pipewire-pulse.conf" >/dev/null 2>&1; then
+    if pactl info >/dev/null 2>&1; then
         break
     fi
     sleep 0.1
 done
-if ! pgrep -u "$USER" -x pipewire-pulse >/dev/null 2>&1 && ! pgrep -u "$USER" -f "pipewire.*pipewire-pulse.conf" >/dev/null 2>&1; then
+if ! pactl info >/dev/null 2>&1; then
+    pkill -9 -u "$USER" -f "pipewire.*pipewire-pulse.conf" 2>/dev/null || true
     setsid nohup /usr/bin/pipewire -c pipewire-pulse.conf >/dev/null 2>&1 200>&- &
     sleep 0.3
 fi
@@ -60,8 +61,14 @@ if command -v amixer >/dev/null 2>&1; then
     for card in sofhdadsp 0 1; do
         amixer -c "$card" sset 'Auto-Mute Mode' 'Enabled' >/dev/null 2>&1 || true
         amixer -c "$card" cset name='Master Playback Switch' on >/dev/null 2>&1 || true
-        amixer -c "$card" cset name='Headphone Playback Switch' on,on >/dev/null 2>&1 || true
-        amixer -c "$card" cset name='Speaker Playback Switch' on,on >/dev/null 2>&1 || true
+        hp_jack="$(amixer -c "$card" cget iface=CARD,name='Front Headphone Jack' 2>/dev/null | awk -F'=' '/values=/ {print $2}')"
+        if [ "$hp_jack" = "on" ]; then
+            amixer -c "$card" cset name='Headphone Playback Switch' on,on >/dev/null 2>&1 || true
+            amixer -c "$card" cset name='Speaker Playback Switch' off,off >/dev/null 2>&1 || true
+        else
+            amixer -c "$card" cset name='Headphone Playback Switch' off,off >/dev/null 2>&1 || true
+            amixer -c "$card" cset name='Speaker Playback Switch' on,on >/dev/null 2>&1 || true
+        fi
         amixer -c "$card" cset name='Master Playback Volume' 87 >/dev/null 2>&1 || true
         amixer -c "$card" cset name='Speaker Playback Volume' 87,87 >/dev/null 2>&1 || true
         amixer -c "$card" cset name='Headphone Playback Volume' 87,87 >/dev/null 2>&1 || true
@@ -85,5 +92,10 @@ if command -v pactl >/dev/null 2>&1; then
     if [ -n "$dmic_name" ]; then
         timeout 2s pactl set-default-source "$dmic_name" >/dev/null 2>&1 || true
     fi
+fi
+
+# Ensure dynamic headphone jack monitor is running in background
+if command -v void-audio-jack-monitor >/dev/null 2>&1; then
+    setsid nohup void-audio-jack-monitor >/dev/null 2>&1 200>&- &
 fi
 

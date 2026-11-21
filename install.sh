@@ -512,6 +512,43 @@ KERNEL=="midiC[0-9]*", SUBSYSTEM=="sound", TAG-="uaccess", GROUP="audio", MODE="
 KERNEL=="timer", SUBSYSTEM=="sound", TAG-="uaccess", GROUP="audio", MODE="0660"
 KERNEL=="seq", SUBSYSTEM=="sound", TAG-="uaccess", GROUP="audio", MODE="0660"
 UDEV
+    # Ensure SOUND_INITIALIZED is set on add as well as change events under eudev
+    cat <<'UDEV' | sudo tee /etc/udev/rules.d/78-sound-card.rules >/dev/null
+# Custom Void Linux sound card rules - ensure SOUND_INITIALIZED is set on both add and change
+SUBSYSTEM!="sound", GOTO="sound_end"
+ACTION=="add|change", KERNEL=="controlC*", ATTR{../uevent}="change"
+KERNEL!="card*", GOTO="sound_end"
+ENV{SOUND_INITIALIZED}="1"
+IMPORT{builtin}="hwdb"
+IMPORT{builtin}="path_id"
+SUBSYSTEMS=="usb", IMPORT{builtin}="usb_id"
+SUBSYSTEMS=="usb", GOTO="skip_pci"
+SUBSYSTEMS=="firewire", ATTRS{guid}=="?*", \
+  ENV{ID_BUS}="firewire", ENV{ID_SERIAL}="$attr{guid}", ENV{ID_SERIAL_SHORT}="$attr{guid}", \
+  ENV{ID_VENDOR_ID}="$attr{vendor}", ENV{ID_MODEL_ID}="$attr{model}", \
+  ENV{ID_VENDOR}="$attr{vendor_name}", ENV{ID_MODEL}="$attr{model_name}"
+SUBSYSTEMS=="firewire", GOTO="skip_pci"
+SUBSYSTEMS=="pci", ENV{ID_BUS}="pci", ENV{ID_VENDOR_ID}="$attr{vendor}", ENV{ID_MODEL_ID}="$attr{device}"
+SUBSYSTEMS=="pci", GOTO="skip_pci"
+SUBSYSTEMS=="platform", ENV{SOUND_FORM_FACTOR}="internal", GOTO="sound_end"
+LABEL="skip_pci"
+ENV{ID_SERIAL}=="?*", ENV{ID_USB_INTERFACE_NUM}=="?*", ENV{ID_ID}="$env{ID_BUS}-$env{ID_SERIAL}-$env{ID_USB_INTERFACE_NUM}"
+ENV{ID_SERIAL}=="?*", ENV{ID_USB_INTERFACE_NUM}=="", ENV{ID_ID}="$env{ID_BUS}-$env{ID_SERIAL}"
+ATTR{pcmC%nD0p/pcm_class}=="modem", ENV{SOUND_CLASS}="modem", GOTO="sound_end"
+SUBSYSTEMS=="pci", DEVPATH=="*/0000:00:??.?/sound/*", ENV{SOUND_FORM_FACTOR}="internal", GOTO="sound_end"
+SUBSYSTEMS=="usb", ENV{ID_USB_INTERFACES}=="*:0e????:*", ENV{SOUND_FORM_FACTOR}="webcam", GOTO="sound_end"
+ENV{ID_MODEL}=="*[Ss]peaker*", ENV{SOUND_FORM_FACTOR}="speaker", GOTO="sound_end"
+ENV{ID_MODEL_FROM_DATABASE}=="*[Ss]peaker*", ENV{SOUND_FORM_FACTOR}="speaker", GOTO="sound_end"
+ENV{ID_MODEL}=="*[Hh]eadphone*", ENV{SOUND_FORM_FACTOR}="headphone", GOTO="sound_end"
+ENV{ID_MODEL_FROM_DATABASE}=="*[Hh]eadphone*", ENV{SOUND_FORM_FACTOR}="headphone", GOTO="sound_end"
+ENV{ID_MODEL}=="*[Hh]eadset*", ENV{SOUND_FORM_FACTOR}="headset", GOTO="sound_end"
+ENV{ID_MODEL_FROM_DATABASE}=="*[Hh]eadset*", ENV{SOUND_FORM_FACTOR}="headset", GOTO="sound_end"
+ENV{ID_MODEL}=="*[Hh]andset*", ENV{SOUND_FORM_FACTOR}="handset", GOTO="sound_end"
+ENV{ID_MODEL_FROM_DATABASE}=="*[Hh]andset*", ENV{SOUND_FORM_FACTOR}="handset", GOTO="sound_end"
+ENV{ID_MODEL}=="*[Mm]icrophone*", ENV{SOUND_FORM_FACTOR}="microphone", GOTO="sound_end"
+ENV{ID_MODEL_FROM_DATABASE}=="*[Mm]icrophone*", ENV{SOUND_FORM_FACTOR}="microphone", GOTO="sound_end"
+LABEL="sound_end"
+UDEV
     sudo rm -f /etc/udev/rules.d/60-sound.rules /etc/udev/rules.d/99-sound.rules
     sudo udevadm control --reload 2>/dev/null || true
     sudo udevadm trigger --subsystem-match=sound 2>/dev/null || true
