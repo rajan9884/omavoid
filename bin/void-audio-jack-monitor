@@ -2,7 +2,7 @@
 """
 Dynamic headphone jack monitor for Void Linux / SOF HDA DSP.
 Monitors /dev/input event device for headphone insert/remove events
-and synchronizes ALSA mixer switches and PipeWire/Pulse card profiles.
+and synchronizes ALSA mixer switches, PipeWire card profiles, and DTS speaker tuning.
 """
 
 import os
@@ -12,8 +12,31 @@ import subprocess
 import re
 import fcntl
 import time
+import select
 
-def find_jack_device():
+def get_node_id(pattern, section="Sinks"):
+    try:
+        out = subprocess.run(["wpctl", "status"], capture_output=True, text=True).stdout
+        in_sec = False
+        for line in out.splitlines():
+            if f"├─ {section}:" in line or f"{section}:" in line:
+                in_sec = True
+                continue
+            if in_sec:
+                if any(s in line for s in ["Sources:", "Filters:", "Streams:", "Devices:", "Video"]):
+                    break
+                if pattern in line:
+                    m = re.search(r"(\d+)\.", line)
+                    if m:
+                        return m.group(1)
+    except Exception:
+        pass
+    return None
+
+def find_jack_devices():
+    """Find event devices for headphone jack and headset mic."""
+    hp_dev = None
+    mic_dev = None
     try:
         with open("/proc/bus/input/devices", "r") as f:
             text = f.read()
@@ -23,10 +46,36 @@ def find_jack_device():
                 if m:
                     dev = "/dev/input/" + m.group(1)
                     if os.path.exists(dev):
-                        return dev
+                        hp_dev = dev
+            elif "Headset Mic" in section:
+                m = re.search(r"Handlers=.*?(event\d+)", section)
+                if m:
+                    dev = "/dev/input/" + m.group(1)
+                    if os.path.exists(dev):
+                        mic_dev = dev
     except Exception:
         pass
-    return None
+    return hp_dev, mic_dev
+
+def get_current_jack_state():
+    try:
+        out = subprocess.run(["amixer", "-c", "sofhdadsp", "cget", "iface=CARD,name=Front Headphone Jack"], capture_output=True, text=True).stdout
+        for line in out.splitlines():
+            if line.strip().startswith(": values="):
+                return "on" in line.lower() or "1" in line
+    except Exception:
+        pass
+    return False
+
+def get_current_mic_jack_state():
+    try:
+        out = subprocess.run(["amixer", "-c", "sofhdadsp", "cget", "iface=CARD,name=Headset Mic Jack"], capture_output=True, text=True).stdout
+        for line in out.splitlines():
+            if line.strip().startswith(": values="):
+                return "on" in line.lower() or "1" in line
+    except Exception:
+        pass
+    return False
 
 def apply_jack_state(is_plugged):
     card = "sofhdadsp"
@@ -36,30 +85,44 @@ def apply_jack_state(is_plugged):
         subprocess.run(["pactl", "set-card-profile", card_name, profile], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         subprocess.run(["amixer", "-c", card, "cset", "name=Headphone Playback Switch", "on,on"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         subprocess.run(["amixer", "-c", card, "cset", "name=Speaker Playback Switch", "off,off"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        # Find headphones sink and set default
-        time.sleep(0.1)
-        hp_id = subprocess.run(["sh", "-c", "wpctl status | awk '/Headphones/ {gsub(/[^0-9]/, \"\", $1); if ($1 != \"\") {print $1; exit}}'"], capture_output=True, text=True).stdout.strip()
+        time.sleep(0.15)
+
+        hp_id = get_node_id("Headphones", "Sinks")
         if hp_id:
             subprocess.run(["wpctl", "set-default", hp_id], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run(["wpctl", "set-mute", hp_id, "0"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+        # Check if headset mic is plugged in
+        if get_current_mic_jack_state():
+            mic2_id = get_node_id("Stereo Microphone", "Sources")
+            if mic2_id:
+                subprocess.run(["wpctl", "set-default", mic2_id], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                subprocess.run(["wpctl", "set-mute", mic2_id, "0"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        else:
+            mic1_id = get_node_id("Digital Microphone", "Sources")
+            if mic1_id:
+                subprocess.run(["wpctl", "set-default", mic1_id], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                subprocess.run(["wpctl", "set-mute", mic1_id, "0"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     else:
         profile = "HiFi (HDMI1, HDMI2, HDMI3, Mic1, Mic2, Speaker)"
         subprocess.run(["pactl", "set-card-profile", card_name, profile], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         subprocess.run(["amixer", "-c", card, "cset", "name=Speaker Playback Switch", "on,on"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         subprocess.run(["amixer", "-c", card, "cset", "name=Headphone Playback Switch", "off,off"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        time.sleep(0.1)
-        spk_id = subprocess.run(["sh", "-c", "wpctl status | awk '/Speaker/ {gsub(/[^0-9]/, \"\", $1); if ($1 != \"\") {print $1; exit}}'"], capture_output=True, text=True).stdout.strip()
+        time.sleep(0.15)
+
+        # Prefer void_speaker_tuning (DTS tuned output) if present
+        spk_id = get_node_id("void_speaker_tuning", "Sinks")
+        if not spk_id:
+            spk_id = get_node_id("Speaker", "Sinks")
         if spk_id:
             subprocess.run(["wpctl", "set-default", spk_id], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run(["wpctl", "set-mute", spk_id, "0"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-def get_current_jack_state():
-    try:
-        out = subprocess.run(["amixer", "-c", "sofhdadsp", "cget", "iface=CARD,name=Front Headphone Jack"], capture_output=True, text=True).stdout
-        for line in out.splitlines():
-            if "values=" in line:
-                return "on" in line.lower()
-    except Exception:
-        pass
-    return False
+        # Switch default microphone back to Digital Microphone (Mic1) and ensure unmuted
+        mic1_id = get_node_id("Digital Microphone", "Sources")
+        if mic1_id:
+            subprocess.run(["wpctl", "set-default", mic1_id], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run(["wpctl", "set-mute", mic1_id, "0"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 def main():
     runtime_dir = os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}")
@@ -70,18 +133,22 @@ def main():
     except (IOError, OSError):
         sys.exit(0)
 
-    # Initial state
+    # Initial state synchronization
     current_state = get_current_jack_state()
     apply_jack_state(current_state)
 
-    dev_path = find_jack_device()
-    if not dev_path:
-        sys.exit(0)
-
-    try:
-        fd = open(dev_path, "rb")
-    except Exception:
-        sys.exit(1)
+    hp_dev, mic_dev = find_jack_devices()
+    fds = []
+    if hp_dev:
+        try:
+            fds.append(open(hp_dev, "rb"))
+        except Exception:
+            pass
+    if mic_dev:
+        try:
+            fds.append(open(mic_dev, "rb"))
+        except Exception:
+            pass
 
     # struct input_event: timeval (16 bytes), type (2 bytes), code (2 bytes), value (4 bytes) = 24 bytes
     fmt = "llHHI"
@@ -89,19 +156,36 @@ def main():
 
     EV_SW = 0x05
     SW_HEADPHONE_INSERT = 0x02
+    SW_MICROPHONE_INSERT = 0x04
 
+    last_state = current_state
+
+    # Event loop with select timeout fallback to ALSA poll
     while True:
         try:
-            data = fd.read(event_size)
-            if not data or len(data) < event_size:
-                time.sleep(0.5)
-                continue
-            sec, usec, ev_type, ev_code, ev_value = struct.unpack(fmt, data)
-            if ev_type == EV_SW and ev_code == SW_HEADPHONE_INSERT:
-                is_plugged = (ev_value != 0)
-                apply_jack_state(is_plugged)
+            if fds:
+                rlist, _, _ = select.select(fds, [], [], 2.0)
+                for fd in rlist:
+                    data = fd.read(event_size)
+                    if data and len(data) >= event_size:
+                        sec, usec, ev_type, ev_code, ev_value = struct.unpack(fmt, data)
+                        if ev_type == EV_SW:
+                            if ev_code in (SW_HEADPHONE_INSERT, SW_MICROPHONE_INSERT):
+                                is_plugged = get_current_jack_state()
+                                if is_plugged != last_state:
+                                    last_state = is_plugged
+                                    apply_jack_state(is_plugged)
+            else:
+                time.sleep(2.0)
+
+            # Polling safety check (in case device was replugged without event delivery)
+            actual_state = get_current_jack_state()
+            if actual_state != last_state:
+                last_state = actual_state
+                apply_jack_state(actual_state)
+
         except Exception:
-            time.sleep(1)
+            time.sleep(1.0)
 
 if __name__ == "__main__":
     main()

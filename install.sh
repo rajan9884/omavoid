@@ -662,6 +662,10 @@ KERNEL=="timer", SUBSYSTEM=="sound", TAG-="uaccess", GROUP="audio", MODE="0660"
 KERNEL=="seq", SUBSYSTEM=="sound", TAG-="uaccess", GROUP="audio", MODE="0660"
 UDEV
 
+    cat <<'UDEV' | sudo tee /etc/udev/rules.d/99-sound-input.rules >/dev/null
+KERNEL=="event*", SUBSYSTEM=="input", GROUP="input", MODE="0660"
+UDEV
+
     cat <<'UDEV' | sudo tee /etc/udev/rules.d/78-sound-card.rules >/dev/null
 SUBSYSTEM!="sound", GOTO="sound_end"
 ACTION=="add|change", KERNEL=="controlC*", ATTR{../uevent}="change"

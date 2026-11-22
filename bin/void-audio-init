@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Authentic Void audio stack initialization for Void Linux under Wayland / Hyprland
-# Ensures PipeWire, WirePlumber, PipeWire-Pulse, Void speaker tuning, and Jack detection start cleanly.
+# Ensures PipeWire, WirePlumber, PipeWire-Pulse, DTS speaker tuning, and Jack detection start cleanly.
 
 if [ -z "${XDG_RUNTIME_DIR:-}" ]; then
     export XDG_RUNTIME_DIR="/run/user/$(id -u)"
@@ -80,22 +80,26 @@ if command -v amixer >/dev/null 2>&1; then
     done
 fi
 
-# Ensure default audio source is Digital Microphone if present
+# Ensure DTS speaker tuning filter chain is running
+if [ -f "$HOME/.config/pipewire/void-speaker-tuning.conf" ]; then
+    if ! pgrep -u "$USER" -f "pipewire -c .*void-speaker-tuning.conf" >/dev/null 2>&1; then
+        setsid nohup /usr/bin/pipewire -c void-speaker-tuning.conf >/dev/null 2>&1 200>&- &
+        sleep 0.4
+    fi
+fi
+
+# Ensure default audio source is unmuted and active
 if command -v wpctl >/dev/null 2>&1; then
     dmic_id="$(timeout 2s wpctl status 2>/dev/null | awk '/Digital Microphone/ {gsub(/[^0-9]/, "", $1); if ($1 != "") {print $1; exit}}')"
     if [ -n "$dmic_id" ]; then
         timeout 2s wpctl set-default "$dmic_id" >/dev/null 2>&1 || true
     fi
-fi
-if command -v pactl >/dev/null 2>&1; then
-    dmic_name="$(timeout 2s pactl list sources short 2>/dev/null | awk '/HiFi__Mic1__source/ {print $2; exit}')"
-    if [ -n "$dmic_name" ]; then
-        timeout 2s pactl set-default-source "$dmic_name" >/dev/null 2>&1 || true
-    fi
+    timeout 2s wpctl set-mute @DEFAULT_AUDIO_SOURCE@ 0 >/dev/null 2>&1 || true
 fi
 
 # Ensure dynamic headphone jack monitor is running in background
 if command -v void-audio-jack-monitor >/dev/null 2>&1; then
-    setsid nohup void-audio-jack-monitor >/dev/null 2>&1 200>&- &
+    if ! pgrep -u "$USER" -x void-audio-jack-monitor >/dev/null 2>&1 && ! pgrep -u "$USER" -f "python3 .*/void-audio-jack-monitor" >/dev/null 2>&1; then
+        setsid nohup void-audio-jack-monitor >/dev/null 2>&1 200>&- &
+    fi
 fi
-
