@@ -10,9 +10,9 @@
   },
 
   "display": {
-    "separator": " ➜ ",
+    "separator": "     ➜     ",
     "key": {
-      "width": 14
+      "width": 24
     }
   },
 
@@ -28,32 +28,32 @@
     },
     {
       "type": "os",
-      "key": " OS",
+      "key": " OS        ",
       "keyColor": "#b59790"
     },
     {
       "type": "host",
-      "key": "󰌢 Host",
+      "key": "󰌢 Host      ",
       "keyColor": "#b59790"
     },
     {
       "type": "kernel",
-      "key": "󰌽 Kernel",
+      "key": "󰌽 Kernel    ",
       "keyColor": "#b59790"
     },
     {
       "type": "uptime",
-      "key": "󰅐 Uptime",
+      "key": "󰅐 Uptime    ",
       "keyColor": "#b59790"
     },
     {
       "type": "packages",
-      "key": "󰏖 Packages",
+      "key": "󰏖 Packages  ",
       "keyColor": "#b59790"
     },
     {
       "type": "shell",
-      "key": " Shell",
+      "key": " Shell     ",
       "keyColor": "#b59790"
     },
     {
@@ -67,43 +67,43 @@
     },
     {
       "type": "display",
-      "key": "󰍹 Display",
+      "key": "󰍹 Display   ",
       "keyColor": "#a5a0b6",
       "format": "{width}x{height} @ {refresh-rate} Hz {scale-factor}x {inch}''"
     },
     {
       "type": "de",
-      "key": "󰘔 DE",
+      "key": "󰘔 DE        ",
       "keyColor": "#a5a0b6"
     },
     {
       "type": "wm",
-      "key": "󰖲 WM",
+      "key": "󰖲 WM        ",
       "keyColor": "#a5a0b6"
     },
     {
       "type": "wmtheme",
-      "key": "󰋜 WM Theme",
+      "key": "󰋜 WM Theme  ",
       "keyColor": "#a5a0b6"
     },
     {
       "type": "font",
-      "key": "󰛖 Font",
+      "key": "󰛖 Font      ",
       "keyColor": "#a5a0b6"
     },
     {
       "type": "cursor",
-      "key": "󰇀 Cursor",
+      "key": "󰇀 Cursor    ",
       "keyColor": "#a5a0b6"
     },
     {
       "type": "terminal",
-      "key": " Terminal",
+      "key": " Terminal  ",
       "keyColor": "#a5a0b6"
     },
     {
       "type": "terminalfont",
-      "key": " Term Font",
+      "key": " Term Font ",
       "keyColor": "#a5a0b6"
     },
     {
@@ -117,24 +117,24 @@
     },
     {
       "type": "cpu",
-      "key": " CPU",
+      "key": " CPU       ",
       "keyColor": "#c4d8e2",
       "format": "{name} ({cores-online})"
     },
     {
       "type": "gpu",
-      "key": "󰢮 GPU",
+      "key": "󰢮 GPU       ",
       "keyColor": "#c4d8e2",
       "format": "{vendor} {name} ({type})"
     },
     {
       "type": "memory",
-      "key": "󰍛 Memory",
+      "key": "󰍛 Memory    ",
       "keyColor": "#c4d8e2"
     },
     {
       "type": "disk",
-      "key": "󰋊 Disk",
+      "key": "󰋊 Disk      ",
       "keyColor": "#c4d8e2"
     },
     {

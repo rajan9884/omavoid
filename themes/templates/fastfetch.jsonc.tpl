@@ -10,9 +10,9 @@
   },
 
   "display": {
-    "separator": " ➜ ",
+    "separator": "     ➜     ",
     "key": {
-      "width": 14
+      "width": 24
     }
   },
 
@@ -28,32 +28,32 @@
     },
     {
       "type": "os",
-      "key": " OS",
+      "key": " OS        ",
       "keyColor": "{{ accent }}"
     },
     {
       "type": "host",
-      "key": "󰌢 Host",
+      "key": "󰌢 Host      ",
       "keyColor": "{{ accent }}"
     },
     {
       "type": "kernel",
-      "key": "󰌽 Kernel",
+      "key": "󰌽 Kernel    ",
       "keyColor": "{{ accent }}"
     },
     {
       "type": "uptime",
-      "key": "󰅐 Uptime",
+      "key": "󰅐 Uptime    ",
       "keyColor": "{{ accent }}"
     },
     {
       "type": "packages",
-      "key": "󰏖 Packages",
+      "key": "󰏖 Packages  ",
       "keyColor": "{{ accent }}"
     },
     {
       "type": "shell",
-      "key": " Shell",
+      "key": " Shell     ",
       "keyColor": "{{ accent }}"
     },
     {
@@ -67,43 +67,43 @@
     },
     {
       "type": "display",
-      "key": "󰍹 Display",
+      "key": "󰍹 Display   ",
       "keyColor": "{{ cyan }}",
       "format": "{width}x{height} @ {refresh-rate} Hz {scale-factor}x {inch}''"
     },
     {
       "type": "de",
-      "key": "󰘔 DE",
+      "key": "󰘔 DE        ",
       "keyColor": "{{ cyan }}"
     },
     {
       "type": "wm",
-      "key": "󰖲 WM",
+      "key": "󰖲 WM        ",
       "keyColor": "{{ cyan }}"
     },
     {
       "type": "wmtheme",
-      "key": "󰋜 WM Theme",
+      "key": "󰋜 WM Theme  ",
       "keyColor": "{{ cyan }}"
     },
     {
       "type": "font",
-      "key": "󰛖 Font",
+      "key": "󰛖 Font      ",
       "keyColor": "{{ cyan }}"
     },
     {
       "type": "cursor",
-      "key": "󰇀 Cursor",
+      "key": "󰇀 Cursor    ",
       "keyColor": "{{ cyan }}"
     },
     {
       "type": "terminal",
-      "key": " Terminal",
+      "key": " Terminal  ",
       "keyColor": "{{ cyan }}"
     },
     {
       "type": "terminalfont",
-      "key": " Term Font",
+      "key": " Term Font ",
       "keyColor": "{{ cyan }}"
     },
     {
@@ -117,24 +117,24 @@
     },
     {
       "type": "cpu",
-      "key": " CPU",
+      "key": " CPU       ",
       "keyColor": "{{ magenta }}",
       "format": "{name} ({cores-online})"
     },
     {
       "type": "gpu",
-      "key": "󰢮 GPU",
+      "key": "󰢮 GPU       ",
       "keyColor": "{{ magenta }}",
       "format": "{vendor} {name} ({type})"
     },
     {
       "type": "memory",
-      "key": "󰍛 Memory",
+      "key": "󰍛 Memory    ",
       "keyColor": "{{ magenta }}"
     },
     {
       "type": "disk",
-      "key": "󰋊 Disk",
+      "key": "󰋊 Disk      ",
       "keyColor": "{{ magenta }}"
     },
     {
