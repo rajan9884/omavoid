@@ -6,28 +6,35 @@ cmd="${1:-toggle}"
 
 case "$cmd" in
     start|on|up)
-        echo "Starting Cloudflare warp-svc..."
+        echo "Starting Cloudflare warp-svc on demand..."
         if [ ! -L /var/service/warp-svc ]; then
             sudo ln -sf /etc/sv/warp-svc /var/service/
         fi
         sudo rm -f /etc/sv/warp-svc/down
-        sudo sv up warp-svc
-        sleep 1
-        warp-cli status || true
+        sudo sv up warp-svc 2>/dev/null || true
+        for _ in {1..15}; do
+            if [ -S /var/run/cloudflare-warp/warp_service.sock ] || pgrep -x warp-svc >/dev/null 2>&1; then
+                break
+            fi
+            sleep 0.2
+        done
+        warp-cli status 2>/dev/null || true
+        echo "warp-svc is active."
         ;;
     stop|off|down)
         echo "Stopping Cloudflare warp-svc to free memory..."
-        sudo touch /etc/sv/warp-svc/down
+        warp-cli disconnect 2>/dev/null || true
+        sudo touch /etc/sv/warp-svc/down 2>/dev/null || true
         sudo sv down warp-svc 2>/dev/null || true
         sudo rm -f /var/service/warp-svc
-        echo "warp-svc stopped."
+        echo "warp-svc stopped and removed from active services."
         ;;
     status)
         if pgrep -x warp-svc >/dev/null 2>&1; then
             echo "warp-svc is RUNNING"
-            warp-cli status || true
+            warp-cli status 2>/dev/null || true
         else
-            echo "warp-svc is STOPPED"
+            echo "warp-svc is STOPPED (unlinked from /var/service)"
         fi
         ;;
     toggle)

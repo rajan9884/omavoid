@@ -26,7 +26,14 @@ Item {
   }
 
   function setNightlight(value) {
-    applyTemperature(value ? nightTemperature : dayTemperature)
+    if (value) {
+      applyTemperature(nightTemperature)
+    } else {
+      root.temperature = null
+      root.stateLoaded = true
+      applyProcess.command = ["bash", "-c", "pkill -x hyprsunset 2>/dev/null || true"]
+      applyProcess.running = true
+    }
   }
 
   function toggle() {

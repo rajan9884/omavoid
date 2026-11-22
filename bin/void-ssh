@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# void:summary=On-demand OpenSSH daemon management
+set -euo pipefail
+
+cmd="${1:-toggle}"
+
+case "$cmd" in
+    start|on|up)
+        echo "Starting SSH server (sshd) on demand..."
+        if [ ! -L /var/service/sshd ]; then
+            sudo ln -sf /etc/sv/sshd /var/service/
+        fi
+        sudo rm -f /etc/sv/sshd/down
+        sudo sv up sshd 2>/dev/null || true
+        sleep 0.5
+        if pgrep -x sshd >/dev/null 2>&1; then
+            echo "sshd is RUNNING on port 22."
+        fi
+        ;;
+    stop|off|down)
+        echo "Stopping SSH server to eliminate open listener..."
+        sudo touch /etc/sv/sshd/down 2>/dev/null || true
+        sudo sv down sshd 2>/dev/null || true
+        sudo rm -f /var/service/sshd
+        echo "sshd stopped and removed from active services."
+        ;;
+    status)
+        if pgrep -x sshd >/dev/null 2>&1; then
+            echo "sshd is RUNNING (listening on port 22)"
+        else
+            echo "sshd is STOPPED (unlinked from /var/service)"
+        fi
+        ;;
+    toggle)
+        if pgrep -x sshd >/dev/null 2>&1; then
+            "$0" off
+        else
+            "$0" on
+        fi
+        ;;
+    *)
+        echo "Usage: void-ssh [on|off|status|toggle]"
+        exit 1
+        ;;
+esac

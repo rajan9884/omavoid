@@ -48,6 +48,21 @@ wait_powered() {
   done
 }
 
+start_agent_if_needed() {
+  if ! pgrep -f "void-bluetooth-agent" >/dev/null 2>&1; then
+    local agent_path="/usr/share/void/bin/void-bluetooth-agent"
+    [[ -x "$agent_path" ]] || agent_path="$HOME/omavoid/bin/void-bluetooth-agent"
+    if [[ -f "$agent_path" ]]; then
+      setsid python3 "$agent_path" >/dev/null 2>&1 &
+    fi
+  fi
+}
+
+stop_agent() {
+  pkill -f "/usr/share/void/bin/void-bluetooth-agent" 2>/dev/null || true
+  pkill -f "python3 .*/void-bluetooth-agent" 2>/dev/null || true
+}
+
 power_on() {
   rfkill unblock bluetooth
 
@@ -66,17 +81,21 @@ power_on() {
 case "${1:-}" in
   on)
     power_on
+    start_agent_if_needed
     ;;
   off)
     # No bluetoothctl power off to go with this: the block already drops the
     # adapter to Powered: no, and it is the half that survives the reboot.
     rfkill block bluetooth
+    stop_agent
     ;;
   toggle)
     if powered; then
       rfkill block bluetooth
+      stop_agent
     else
       power_on
+      start_agent_if_needed
     fi
     ;;
   is-on)

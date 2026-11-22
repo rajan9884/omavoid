@@ -1,11 +1,10 @@
 #!/bin/bash
 
-# void:summary=Toggle nightlight screen temperature
+# void:summary=Toggle nightlight screen temperature (runs hyprsunset on-demand)
 # void:args=[--status]
 # void:examples=void toggle nightlight
 
 ON_TEMP=4000
-OFF_TEMP=6500
 IDENTITY_TEMP=6000
 
 current_temp() {
@@ -34,35 +33,17 @@ if [[ ${1:-} == "--status" ]]; then
   exit 0
 fi
 
-# Ensure hyprsunset is running. One a few seconds old may still be booting,
-# such as one started at login, so it counts as just started too.
-STARTING=false
-if ! pgrep -x hyprsunset >/dev/null; then
-  setsid uwsm-app -- hyprsunset &
-  STARTING=true
-elif (( $(ps -o etimes= -p "$(pgrep -nx hyprsunset)" 2>/dev/null || echo 0) < 3 )); then
-  STARTING=true
-fi
-
-# Query the current temperature
-CURRENT_TEMP=$(current_temp)
-
-if [[ -z $CURRENT_TEMP || $CURRENT_TEMP == $OFF_TEMP ]]; then
-  TARGET_TEMP=$ON_TEMP
+if pgrep -x hyprsunset >/dev/null; then
+  # Already running: turn OFF and terminate hyprsunset completely
+  pkill -x hyprsunset 2>/dev/null || true
 else
-  TARGET_TEMP=$OFF_TEMP
+  # Not running: turn ON on demand
+  setsid uwsm-app -- hyprsunset >/dev/null 2>&1 &
+  for _ in {1..10}; do
+    hyprctl hyprsunset temperature $ON_TEMP >/dev/null 2>&1
+    [[ $(current_temp) == "$ON_TEMP" ]] && break
+    sleep 0.2
+  done
 fi
 
-# A freshly-started hyprsunset applies its default temperature at the end of
-# its boot, overriding anything set before then — so resend until it sticks. One
-# that has finished starting applies it at once, so it needs no wait.
-for _ in {1..10}; do
-  hyprctl hyprsunset temperature $TARGET_TEMP >/dev/null 2>&1
-  if [[ $STARTING == "false" && $(current_temp) == "$TARGET_TEMP" ]]; then
-    break
-  fi
-  sleep 0.2
-  [[ $(current_temp) == "$TARGET_TEMP" ]] && break
-done
-
-void-shell -q nightlight refresh
+void-shell -q nightlight refresh 2>/dev/null || true

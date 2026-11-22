@@ -53,3 +53,11 @@ alias svstatus='sudo sv status /var/service/*'
 alias vsv='sudo vsv'
 alias vp-sync='XBPS_DISTDIR="$HOME/.local/share/pkg/void-packages" "$HOME/.local/share/pkg/void-packages/vp-sync"'
 export XBPS_DISTDIR="${XBPS_DISTDIR:-$HOME/.local/share/pkg/void-packages}"
+
+# On-demand service toggles
+alias docker-on='void-docker on'
+alias docker-off='void-docker off'
+alias ssh-on='void-ssh on'
+alias ssh-off='void-ssh off'
+alias warp-on='void-warp on'
+alias warp-off='void-warp off'

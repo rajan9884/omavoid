@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# void:summary=On-demand Docker service management
+set -euo pipefail
+
+cmd="${1:-toggle}"
+
+case "$cmd" in
+    start|on|up)
+        echo "Starting Docker daemon on demand..."
+        if [ ! -L /var/service/docker ]; then
+            sudo ln -sf /etc/sv/docker /var/service/
+        fi
+        sudo rm -f /etc/sv/docker/down
+        sudo sv up docker 2>/dev/null || true
+        for _ in {1..20}; do
+            if [ -S /var/run/docker.sock ] || pgrep -x dockerd >/dev/null 2>&1; then
+                break
+            fi
+            sleep 0.2
+        done
+        if docker info >/dev/null 2>&1; then
+            echo "Docker daemon is ready."
+        else
+            echo "Docker service linked and starting up..."
+        fi
+        ;;
+    stop|off|down)
+        echo "Stopping Docker daemon to free system memory..."
+        sudo touch /etc/sv/docker/down 2>/dev/null || true
+        sudo sv down docker 2>/dev/null || true
+        sudo rm -f /var/service/docker
+        echo "Docker stopped and removed from active services."
+        ;;
+    status)
+        if pgrep -x dockerd >/dev/null 2>&1; then
+            echo "Docker daemon is RUNNING"
+            docker info 2>/dev/null | grep -E "Containers:|Running:|Images:|Server Version:" || true
+        else
+            echo "Docker daemon is STOPPED (unlinked from /var/service)"
+        fi
+        ;;
+    toggle)
+        if pgrep -x dockerd >/dev/null 2>&1; then
+            "$0" off
+        else
+            "$0" on
+        fi
+        ;;
+    *)
+        echo "Usage: void-docker [on|off|status|toggle]"
+        exit 1
+        ;;
+esac

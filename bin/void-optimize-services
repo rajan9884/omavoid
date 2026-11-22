@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# void:summary=Optimize Void Linux background runit services for minimal idle overhead
+set -euo pipefail
+
+echo "=========================================================="
+echo " Void Linux: Idle Service Optimizer"
+echo "=========================================================="
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo "This script requires root privileges to modify /var/service."
+    echo "Re-running with sudo..."
+    exec sudo "$0" "$@"
+fi
+
+# 1. Stop and completely remove redundant ACPI daemon (elogind natively handles power/lid/sleep)
+if [ -L /var/service/acpid ]; then
+    echo "[-] Removing redundant acpid (managed natively by elogind)..."
+    sv down acpid 2>/dev/null || true
+    rm -f /var/service/acpid
+fi
+
+# 2. Prune redundant agetty consoles (tty3 - tty6), keeping agetty-tty2 as single rescue VT
+for tty in 3 4 5 6; do
+    if [ -L "/var/service/agetty-tty${tty}" ]; then
+        echo "[-] Removing idle console agetty-tty${tty}..."
+        sv down "agetty-tty${tty}" 2>/dev/null || true
+        rm -f "/var/service/agetty-tty${tty}"
+    fi
+done
+
+# 3. Completely remove continuous background services and mark them on-demand
+for svc in docker sshd warp-svc; do
+    if [ -L "/var/service/${svc}" ]; then
+        echo "[-] Moving ${svc} to on-demand (removing from /var/service)..."
+        touch "/etc/sv/${svc}/down" 2>/dev/null || true
+        sv down "${svc}" 2>/dev/null || true
+        rm -f "/var/service/${svc}"
+    fi
+done
+
+# 4. Set NO_AT_BRIDGE in /etc/environment to permanently prevent AT-SPI accessibility daemon launch
+if [ -f /etc/environment ]; then
+    if ! grep -q 'NO_AT_BRIDGE' /etc/environment; then
+        echo "NO_AT_BRIDGE=1" >> /etc/environment
+        echo "[+] Added NO_AT_BRIDGE=1 to /etc/environment"
+    fi
+fi
+
+# Allow runsvdir to clean up terminated supervisors
+sleep 1
+echo ""
+echo "Current active services in /var/service:"
+ls -1 /var/service/
+echo ""
+echo "Optimization complete! Docker, SSH, and WARP can be launched on demand via:"
+echo "  void-docker on|off"
+echo "  void-ssh on|off"
+echo "  void-warp on|off"
+echo "=========================================================="

@@ -585,18 +585,29 @@ setup_runit_and_groups() {
         [ -L "/var/service/${conflict_svc}" ] && sudo rm -f "/var/service/${conflict_svc}"
     done
 
-    # Enable essential runit services
-    for svc in dbus elogind seatd NetworkManager bluetoothd polkitd acpid power-profiles-daemon; do
+    # Enable essential runit services (acpid removed; elogind natively handles power/lid/sleep)
+    for svc in dbus elogind seatd NetworkManager bluetoothd polkitd power-profiles-daemon; do
         if [ -d "/etc/sv/${svc}" ] && [ ! -L "/var/service/${svc}" ]; then
             sudo ln -sf "/etc/sv/${svc}" "/var/service/${svc}"
             log_ok "Enabled runit service: ${svc}"
         fi
     done
 
-    # Prevent acpid from double-stepping backlight brightness
-    if [ -f /etc/acpi/handler.sh ]; then
-        sudo sed -i 's/^\([[:space:]]*step_backlight\)/#\1/' /etc/acpi/handler.sh 2>/dev/null || true
-    fi
+    # Remove redundant acpid if present (handled natively by elogind)
+    [ -L "/var/service/acpid" ] && sudo rm -f "/var/service/acpid"
+
+    # Prune redundant virtual consoles (keep agetty-tty2 as single backup emergency VT)
+    for tty in 3 4 5 6; do
+        [ -L "/var/service/agetty-tty${tty}" ] && sudo rm -f "/var/service/agetty-tty${tty}"
+    done
+
+    # Ensure heavy intermittent services remain strictly on-demand
+    for ondemand_svc in docker sshd warp-svc; do
+        if [ -L "/var/service/${ondemand_svc}" ]; then
+            sudo touch "/etc/sv/${ondemand_svc}/down" 2>/dev/null || true
+            sudo rm -f "/var/service/${ondemand_svc}"
+        fi
+    done
 
     # Enable bluetoothd experimental flags for modern BLE/LE Audio profiles
     if [ -d /etc/sv/bluetoothd ]; then
@@ -615,10 +626,11 @@ setup_runit_and_groups() {
         sudo sed -i 's/^#*MultiProfile *=.*/MultiProfile = multiple/' /etc/bluetooth/main.conf 2>/dev/null || true
     fi
 
-    # Optimize glibc memory arenas to prevent memory bloat across multithreaded daemons
+    # Optimize glibc memory arenas & disable AT-SPI accessibility bridge to prevent idle memory bloat
     if [ -f /etc/environment ]; then
         grep -q 'MALLOC_ARENA_MAX' /etc/environment || echo 'MALLOC_ARENA_MAX=2' | sudo tee -a /etc/environment >/dev/null
         grep -q 'MALLOC_TRIM_THRESHOLD_' /etc/environment || echo 'MALLOC_TRIM_THRESHOLD_=131072' | sudo tee -a /etc/environment >/dev/null
+        grep -q 'NO_AT_BRIDGE' /etc/environment || echo 'NO_AT_BRIDGE=1' | sudo tee -a /etc/environment >/dev/null
     fi
 
     # Enable greetd display manager if installed

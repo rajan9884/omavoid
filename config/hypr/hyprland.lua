@@ -25,6 +25,9 @@ hl.env("XDG_SESSION_TYPE", "wayland")
 hl.env("XDG_CURRENT_DESKTOP", "Hyprland")
 hl.env("XDG_SESSION_DESKTOP", "Hyprland")
 
+-- Disable AT-SPI accessibility bus to save idle memory and processes
+hl.env("NO_AT_BRIDGE", "1")
+
 -- Malloc arena memory optimization
 hl.env("MALLOC_ARENA_MAX", "2")
 hl.env("MALLOC_TRIM_THRESHOLD_", "131072")
