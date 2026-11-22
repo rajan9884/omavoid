@@ -319,6 +319,8 @@ def delete_payload(payload: str):
         raise ValueError(f"unknown payload: {payload}")
 
 
+
+def do_delete(selected_lines):
     payloads = []
     for line in selected_lines:
         line = line.rstrip("\n")
