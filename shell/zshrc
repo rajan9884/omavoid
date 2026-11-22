@@ -47,6 +47,10 @@ ffd() {
   (( $#files )) && { echo "Delete: $files"; read -q "?Confirm? "; echo; rm -rf $files }
 }
 
+fcs() {
+  command fcs "$@"
+}
+
 # Monochrome eza
 export EZA_COLORS="uu=bright-black:gu=bright-black:da=bright-black:ur=white:uw=bright-black:ux=white:ue=bright-black:gr=bright-black:gw=bright-black:gx=white:tr=bright-black:fi=white:di=bright-white:ln=bright-black:pi=bright-black:so=bright-black:bd=bright-black:cd=bright-black:or=bright-black:mi=bright-black:ex=white"
 
@@ -142,7 +146,7 @@ if command -v zoxide >/dev/null 2>&1; then
 fi
 
 # Added by Antigravity CLI installer
-export PATH="/home/rajan/.local/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
 
 # kilo
-export PATH=/home/rajan/.kilo/bin:$PATH
+export PATH="$HOME/.kilo/bin:$PATH"

@@ -1,0 +1,413 @@
+#!/usr/bin/env python3
+import argparse
+import base64
+import json
+import os
+import re
+import shutil
+import sqlite3
+import shlex
+import subprocess
+import sys
+from datetime import datetime
+from pathlib import Path
+
+HOME = Path.home()
+KILO_DB = HOME / ".local/share/kilo/kilo.db"
+KILO_DIFF_DIR = HOME / ".local/share/kilo/storage/session_diff"
+CLAUDE_ROOT = HOME / ".claude/projects"
+AG_ROOT = HOME / ".gemini/antigravity-cli/conversations"
+
+SCRIPT = Path(__file__).resolve()
+
+
+def b64(s: str) -> str:
+    return base64.b64encode(s.encode()).decode()
+
+
+def clean(s: str) -> str:
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def fmt_ms(ms: int) -> str:
+    try:
+        return datetime.fromtimestamp(ms / 1000).strftime("%Y-%m-%d %H:%M")
+    except Exception:
+        return str(ms)
+
+
+def kilo_candidates():
+    out = []
+    if not KILO_DB.is_file():
+        return out
+    conn = sqlite3.connect(f"file:{KILO_DB}?mode=ro", uri=True, timeout=10)
+    try:
+        for sid, title, directory, updated in conn.execute(
+            "SELECT id, title, directory, time_updated FROM session ORDER BY time_updated DESC"
+        ):
+            out.append(
+                {
+                    "tool": "kilo",
+                    "title": clean(title or sid),
+                    "location": clean(directory or ""),
+                    "updated": fmt_ms(updated or 0),
+                    "payload": f"kilo:{sid}",
+                }
+            )
+    finally:
+        conn.close()
+    return out
+
+
+def claude_title(path: Path) -> str:
+    try:
+        with path.open("r", encoding="utf-8", errors="replace") as f:
+            for line in f:
+                try:
+                    obj = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if obj.get("type") != "user":
+                    continue
+                msg = obj.get("message", {})
+                content = msg.get("content", "")
+                if isinstance(content, list):
+                    parts = []
+                    for item in content:
+                        if isinstance(item, dict):
+                            parts.append(item.get("text", ""))
+                        else:
+                            parts.append(str(item))
+                    content = " ".join(parts)
+                title = clean(str(content))
+                if title:
+                    return title[:100]
+    except OSError:
+        pass
+    return path.stem
+
+
+def claude_candidates():
+    out = []
+    if not CLAUDE_ROOT.is_dir():
+        return out
+    for path in CLAUDE_ROOT.glob("*/*.jsonl"):
+        project = path.parent.name
+        title = claude_title(path)
+        try:
+            mtime = path.stat().st_mtime
+            updated = datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M")
+        except OSError:
+            updated = ""
+        out.append(
+            {
+                "tool": "claude",
+                "title": title,
+                "location": project,
+                "updated": updated,
+                "payload": f"claude:{path}",
+            }
+        )
+    out.sort(key=lambda x: x["updated"], reverse=True)
+    return out
+
+
+def ag_title(path: Path) -> str:
+    try:
+        conn = sqlite3.connect(f"file:{path}?mode=ro", uri=True, timeout=10)
+    except sqlite3.Error:
+        return path.stem
+    best = ""
+    try:
+        for (payload,) in conn.execute("SELECT step_payload FROM steps ORDER BY idx"):
+            if not payload:
+                continue
+            text = payload if isinstance(payload, str) else bytes(payload).decode("utf-8", "replace")
+            for run in re.findall(r"[\x20-\x7e]{30,}", text):
+                low = run.lower()
+                if any(ch in run for ch in ("$", "{", "}", "\\", "/")):
+                    continue
+                if len(run.split()) < 4:
+                    continue
+                if re.search(r"[0-9a-f]{8}-[0-9a-f]{4}-", run):
+                    continue
+                if any(
+                    bad in low
+                    for bad in (
+                        "commandline",
+                        "toolsummary",
+                        "you are working",
+                        "slash commands",
+                        "user_rules",
+                        "running_tasks",
+                        "conversation_transcript",
+                    )
+                ):
+                    continue
+                best = run
+                break
+            if best:
+                break
+    except sqlite3.Error:
+        pass
+    finally:
+        conn.close()
+    return clean(best)[:100] if best else path.stem
+
+
+def ag_candidates():
+    out = []
+    if not AG_ROOT.is_dir():
+        return out
+    for path in AG_ROOT.glob("*.db"):
+        title = ag_title(path)
+        try:
+            mtime = path.stat().st_mtime
+            updated = datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M")
+            size = path.stat().st_size
+        except OSError:
+            updated = ""
+            size = 0
+        out.append(
+            {
+                "tool": "antigravity",
+                "title": title,
+                "location": f"{path.stem} ({size // (1024 * 1024)}MB)" if size else path.stem,
+                "updated": updated,
+                "payload": f"antigravity:{path}",
+            }
+        )
+    out.sort(key=lambda x: x["updated"], reverse=True)
+    return out
+
+
+def all_candidates():
+    return kilo_candidates() + claude_candidates() + ag_candidates()
+
+
+def candidate_lines():
+    lines = []
+    for c in all_candidates():
+        display = f"{c['tool']} | {c['title']} | {c['location']} | {c['updated']}"
+        lines.append(f"{display}\t{b64(c['payload'])}")
+    return lines
+
+
+def do_list():
+    for line in candidate_lines():
+        print(line)
+
+
+def do_preview(line: str):
+    line = line.rstrip("\n")
+    parts = line.split("\t")
+    if len(parts) < 2:
+        print(line)
+        return
+    try:
+        payload = base64.b64decode(parts[1]).decode()
+    except Exception:
+        print(line)
+        return
+    display = parts[0]
+    print(display)
+    print("-" * min(80, len(display)))
+    do_preview_payload(payload)
+    return
+
+
+def do_preview_payload(payload: str):
+    print(payload)
+    print("-" * min(80, len(payload)))
+    if payload.startswith("kilo:"):
+        sid = payload[len("kilo:") :]
+        print(f"session id: {sid}")
+        if KILO_DB.is_file():
+            conn = sqlite3.connect(f"file:{KILO_DB}?mode=ro", uri=True, timeout=10)
+            try:
+                row = conn.execute(
+                    "SELECT title, directory, time_created, time_updated, agent, model FROM session WHERE id=?",
+                    (sid,),
+                ).fetchone()
+                if row:
+                    title, directory, created, updated, agent, model = row
+                    print(f"title: {title}")
+                    print(f"directory: {directory}")
+                    print(f"created: {fmt_ms(created or 0)}")
+                    print(f"updated: {fmt_ms(updated or 0)}")
+                    print(f"agent: {agent or ''}")
+                    print(f"model: {model or ''}")
+                counts = conn.execute(
+                    "SELECT (SELECT COUNT(*) FROM message WHERE session_id=?), (SELECT COUNT(*) FROM part WHERE session_id=?)",
+                    (sid, sid),
+                ).fetchone()
+                print(f"messages: {counts[0]}, parts: {counts[1]}")
+                diff = KILO_DIFF_DIR / f"{sid}.json"
+                print(f"session_diff: {'yes' if diff.is_file() else 'no'}")
+            finally:
+                conn.close()
+    elif payload.startswith("claude:"):
+        path = Path(payload[len("claude:") :])
+        print(f"path: {path}")
+        try:
+            print(f"size: {path.stat().st_size} bytes")
+            print(f"modified: {datetime.fromtimestamp(path.stat().st_mtime)}")
+        except OSError:
+            pass
+        title = claude_title(path)
+        print(f"first user message: {title}")
+        sidecar = path.parent / path.stem
+        print(f"sidecar dir: {'yes' if sidecar.is_dir() else 'no'}")
+        fh = HOME / ".claude/file-history" / path.stem
+        se = HOME / ".claude/session-env" / path.stem
+        print(f"file-history: {'yes' if fh.is_dir() else 'no'}")
+        print(f"session-env: {'yes' if se.is_dir() else 'no'}")
+    elif payload.startswith("antigravity:"):
+        path = Path(payload[len("antigravity:") :])
+        print(f"path: {path}")
+        try:
+            print(f"size: {path.stat().st_size} bytes")
+            print(f"modified: {datetime.fromtimestamp(path.stat().st_mtime)}")
+        except OSError:
+            pass
+        brain = HOME / ".gemini/antigravity-cli/brain" / path.stem
+        print(f"brain dir: {'yes' if brain.is_dir() else 'no'}")
+        if brain.is_dir():
+            try:
+                print(f"brain size: {sum(p.stat().st_size for p in brain.rglob('*') if p.is_file())} bytes")
+            except OSError:
+                pass
+        print(f"extracted title: {ag_title(path)}")
+
+
+def remove_path(path: Path):
+    try:
+        if path.is_dir() and not path.is_symlink():
+            shutil.rmtree(path, ignore_errors=True)
+        else:
+            path.unlink(missing_ok=True)
+    except FileNotFoundError:
+        pass
+    except OSError:
+        pass
+
+
+def delete_payload(payload: str):
+    if payload.startswith("kilo:"):
+        sid = payload[len("kilo:"):]
+        if KILO_DB.is_file():
+            conn = sqlite3.connect(str(KILO_DB), timeout=10)
+            try:
+                conn.execute("PRAGMA foreign_keys=ON")
+                conn.execute("DELETE FROM session WHERE id=?", (sid,))
+                conn.commit()
+            finally:
+                conn.close()
+        remove_path(KILO_DIFF_DIR / f"{sid}.json")
+    elif payload.startswith("claude:"):
+        path = Path(payload[len("claude:"):])
+        remove_path(path)
+        sidecar = path.parent / path.stem
+        remove_path(sidecar)
+        for base in (HOME / ".claude" / "file-history", HOME / ".claude" / "session-env"):
+            remove_path(base / path.stem)
+    elif payload.startswith("antigravity:"):
+        path = Path(payload[len("antigravity:"):])
+        remove_path(path)
+        remove_path(HOME / ".gemini" / "antigravity-cli" / "brain" / path.stem)
+    else:
+        raise ValueError(f"unknown payload: {payload}")
+
+
+    payloads = []
+    for line in selected_lines:
+        line = line.rstrip("\n")
+        parts = line.split("\t")
+        if len(parts) < 2:
+            continue
+        try:
+            payloads.append(base64.b64decode(parts[1]).decode())
+        except Exception:
+            continue
+    if not payloads:
+        print("Nothing selected.")
+        return 0
+    print("Selected for deletion:")
+    for p in payloads:
+        print(f"  - {p}")
+    try:
+        answer = input("Confirm deletion? [y/N] ").strip().lower()
+    except EOFError:
+        answer = ""
+    if answer not in ("y", "yes"):
+        print("Aborted.")
+        return 1
+    for p in payloads:
+        delete_payload(p)
+        print(f"deleted: {p}")
+    return 0
+
+
+def interactive():
+    lines = candidate_lines()
+    if not lines:
+        print("No chat sessions found.")
+        return 0
+    # fzf receives the whole candidate line as the preview argument.
+    cmd = [
+        "fzf",
+        "--multi",
+        "--delimiter=\t",
+        "--with-nth=1",
+        "--height=90%",
+        "--layout=reverse",
+        "--border",
+        "--prompt=remove session> ",
+        "--header=Tab: select  Enter: confirm  Ctrl-C: abort",
+        "--preview-window=right:60%:wrap",
+        "--preview",
+        f"{shlex.quote(str(SCRIPT))} --preview-b64 {{2}}",
+    ]
+
+    proc = subprocess.run(
+        cmd,
+        input="\n".join(lines).encode(),
+        stdout=subprocess.PIPE,
+        stderr=None,
+    )
+    if proc.returncode not in (0, 1):
+        return proc.returncode
+    selected = proc.stdout.decode().splitlines()
+    if not selected:
+        print("Nothing selected.")
+        return 0
+    return do_delete(selected)
+
+
+def main():
+    parser = argparse.ArgumentParser(description="fzf-based remover for kilo/claude/antigravity chat sessions")
+    parser.add_argument("--list", action="store_true", help="print candidates")
+    parser.add_argument("--preview", nargs="*", help="preview a candidate line")
+    parser.add_argument("--preview-b64", nargs="*", help="preview a base64 payload")
+    parser.add_argument("--delete", action="store_true", help="delete candidates read from stdin")
+    args = parser.parse_args()
+
+    if args.list:
+        do_list()
+        return 0
+    if args.preview_b64 is not None:
+        payload = base64.b64decode(" ".join(args.preview_b64)).decode()
+        do_preview_payload(payload)
+        return 0
+    if args.preview is not None:
+        line = " ".join(args.preview)
+        do_preview(line)
+        return 0
+    if args.delete:
+        return do_delete(sys.stdin.read().splitlines())
+    return interactive()
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+PY
